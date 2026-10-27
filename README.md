@@ -1,6 +1,6 @@
 # raylib for Xteink X4
 
-Build 2D applications for the **original ESP32-C3 Xteink X4** with raylib. Draw at the panel's native 480 × 800 resolution, run the same application in a desktop emulator, and deploy it with ESP-IDF.
+Build raylib 2D applications for the **original, unlocked ESP32-C3 Xteink X4**. Draw at 480 × 800 and run the same code in a desktop emulator.
 
 [Documentation](docs/README.md) · [Hardware setup](docs/hardware.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
@@ -18,24 +18,26 @@ Build 2D applications for the **original ESP32-C3 Xteink X4** with raylib. Draw 
 
 ## Quickstart
 
-Build Paper firmware with Docker:
+From the project root, build Paper firmware with Docker:
 
 ```sh
 docker build --output type=local,dest=build-docker/paper .
 ```
 
-This exports flashable files and checksums using a pinned ESP-IDF toolchain. See [Docker builds](docs/docker.md) for Tetris, custom apps, and headless tests. No local SDK or Nix installation is required.
+Firmware and checksums are exported to `build-docker/paper/`. See the [Docker guide](docs/docker.md) for Tetris, custom apps, and headless tests.
 
-Follow the [hardware guide](docs/hardware.md) to back up and flash from your host. **Installation replaces the device firmware and partition table.** This target supports the original, unlocked ESP32-C3 X4; X3, X4 Pro, and locked variants are unsupported.
+Follow the [hardware guide](docs/hardware.md) to back up and flash your X4. **Installation replaces its firmware and partition table.**
 
-On the tested reader, ordinary cursor/menu updates complete in about **0.44 seconds**, and full cleans take about **3.8 seconds**. Paper and Tetris process ordinary controls during refreshes and clean on startup/wake or Power. See [performance measurements](docs/performance.md) for scope and limits.
+On the tested reader, cursor/menu updates take about **0.44 seconds** and full cleans **3.8 seconds**. See [measurements and limits](docs/performance.md).
 
 ## Desktop emulator
 
-<details>
-<summary>Quickstart on Ubuntu / Debian</summary>
+Choose your setup and run from the project root:
 
-Tested on Ubuntu 24.04/26.04 and Debian 12/13. Install the distribution packages, then build and run from the project root:
+<details>
+<summary>Ubuntu / Debian</summary>
+
+Tested on Ubuntu 24.04/26.04 and Debian 12/13:
 
 ```sh
 sudo apt update
@@ -49,9 +51,9 @@ cmake --build build --parallel
 </details>
 
 <details>
-<summary>Quickstart with CMake (Linux)</summary>
+<summary>Other Linux distributions (CMake)</summary>
 
-On Linux, install the [build dependencies](docs/emulator.md#build) (CMake, a C/C++ compiler, Python, Git, and SDL2), then run from the project root:
+Install the [build dependencies](docs/emulator.md#build), then:
 
 ```sh
 python3 scripts/fetch-emulator.py
@@ -63,9 +65,9 @@ cmake --build build --parallel
 </details>
 
 <details>
-<summary>Quickstart with Nix (x86_64 Linux)</summary>
+<summary>Nix (x86_64 Linux)</summary>
 
-Nix supplies the pinned build dependencies. Run from the project root:
+Nix supplies the pinned build dependencies:
 
 ```sh
 nix develop path:.
@@ -77,13 +79,13 @@ cmake --build build --parallel
 
 </details>
 
-Run `./build/x4_tetris` for Tetris. Use the arrow keys, Enter to confirm, Escape to go back, and `P` to clean the display. See [example controls](docs/examples.md) for each game.
+Run `./build/x4_tetris` for Tetris. Controls: arrow keys, Enter, Escape, and `P` to clean the display. See [game controls](docs/examples.md).
 
-The [emulator guide](docs/emulator.md) covers dependency installation, optional Nix setup, virtual SD storage, and screenshots.
+The [emulator guide](docs/emulator.md) covers setup, virtual SD storage, and screenshots.
 
 ## Write an application
 
-Start with [examples/minimal.c](examples/minimal.c): include `raylib.h`, open a 480 × 800 window, and use the usual drawing loop. The [application guide](docs/application.md) covers custom builds, input, storage, memory limits, and the X4 refresh API.
+Start with [minimal.c](examples/minimal.c). The [application guide](docs/application.md) covers custom builds, input, storage, memory limits, and refresh control.
 
 This is a 2D target for e-paper interfaces and games. Audio, 3D, shaders, and render textures are outside its scope.
 
@@ -99,7 +101,7 @@ This is a 2D target for e-paper interfaces and games. Audio, 3D, shaders, and re
 | [Testing](docs/testing.md) | Native, sanitizer, QEMU, and device checks |
 | [Design](docs/design.md) | Renderer, memory layout, display driver |
 
-The target has been exercised in microreader, ESP32-C3 QEMU, and on a physical X4. [Validation results](docs/validation.md) distinguish automated checks from physical and optical observations.
+See [validation results](docs/validation.md) for emulator, QEMU, and physical-device coverage.
 
 ## License
 
