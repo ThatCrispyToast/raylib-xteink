@@ -4,8 +4,14 @@
 
 static X4EpdIO bus;
 static bool ready, baseline;
+static bool powered, partial_lut;
+static uint64_t lut_at, active_at;
 static X4EpdStats stats;
 typedef struct { int x0, x1, y0, y1; } Window; // Byte columns and buffer rows, inclusive.
+static Window pending_window;
+static const uint8_t *pending_frame;
+static bool pending_full, pending_load;
+static uint64_t started_at;
 static uint64_t time_us(void) { return bus.time_us ? bus.time_us() : 0; }
 X4EpdStats x4_epd_stats(void) { return stats; }
 
@@ -16,17 +22,30 @@ static bool wait_ready(void)
         if (!bus.busy()) return true;
         bus.sleep_ms(2);
     }
-    ready=baseline=false;
+    ready=baseline=powered=partial_lut=false;
+    pending_frame=NULL;
     return false;
 }
 static bool write(bool data, const uint8_t *bytes, size_t size)
 {
     if (bus.write(data,bytes,size)) return true;
-    ready=baseline=false; return false;
+    ready=baseline=powered=partial_lut=false; pending_frame=NULL; return false;
 }
 static bool command(uint8_t cmd, const uint8_t *data, size_t size)
 { return write(false,&cmd,1) && (!size || write(true,data,size)); }
 static bool byte(uint8_t cmd, uint8_t value) { return command(cmd,&value,1); }
+static bool wait_pending(void)
+{
+    if (!bus.time_us) return wait_ready();
+    for (;;) {
+        uint64_t elapsed=time_us()-started_at;
+        if (elapsed>=15000000) {
+            ready=baseline=powered=partial_lut=false; pending_frame=NULL; return false;
+        }
+        if (elapsed>=2000 && !bus.busy()) return true;
+        bus.sleep_ms(2);
+    }
+}
 
 static bool ram_window(Window w)
 {
@@ -72,7 +91,8 @@ static Window changed_window(const uint8_t *frame, const uint8_t *previous)
 bool x4_epd_init(const X4EpdIO *io)
 {
     if (!io || !io->write || !io->busy || !io->reset || !io->sleep_ms) return false;
-    bus=*io; ready=baseline=false; stats=(X4EpdStats){0};
+    bus=*io; ready=baseline=powered=partial_lut=false; stats=(X4EpdStats){0};
+    pending_frame=NULL;
     bus.reset(true); bus.sleep_ms(20); bus.reset(false); bus.sleep_ms(2);
     bus.reset(true); bus.sleep_ms(20);
     if (!wait_ready() || !command(0x12,NULL,0) || !wait_ready()) return false;
@@ -81,32 +101,67 @@ bool x4_epd_init(const X4EpdIO *io)
         command(0x01,driver,sizeof(driver)) && byte(0x3c,0x01);
     return ready;
 }
-bool x4_epd_present(const uint8_t *frame, const uint8_t *previous, bool full)
+bool x4_epd_begin(const uint8_t *frame, const uint8_t *previous, bool full)
 {
+    if (pending_frame) return false;
     stats=(X4EpdStats){0};
     if (!ready || !frame || (!full && (!previous || !baseline))) return false;
     Window w=full ? (Window){0,X4_PANEL_WIDTH/8-1,0,X4_PANEL_HEIGHT-1} : changed_window(frame,previous);
     if (w.x1<w.x0) return true;
     stats.window_width=(w.x1-w.x0+1)*8; stats.window_height=w.y1-w.y0+1;
-    if (!wait_ready()) return false;
+    if (bus.busy() && !wait_ready()) return false;
     uint64_t start=time_us();
     if ((full && !write_ram(0x26,frame,w)) || !write_ram(0x24,frame,w)) return false;
     stats.transfer_us=time_us()-start;
-    // Mode 2 plus analog/clock shutdown uses the same OTP waveform as FC + 83.
-    if (!byte(0x21,full ? 0x40 : 0x00) || !byte(0x22,full ? 0xf7 : 0xff)) return false;
-    start=time_us();
-    if (!command(0x20,NULL,0) || !wait_ready()) return false;
-    stats.waveform_us=time_us()-start;
-    start=time_us();
+    // Reuse temperature-selected Mode 2 OTP during a burst; never override its voltages.
+    bool load_lut=!partial_lut || !bus.time_us || time_us()-lut_at >= 30000000;
+    uint8_t control=full ? 0xf7 : (powered ? 0 : 0xc0) | (load_lut ? 0x3c : 0x0c);
+    if (!bus.time_us) control |= 0x03;
+    if (!byte(0x21,full ? 0x40 : 0x00) || !byte(0x22,control)) return false;
+    if (!command(0x20,NULL,0)) return false;
+    pending_frame=frame; pending_window=w; pending_full=full; pending_load=load_lut;
+    started_at=time_us();
+    return true;
+}
+bool x4_epd_busy(void)
+{
+    if (!pending_frame) return false;
+    if (bus.time_us && time_us()-started_at>=15000000) {
+        ready=baseline=powered=partial_lut=false; pending_frame=NULL; return false;
+    }
+    return (bus.time_us && time_us()-started_at<2000) || bus.busy();
+}
+bool x4_epd_finish(void)
+{
+    if (!ready) return false;
+    if (!pending_frame) return true;
+    if (!wait_pending()) return false;
+    stats.waveform_us=time_us()-started_at;
+    powered=!pending_full && bus.time_us;
+    partial_lut=!pending_full;
+    active_at=time_us();
+    if (pending_load) lut_at=active_at;
+    uint64_t start=time_us();
     // Synchronize both banks after Mode 2, including controllers using RAM ping-pong.
-    if (!write_ram(0x26,frame,w) || (!full && !write_ram(0x24,frame,w))) return false;
+    if (!write_ram(0x26,pending_frame,pending_window) ||
+        (!pending_full && !write_ram(0x24,pending_frame,pending_window))) return false;
     stats.transfer_us+=time_us()-start;
+    pending_frame=NULL;
     baseline=true; return true;
+}
+bool x4_epd_present(const uint8_t *frame, const uint8_t *previous, bool full)
+{ return x4_epd_begin(frame,previous,full) && x4_epd_finish(); }
+bool x4_epd_idle(void)
+{
+    // Polling this on the render task serializes shutdown with refresh and RAM reseeding.
+    if (!ready || pending_frame || !powered || !bus.time_us || time_us()-active_at<2000000) return ready;
+    if (!byte(0x22,0x83) || !command(0x20,NULL,0) || !wait_ready()) return false;
+    powered=false; return true;
 }
 bool x4_epd_sleep(void)
 {
     if (!ready) return false;
-    bool ok=wait_ready() && byte(0x22,0x83) && command(0x20,NULL,0) &&
+    bool ok=x4_epd_finish() && wait_ready() && byte(0x22,0x83) && command(0x20,NULL,0) &&
         wait_ready() && byte(0x10,0x01);
-    ready=baseline=false; return ok;
+    ready=baseline=powered=partial_lut=false; pending_frame=NULL; return ok;
 }

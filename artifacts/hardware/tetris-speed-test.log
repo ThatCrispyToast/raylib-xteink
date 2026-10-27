@@ -1,0 +1,39 @@
+I (240) sdspi_transaction: cmd=52, R1 response: command not supported
+I (283) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+TETRIS_HW action=0 draw_ms=132.633 present_ms=3766.687 full=1 partial=0 errors=0
+TETRIS: ready heap=73668 minimum=73668 largest=36864 sd=1
+TETRIS_HW action=1 draw_ms=134.086 present_ms=523.962 full=1 partial=1 errors=0
+TETRIS_HW action=2 draw_ms=159.986 present_ms=476.741 full=1 partial=2 errors=0
+TETRIS_HW action=3 draw_ms=6.536 present_ms=476.741 full=1 partial=2 errors=0
+TETRIS_HW action=5 draw_ms=16.260 present_ms=476.741 full=1 partial=2 errors=0
+TETRIS_HW action=6 draw_ms=42.692 present_ms=449.786 full=1 partial=4 errors=0
+TETRIS_HW action=7 draw_ms=9.554 present_ms=449.786 full=1 partial=4 errors=0
+TETRIS_HW action=8 draw_ms=40.756 present_ms=450.789 full=1 partial=6 errors=0
+TETRIS_HW action=9 draw_ms=72.445 present_ms=475.370 full=1 partial=7 errors=0
+TETRIS_HW action=10 draw_ms=3.151 present_ms=433.765 full=1 partial=8 errors=0
+TETRIS_HW action=11 draw_ms=3.128 present_ms=431.721 full=1 partial=9 errors=0
+TETRIS_HW action=12 draw_ms=71.930 present_ms=420.874 full=1 partial=10 errors=0
+TETRIS_HW action=13 draw_ms=164.186 present_ms=475.714 full=1 partial=11 errors=0
+TETRIS_HW action=14 draw_ms=0.484 present_ms=3766.576 full=2 partial=11 errors=0
+TETRIS_HW action=15 draw_ms=71.356 present_ms=561.558 full=2 partial=12 errors=0
+TETRIS_HW action=16 draw_ms=3.487 present_ms=433.524 full=2 partial=13 errors=0
+TETRIS_HW action=17 draw_ms=3.485 present_ms=433.510 full=2 partial=14 errors=0
+TETRIS_HW action=18 draw_ms=3.146 present_ms=433.614 full=2 partial=15 errors=0
+TETRIS_HW action=19 draw_ms=211.840 present_ms=474.101 full=2 partial=16 errors=0
+TETRIS_HW action=20 draw_ms=71.736 present_ms=473.981 full=2 partial=17 errors=0
+TETRIS_HW action=21 draw_ms=3.144 present_ms=433.806 full=2 partial=18 errors=0
+TETRIS_HW action=22 draw_ms=3.130 present_ms=431.734 full=2 partial=19 errors=0
+TETRIS_HW action=23 draw_ms=54.347 present_ms=472.395 full=2 partial=20 errors=0
+TETRIS_HW action=24 draw_ms=158.438 present_ms=474.841 full=2 partial=21 errors=0
+TETRIS_HW action=25 draw_ms=71.554 present_ms=475.339 full=2 partial=22 errors=0
+TETRIS_HW action=26 draw_ms=3.120 present_ms=449.652 full=2 partial=23 errors=0
+TETRIS_HW action=27 draw_ms=53.746 present_ms=474.079 full=2 partial=24 errors=0
+TETRIS_HW action=28 draw_ms=33.824 present_ms=445.935 full=2 partial=25 errors=0
+TETRIS: screen=6 score=0 lines=0 pieces=0 x=3 y=0 rotation=0 practice=0 frames=28 full=2 partial=25 errors=0 coalesced=1
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+TETRIS_HW_PASS actions=29 heap=214648 minimum=73668 stack=13284

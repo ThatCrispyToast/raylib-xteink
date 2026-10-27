@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(raylib_x4 VERSION 1.1.2 LANGUAGES C CXX)
+project(raylib_x4 VERSION 1.2.0 LANGUAGES C CXX)
 option(X4_SANITIZE "Build with address and undefined behavior sanitizers" OFF)
 option(X4_BUILD_EMULATOR "Build the microreader X4 emulator adapter" ON)
 set(X4_MICROREADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/research/microreader" CACHE PATH "Pinned microreader checkout")

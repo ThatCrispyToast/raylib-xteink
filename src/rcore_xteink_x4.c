@@ -324,6 +324,7 @@ void OpenURL(const char *url) { (void)url; TRACELOG(LOG_WARNING, "X4: browser un
 
 void PollInputEvents(void)
 {
+    if (!x4_service_display(false)) CORE.Window.shouldClose=true;
     X4Input input = x4_hal_poll();
     double now = GetTime();
     CORE.Input.Keyboard.keyPressedQueueCount = 0;
@@ -385,4 +386,4 @@ int InitPlatform(void)
     return 0;
 }
 
-void ClosePlatform(void) { x4_hal_close(); CORE.Window.ready = false; }
+void ClosePlatform(void) { X4WaitDisplay(); x4_hal_close(); CORE.Window.ready = false; }

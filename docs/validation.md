@@ -1,30 +1,44 @@
 # Validation report
 
-Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flake.lock`; the embedded SDK is ESP-IDF 5.5.2 and the emulator is Espressif QEMU 9.2.2. The native display emulator is microreader revision `a4adfdb9a37b83bcb724cac3dc8990f335b49e8a`.
+Latest validation on 2026-10-27 on NixOS x86_64. Exact tool versions are locked in `flake.lock`; the embedded SDK is ESP-IDF 5.5.2 and the emulator is Espressif QEMU 9.2.2. The native display emulator is microreader revision `a4adfdb9a37b83bcb724cac3dc8990f335b49e8a`.
 
 ## Results
 
 | Check | Result | Evidence |
 |---|---|---|
 | Native Release build | Pass | `build/x4_demo`, `build/libraylib_x4.a` |
-| Native CTest suite | 11/11 pass | `artifacts/native-tests.txt` |
-| ASan + UBSan | 7/7 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
-| Hardware ESP32-C3 compile/link | Pass | `firmware/build/raylib_x4_firmware.bin`, `artifacts/firmware-build.log` |
+| Native CTest suite | 11/11 pass | `artifacts/speed-native-tests.txt` |
+| ASan + UBSan | 7/7 pass, no sanitizer findings | `artifacts/speed-sanitizer-tests.txt` |
+| Hardware ESP32-C3 compile/link | Pass | `firmware/build/raylib_x4_firmware.bin`, `artifacts/speed-firmware-build.log` |
 | Alternative application build | Pass | `build-minimal/raylib_x4_firmware.bin`, `artifacts/minimal-build.log` |
-| ESP32-C3 QEMU boot and renderer | Pass | `artifacts/qemu-test.log` |
+| ESP32-C3 QEMU boot and renderer | Pass | `artifacts/speed-qemu-1.log`, `speed-qemu-2.log`, `speed-qemu-3.log` |
 | SDL screenshot inspection | Pass | `artifacts/demo.png`, `artifacts/puzzle.png`, `artifacts/status.png` |
-| Physical X4 render/storage and no-clean soak | 276 checks pass, including 200 partial updates without a full clean | `artifacts/hardware/region-regression/report.json` |
-| Seven physical buttons and visual panel check | Pass | `artifacts/hardware/buttons-report.json` |
-| Deep sleep and timer wake | 3/3 cycles pass | `artifacts/hardware/sleep-console.log` |
-| Physical Back/Power sleep and wake | Pass: owner confirmation and USB disconnect/reconnect | `artifacts/hardware/release-report.json` |
-| Paper 1.1.2 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
+| Physical X4 render/storage and no-clean soak | 276 checks pass, including 200 partial updates without a full clean | `artifacts/hardware/speed-regression/report.json` |
+| Seven physical buttons and visual panel check (historical 1.0.0) | Pass | `artifacts/hardware/buttons-report.json` |
+| Deep sleep and timer wake | 3/3 cycles pass | `artifacts/hardware/speed-sleep.log` |
+| Physical Back/Power sleep and wake (historical 1.0.0) | Pass: owner confirmation and USB disconnect/reconnect | `artifacts/hardware/release-report.json` |
+| Paper 1.2.0 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
 | Physical Paper 1.1.0 storage regression | 228 checks pass | `artifacts/hardware/qa-paper.log` |
 | Independent user acceptance | Functional and wall-clock timing failures fixed and retested | `docs/qa-user-report.md` |
-| Clean build from release source archive | 7/7 tests pass | `artifacts/hardware/archive-check.log` |
+| Clean build from release source archive | 7/7 tests pass | `artifacts/hardware/speed-archive-check.log` |
 
 The tests deliberately trigger a rejected window size and display failure. Their expected error messages do not indicate a failing test.
 
-## Tetris example (2026-10-27)
+## Factory-waveform speed and async presentation (1.2.0)
+
+The target reuses temperature-selected factory Mode 2 during active bursts, shuts the analog rails and clock down after two idle seconds, and reloads temperature/LUT selection after 30 seconds or a full clean. It never uploads a custom LUT or overrides voltages/temperature. The SPI clock remains 20 MHz. The driver now separates activation and completion so applications can process input and replace pending snapshots while the controller is BUSY. Pixel buffers remain 192,000 bytes. Full cleans, critical application transitions, and shutdown still wait for completion.
+
+The final native suite passes 11/11 tests, including 24 Tetris journeys, nine Paper timing cases, renderer comparisons, coalescing, immutable in-flight buffers, deferred failures, and critical-screen guards. All seven ASan/UBSan tests pass. The controller model verifies cached/wake/expiry sequences, both RAM-bank arrangements, prohibited waveform/voltage/OTP writes, and one absolute 15-second deadline shared by polling and blocking completion. The two-millisecond BUSY assertion guard starts after activation transfer.
+
+Repeated ESP32-C3 QEMU boots exposed an intermittent interrupt-watchdog panic in the SDK idle loop. The runner was missing `-icount 3`, which [Espressif's C3 emulator guide](https://github.com/espressif/esp-toolchain-docs/blob/main/qemu/esp32c3/README.md) requires for timer behavior. With that option, 20 consecutive boots pass with the interrupt watchdog enabled. The runner also preserves panic output and rejects a success marker after a panic. Evidence is in `artifacts/speed-qemu-report.json`; the reproduced failure trace is retained as `speed-qemu-before-icount.log`. These emulator timings are not physical performance measurements.
+
+The physical diagnostic regression covers 276 checks, including 200 consecutive partial updates, scene hashes, unchanged-frame suppression, real SD round trips, texture paths, memory integrity, and close/reopen. Long USB diagnostic replies initially lost bytes through the SDK's character-at-a-time VFS path; batched bounded writes and a TX buffer large enough for one status line fix the transport. Three deep-sleep/timer-wake cycles pass with SD remounted and zero errors. The separate async fixture validates 200 submissions, final-frame pixels, coalescing, stable heap, a manual clean requested while BUSY, idle wake, and temperature expiry.
+
+The actual Paper code is benchmarked synchronously for comparable action-through-BUSY timings, using isolated temporary SD saves. The actual Tetris code is exercised by 29 scripted hardware actions and a separate gravity/held-control benchmark that drains the last frame before reporting completion. Exact measurements, current firmware hashes, and limitations are in [performance](performance.md), `artifacts/hardware/speed-report.json`, and the per-application release reports.
+
+The final Paper and Tetris binaries are separately flash-verified and booted with SD mounted; interactive Tetris is left on the reader. Factory-waveform-only operation was explicitly selected by the owner. No custom-waveform candidate was flashed. The owner was unavailable during this pass, so human button feel, optical settling, and ghosting are not newly certified. Earlier owner observations below remain historical evidence.
+
+## Tetris timing correction before 1.2.0 (2026-10-27)
 
 The owner's pace complaint exposed a poor timing choice in the original example: its 1.6-second gravity interval excluded every display refresh, so actual rows took about 2.27 seconds. Held controls were also limited to one step per refresh. Normal mode now includes ordinary refresh time in gravity, starts at 0.8 seconds per row, and accelerates to a 0.12-second minimum. Landing grace still uses visible time so a piece cannot lock while the player is waiting for its image. Pause, full cleaning, and first presentation of a new piece freeze both clocks. Held controls catch up after blocked frames, with bounded batches and no replay after release.
 
@@ -41,7 +55,7 @@ The benchmark uses the actual application and physical display. Its synthetic he
 
 Gameplay tests cover pieces, bags, rotations, collisions, wall/floor adjustments, row clearing, scoring, levels, lock resets, top-out, independent falling/locking clocks, extreme elapsed intervals, and deterministic stress games. All 279,167 assertions pass. Another 257 retained/full redraw comparisons cover board movement, outlines, rotations, locks, line clears, score changes, and all pause-menu selections. Score changes now leave the unchanged next-piece previews alone, and menu moves redraw only selection outlines.
 
-Twenty-three SDL journeys cover the application flows plus wall-clock gravity, held movement and release, held soft drop, and input during a two-second cleaning pause. Buffered Enter cannot drop an unseen next piece or confirm an unseen restart dialog. The complete 11-test native suite passes; after hardening the grounded-only clock path, all three Tetris tests and all seven sanitizer tests were rerun successfully. The targeted log is `artifacts/tetris-pace-tests.txt`.
+At that revision, twenty-three SDL journeys covered the application flows plus wall-clock gravity, held movement and release, held soft drop, and input during a two-second cleaning pause. Buffered Enter cannot drop an unseen next piece or confirm an unseen restart dialog. The complete 11-test native suite passes; after hardening the grounded-only clock path, all three Tetris tests and all seven sanitizer tests were rerun successfully. The targeted log is `artifacts/tetris-pace-tests.txt`.
 
 `tests/tetris_device.c` separately exercises the actual application with 29 scripted actions, including pause, mode changes, help, restart, cleaning, and sleep. The final interactive image is flash-verified and booted with SD mounted. Its current hashes and measurements are in `artifacts/hardware/tetris-report.json`; the original example attestation is preserved in `tetris-before-pace-report.json`. No game files are written. Native screenshots were visually inspected; physical ghosting and human button interaction were not visually observed during this pass.
 
@@ -96,7 +110,7 @@ Emulator automation uses `SDL_PushEvent`, the same event queue used by physical 
 
 The QEMU image executes the same raylib core, software rasterizer, packed framebuffer, conversion, and refresh policy under real ESP-IDF/FreeRTOS on an emulated ESP32-C3. Its test HAL replaces display, input, and SD peripherals. It loads the default font and a 32 × 32 texture, draws three changing frames, checks the refresh counts and heap integrity, unloads resources, and checks memory recovery.
 
-Measured heap values from that run:
+Measured heap values from the original run (the current run is recorded in the speed QEMU logs):
 
 | Point | Free heap, bytes |
 |---|---:|

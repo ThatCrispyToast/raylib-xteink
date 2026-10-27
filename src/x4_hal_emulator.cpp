@@ -9,10 +9,20 @@
 #include <memory>
 #include <filesystem>
 #include <vector>
+#include <atomic>
 
+static std::atomic<bool> refresh_busy{false};
+static SDL_TimerID refresh_timer;
+static Uint32 refresh_done(Uint32 interval, void *unused)
+{ (void)interval; (void)unused; refresh_busy=false; return 0; }
 static void emulator_delay(Uint32 ms)
 {
-    if (!std::getenv("X4_EMULATOR_FAST")) SDL_Delay(ms);
+    if (!std::getenv("X4_EMULATOR_FAST")) {
+        if (refresh_timer) SDL_RemoveTimer(refresh_timer);
+        refresh_busy=true;
+        refresh_timer=SDL_AddTimer(ms,refresh_done,nullptr);
+        if (!refresh_timer) { SDL_Delay(ms); refresh_busy=false; }
+    }
 }
 #define SDL_Delay emulator_delay
 #include "display.h"
@@ -45,6 +55,7 @@ extern "C" bool x4_hal_init(const char *title)
 {
     try {
         runtime = std::make_unique<DesktopRuntime>(20);
+        if (SDL_InitSubSystem(SDL_INIT_TIMER) != 0) throw std::runtime_error(SDL_GetError());
         display = std::make_unique<DesktopEmulatorDisplay>(*runtime);
         display->set_rotation(microreader::Rotation::Deg90);
         SDL_SetWindowTitle(SDL_RenderGetWindow(runtime->renderer()), title ? title : "raylib X4");
@@ -61,6 +72,7 @@ extern "C" bool x4_hal_init(const char *title)
         presses = {};
         poll_count = 0;
         script.clear();
+        refresh_busy=false; refresh_timer=0;
         if (const char *path = std::getenv("X4_INPUT_SCRIPT")) {
             FILE *file = std::fopen(path, "r");
             if (!file) throw std::runtime_error("Cannot open input script");
@@ -77,8 +89,17 @@ extern "C" bool x4_hal_init(const char *title)
     }
 }
 
-extern "C" void x4_hal_close(void) { display.reset(); runtime.reset(); storage.clear(); }
-extern "C" bool x4_hal_present(const uint8_t *frame, const uint8_t *previous, bool full)
+extern "C" void x4_hal_close(void)
+{
+    if (refresh_timer) SDL_RemoveTimer(refresh_timer);
+    refresh_timer=0; refresh_busy=false;
+    display.reset(); runtime.reset(); storage.clear();
+}
+extern "C" bool x4_hal_present_busy(void) { return refresh_busy; }
+extern "C" bool x4_hal_display_idle(void) { return true; }
+extern "C" bool x4_hal_finish_present(void)
+{ while (refresh_busy) SDL_Delay(1); return true; }
+extern "C" bool x4_hal_begin_present(const uint8_t *frame, const uint8_t *previous, bool full)
 {
     if (full) display->full_refresh(frame, microreader::RefreshMode::Full, false);
     else display->partial_refresh(frame, previous);

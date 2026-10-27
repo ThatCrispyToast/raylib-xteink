@@ -157,12 +157,35 @@ int main(void)
     CHECK(X4GetStats().errors == 1 && memcmp(saved,X4GetPanelFrame(),sizeof(saved)) == 0);
     CHECK(WindowShouldClose());
     test_present_ok = true; frame(33); CHECK(X4GetStats().full_refreshes == 4);
+    X4SetRefreshInterval(UINT_MAX); X4SetAsyncRefresh(true); test_present_delay=0.4;
+    unsigned int submissions=test_present_count, partials=X4GetStats().partial_refreshes;
+    double started=test_time;
+    frame(34); CHECK(test_time == started && X4IsDisplayBusy() && !X4GetPanelFrame());
+    frame(35); frame(36); frame(37);
+    CHECK(test_present_count == submissions+1 && X4GetStats().coalesced_frames == 2);
+    test_time+=0.4; PollInputEvents();
+    CHECK(test_present_count == submissions+2 && X4GetStats().partial_refreshes == partials+1);
+    CHECK(X4WaitDisplay() && !X4IsDisplayBusy());
+    CHECK(test_present_buffer_stable && !white(37,35) && white(36,35));
+    CHECK(X4GetStats().partial_refreshes == partials+2);
+    // Explicit clean while busy supersedes queued snapshots and survives completion.
+    frame(38); frame(39); X4RefreshFull(); frame(40);
+    CHECK(!X4IsDisplayBusy() && X4GetStats().full_refreshes == 5 && !white(40,35));
+    frame(41); frame(42);
     CloseWindow(); CHECK(!IsWindowReady());
+    CHECK(!X4IsDisplayBusy() && test_present_buffer_stable && !white(42,35));
+    test_present_delay=0;
     InitWindow(800,480,"invalid"); CHECK(!IsWindowReady());
     InitWindow(480,800,"reopen"); CHECK(IsWindowReady()); frame(20);
     atlas = LoadImageFromTexture(GetFontDefault().texture);
     corner = GetImageColor(atlas,0,0); CHECK(corner.r == 255 && corner.a == 0);
-    UnloadImage(atlas); CloseWindow();
+    UnloadImage(atlas);
+    X4SetAsyncRefresh(true); test_present_delay=0.4; frame(21);
+    CHECK(X4IsDisplayBusy()); test_present_ok=false; test_time+=0.4;
+    PollInputEvents();
+    CHECK(WindowShouldClose() && X4GetStats().errors == 1 && !X4GetPanelFrame());
+    PollInputEvents(); CHECK(X4GetStats().errors == 1);
+    test_present_ok=true; test_present_delay=0; CloseWindow();
     puts("PASS: rendering, clipping, textures, text, camera, input, refresh policy, failure recovery, lifecycle");
     return 0;
 }

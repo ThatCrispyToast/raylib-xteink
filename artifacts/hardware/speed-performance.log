@@ -1,0 +1,61 @@
+I (238) sdspi_transaction: cmd=52, R1 response: command not supported
+I (282) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 100.000 milliseconds
+INFO: TEXTURE: [ID 2] Texture loaded successfully (32x32 | R8G8B8A8 | 1 mipmaps)
+PAPER_PERF frame=0 key=0 draw_ms=258.130 convert_ms=5.606 present_ms=3769.001 total_ms=4033.032 action_ms=4033.102 full=1 partial=0 errors=0
+PANEL_PERF bytes=144000 window=800x480 transfer_ms=59.271 waveform_ms=3709.546
+X4: Paper ready heap=69680 minimum=56876 largest=29696 sd=1
+PAPER_PERF frame=1 key=257 draw_ms=176.585 convert_ms=5.381 present_ms=555.748 total_ms=738.079 action_ms=738.144 full=1 partial=1 errors=0
+PANEL_PERF bytes=106080 window=680x416 transfer_ms=49.934 waveform_ms=501.286
+PAPER_PERF frame=2 key=262 draw_ms=8.978 convert_ms=5.425 present_ms=422.770 total_ms=437.938 action_ms=438.010 full=1 partial=2 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=3.188 waveform_ms=417.229
+PAPER_PERF frame=3 key=262 draw_ms=9.080 convert_ms=5.391 present_ms=423.003 total_ms=438.102 action_ms=438.171 full=1 partial=3 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=3.193 waveform_ms=417.484
+PAPER_PERF frame=4 key=264 draw_ms=9.125 convert_ms=5.422 present_ms=420.927 total_ms=436.218 action_ms=436.282 full=1 partial=4 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.180 waveform_ms=415.984
+PAPER_PERF frame=5 key=263 draw_ms=9.203 convert_ms=5.293 present_ms=423.012 total_ms=438.137 action_ms=438.202 full=1 partial=5 errors=0
+PANEL_PERF bytes=4830 window=80x161 transfer_ms=3.387 waveform_ms=417.424
+PAPER_PERF frame=6 key=265 draw_ms=9.135 convert_ms=5.299 present_ms=420.738 total_ms=435.938 action_ms=436.010 full=1 partial=6 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.245 waveform_ms=415.868
+PAPER_PERF frame=7 key=256 draw_ms=108.012 convert_ms=5.550 present_ms=472.518 total_ms=586.426 action_ms=586.484 full=1 partial=7 errors=0
+PANEL_PERF bytes=111180 window=680x436 transfer_ms=52.235 waveform_ms=415.701
+PAPER_PERF frame=8 key=264 draw_ms=3.609 convert_ms=5.352 present_ms=431.843 total_ms=441.141 action_ms=441.379 full=1 partial=8 errors=0
+PANEL_PERF bytes=19620 window=120x436 transfer_ms=10.385 waveform_ms=417.169
+PAPER_PERF frame=9 key=264 draw_ms=3.620 convert_ms=5.325 present_ms=431.388 total_ms=440.672 action_ms=440.726 full=1 partial=9 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=9.953 waveform_ms=417.077
+PAPER_PERF frame=10 key=264 draw_ms=3.573 convert_ms=5.446 present_ms=432.038 total_ms=441.394 action_ms=441.451 full=1 partial=10 errors=0
+PANEL_PERF bytes=19620 window=120x436 transfer_ms=10.474 waveform_ms=417.196
+PAPER_PERF frame=11 key=264 draw_ms=3.801 convert_ms=5.371 present_ms=430.002 total_ms=439.511 action_ms=439.563 full=1 partial=11 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=9.691 waveform_ms=415.902
+PAPER_PERF frame=12 key=264 draw_ms=3.578 convert_ms=5.402 present_ms=429.777 total_ms=439.095 action_ms=439.151 full=1 partial=12 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=9.589 waveform_ms=415.704
+PAPER_PERF frame=13 key=265 draw_ms=3.128 convert_ms=5.595 present_ms=431.479 total_ms=440.532 action_ms=440.589 full=1 partial=13 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=9.597 waveform_ms=417.409
+PAPER_PERF frame=14 key=265 draw_ms=3.643 convert_ms=5.352 present_ms=429.770 total_ms=439.104 action_ms=439.157 full=1 partial=14 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=9.597 waveform_ms=415.765
+PAPER_PERF frame=15 key=256 draw_ms=176.673 convert_ms=5.438 present_ms=473.950 total_ms=656.401 action_ms=656.454 full=1 partial=15 errors=0
+PANEL_PERF bytes=111180 window=680x436 transfer_ms=52.232 waveform_ms=417.054
+PAPER_PERF frame=16 key=263 draw_ms=9.163 convert_ms=5.309 present_ms=421.255 total_ms=436.489 action_ms=436.558 full=1 partial=16 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=3.323 waveform_ms=415.724
+PAPER_PERF frame=17 key=262 draw_ms=9.335 convert_ms=5.393 present_ms=423.086 total_ms=438.681 action_ms=438.761 full=1 partial=17 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=3.262 waveform_ms=417.616
+PAPER_PERF frame=18 key=264 draw_ms=9.336 convert_ms=5.382 present_ms=422.484 total_ms=438.080 action_ms=438.144 full=1 partial=18 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.237 waveform_ms=417.621
+PAPER_PERF frame=19 key=265 draw_ms=9.146 convert_ms=5.293 present_ms=420.766 total_ms=435.970 action_ms=436.039 full=1 partial=19 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.277 waveform_ms=415.863
+Paper: saved board=7549210 turns=1 cursor=1 slot=0
+PAPER_PERF frame=20 key=257 draw_ms=41.406 convert_ms=5.536 present_ms=441.684 total_ms=489.259 action_ms=550.627 full=1 partial=20 errors=0
+PANEL_PERF bytes=42282 window=464x243 transfer_ms=21.114 waveform_ms=417.544
+PAPER_PERF frame=21 key=262 draw_ms=9.390 convert_ms=5.461 present_ms=422.756 total_ms=438.243 action_ms=438.311 full=1 partial=21 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=3.224 waveform_ms=417.200
+Paper: saved board=7549332 turns=2 cursor=2 slot=1
+PAPER_PERF frame=22 key=257 draw_ms=41.415 convert_ms=5.689 present_ms=443.234 total_ms=490.841 action_ms=520.980 full=1 partial=22 errors=0
+PANEL_PERF bytes=49725 window=408x325 transfer_ms=24.073 waveform_ms=415.921
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+X4: frames=23 full=1 partial=22 unchanged=0 errors=0 buffers=192000
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+PAPER_PERF_DONE result=0

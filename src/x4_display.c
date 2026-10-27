@@ -1,10 +1,14 @@
 #include "x4_hal.h"
 #include <string.h>
+#include "x4_dither_lut.h"
 
-static uint8_t panel[X4_FRAME_BYTES], previous[X4_FRAME_BYTES];
+static uint8_t buffers[2][X4_FRAME_BYTES];
+static uint8_t *front=buffers[0], *back=buffers[1];
 static X4Stats stats;
 static unsigned int interval = 12, partial_count;
 static bool force_full = true, have_frame;
+static bool asynchronous, in_flight, pending, flight_full, failed;
+static double flight_started;
 
 void x4_reset(void)
 {
@@ -13,67 +17,90 @@ void x4_reset(void)
     force_full = true;
     have_frame = false;
     partial_count = 0;
+    asynchronous=in_flight=pending=flight_full=failed=false;
+    front=buffers[0]; back=buffers[1];
 }
 
 void x4_convert_frame(const uint8_t *gray, uint8_t *out)
 {
-    // Each mask selects which of the four shades is white at this Bayer position.
-    static const uint8_t masks[4][4] = {
-        {14,12,14,12}, {8,14,8,12}, {14,8,14,12}, {8,12,8,12}
-    };
     const int stride=X4_WIDTH/4;
-    for (int x=0; x<X4_WIDTH; x++)
+    for (int x=0; x<X4_WIDTH; x+=4)
     {
-        unsigned int shift=6-2*(x%4);
-        const uint8_t m0=masks[0][x%4], m1=masks[1][x%4];
-        const uint8_t m2=masks[2][x%4], m3=masks[3][x%4];
         uint8_t *row=out+(X4_WIDTH-1-x)*(X4_HEIGHT/8);
         for (int y=0; y<X4_HEIGHT/8; y++)
         {
             const uint8_t *p=gray+(X4_HEIGHT-1-y*8)*stride+x/4;
-            #define WHITE_AT(n,m) (((m) >> ((p[-(n)*stride] >> shift) & 3)) & 1)
-            row[y]=(uint8_t)((WHITE_AT(0,m0)<<7) | (WHITE_AT(1,m1)<<6) |
-                (WHITE_AT(2,m2)<<5) | (WHITE_AT(3,m3)<<4) | (WHITE_AT(4,m0)<<3) |
-                (WHITE_AT(5,m1)<<2) | (WHITE_AT(6,m2)<<1) | WHITE_AT(7,m3));
-            #undef WHITE_AT
+            uint32_t bits=(dither_lut[0][p[0]]<<7) | (dither_lut[1][p[-stride]]<<6) |
+                (dither_lut[2][p[-2*stride]]<<5) | (dither_lut[3][p[-3*stride]]<<4) |
+                (dither_lut[0][p[-4*stride]]<<3) | (dither_lut[1][p[-5*stride]]<<2) |
+                (dither_lut[2][p[-6*stride]]<<1) | dither_lut[3][p[-7*stride]];
+            row[y]=(uint8_t)bits;
+            row[y-X4_HEIGHT/8]=(uint8_t)(bits>>8);
+            row[y-2*(X4_HEIGHT/8)]=(uint8_t)(bits>>16);
+            row[y-3*(X4_HEIGHT/8)]=(uint8_t)(bits>>24);
         }
     }
 }
 
+static bool display_failed(void)
+{
+    if (!failed) stats.errors++;
+    if (in_flight) have_frame=false;
+    failed=true; in_flight=pending=false; force_full=true;
+    return false;
+}
+bool x4_service_display(bool wait)
+{
+    if (failed) return false;
+    for (;;) {
+        if (in_flight) {
+            if (!wait && x4_hal_present_busy()) return true;
+            if (!x4_hal_finish_present()) return display_failed();
+            stats.last_present_seconds=x4_hal_time()-flight_started;
+            in_flight=false; have_frame=true;
+            if (flight_full) { stats.full_refreshes++; partial_count=0; }
+            else { stats.partial_refreshes++; partial_count++; }
+        }
+        if (!pending) return x4_hal_display_idle() || display_failed();
+        if (have_frame && !force_full && !memcmp(front,back,X4_FRAME_BYTES)) {
+            stats.unchanged_frames++; pending=false; return true;
+        }
+        flight_full=force_full || !have_frame || partial_count>=interval;
+        flight_started=x4_hal_time();
+        if (!x4_hal_begin_present(back,front,flight_full)) return display_failed();
+        uint8_t *swap=front; front=back; back=swap;
+        pending=false; in_flight=true; force_full=false;
+        // A cleaning refresh always completes before returning to the application.
+        if (flight_full) wait=true;
+        if (!wait) return true;
+    }
+}
 bool x4_present(const uint8_t *gray)
 {
     stats.frames++;
-    double start = x4_hal_time();
-    x4_convert_frame(gray, panel);
-    stats.last_convert_seconds = x4_hal_time() - start;
-    stats.last_present_seconds = 0;
-    if (have_frame && !force_full && memcmp(panel, previous, sizeof(panel)) == 0)
-    {
-        stats.unchanged_frames++;
-        return true;
-    }
-    bool full = force_full || !have_frame || partial_count >= interval;
-    start = x4_hal_time();
-    if (!x4_hal_present(panel, previous, full))
-    {
-        stats.errors++;
-        force_full = true;
-        return false;
-    }
-    stats.last_present_seconds = x4_hal_time() - start;
-    memcpy(previous, panel, sizeof(panel));
-    have_frame = true;
-    force_full = false;
-    if (full) { stats.full_refreshes++; partial_count = 0; }
-    else { stats.partial_refreshes++; partial_count++; }
-    return true;
+    failed=false;
+    if (pending) stats.coalesced_frames++;
+    double start=x4_hal_time();
+    x4_convert_frame(gray,back);
+    stats.last_convert_seconds=x4_hal_time()-start;
+    pending=true;
+    return x4_service_display(!asynchronous || force_full);
+}
+void X4SetAsyncRefresh(bool enabled)
+{
+    asynchronous=enabled;
+}
+bool X4WaitDisplay(void) { return x4_service_display(true); }
+bool X4IsDisplayBusy(void)
+{
+    return in_flight || pending;
 }
 
 void X4RefreshFull(void) { force_full = true; }
 void X4SetRefreshInterval(unsigned int count) { interval = count; }
 X4Stats X4GetStats(void) { return stats; }
 X4Status X4GetStatus(void) { return x4_hal_status(); }
-const uint8_t *X4GetPanelFrame(void) { return have_frame ? previous : NULL; }
+const uint8_t *X4GetPanelFrame(void) { return have_frame && !in_flight ? front : NULL; }
 const char *X4GetStoragePath(void) { return x4_hal_storage(); }
 
 uint8_t x4_decode_buttons(int adc1, int adc2, bool power)

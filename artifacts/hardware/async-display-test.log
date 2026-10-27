@@ -1,0 +1,19 @@
+I (256) sdspi_transaction: cmd=52, R1 response: command not supported
+I (299) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+DISPLAY_SYNC step=1 total_ms=513.268 waveform_ms=501.872
+DISPLAY_SYNC step=2 total_ms=428.593 waveform_ms=417.274
+DISPLAY_SYNC step=3 total_ms=426.868 waveform_ms=415.647
+DISPLAY_SYNC step=4 total_ms=426.862 waveform_ms=415.719
+DISPLAY_SYNC step=5 total_ms=428.561 waveform_ms=417.487
+DISPLAY_SYNC step=6 total_ms=428.587 waveform_ms=417.565
+DISPLAY_SYNC step=7 total_ms=426.540 waveform_ms=415.606
+DISPLAY_SYNC step=8 total_ms=426.973 waveform_ms=415.960
+DISPLAY_ASYNC frames=200 mean_ms=7.182 max_ms=12.333 coalesced=186 partial=22 heap_before=75956 heap_after=75956
+DISPLAY_AFTER_IDLE total_ms=507.987
+DISPLAY_AFTER_EXPIRY total_ms=513.007
+DISPLAY_AFTER_RELOAD total_ms=427.002
+DISPLAY_SPEED_PASS errors=0 full=2 partial=27

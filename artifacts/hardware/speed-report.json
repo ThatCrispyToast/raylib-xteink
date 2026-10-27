@@ -1,0 +1,100 @@
+{
+  "result": "PASS",
+  "version": "1.2.0",
+  "baseline_commit": "834aafa",
+  "samples": {
+    "cursor": {
+      "samples": 9,
+      "median_action_ms": 438.01,
+      "median_draw_ms": 9.146,
+      "median_convert_ms": 5.382,
+      "median_present_ms": 422.484,
+      "median_transfer_ms": 3.245,
+      "median_waveform_ms": 417.229,
+      "median_bytes": 4446.0,
+      "max_action_ms": 438.761,
+      "baseline_median_action_ms": 677.013,
+      "latency_reduction_percent": 35.3
+    },
+    "menu": {
+      "samples": 7,
+      "median_action_ms": 440.589,
+      "median_draw_ms": 3.609,
+      "median_convert_ms": 5.371,
+      "median_present_ms": 431.388,
+      "median_transfer_ms": 9.691,
+      "median_waveform_ms": 417.077,
+      "median_bytes": 18312.0,
+      "max_action_ms": 441.451,
+      "baseline_median_action_ms": 679.188,
+      "latency_reduction_percent": 35.1
+    },
+    "save": {
+      "samples": 2,
+      "median_action_ms": 535.803,
+      "median_draw_ms": 41.41,
+      "median_convert_ms": 5.612,
+      "median_present_ms": 442.459,
+      "median_transfer_ms": 22.593,
+      "median_waveform_ms": 416.732,
+      "median_bytes": 46003.5,
+      "max_action_ms": 550.627,
+      "baseline_median_action_ms": 772.665,
+      "latency_reduction_percent": 30.7
+    }
+  },
+  "async_fixture": {
+    "frames": 200.0,
+    "mean_ms": 7.182,
+    "max_ms": 12.333,
+    "coalesced": 186.0,
+    "partial": 22.0,
+    "heap_before": 75956.0,
+    "heap_after": 75956.0,
+    "after_idle_ms": 507.987,
+    "after_temperature_expiry_ms": 513.007,
+    "after_reload_ms": 427.002,
+    "completion": {
+      "errors": 0.0,
+      "full": 2.0,
+      "partial": 27.0
+    }
+  },
+  "tetris": {
+    "six_rows_seconds": 5.246,
+    "held_drop_seconds": 1.79,
+    "held_move_to_edge_seconds": 0.897,
+    "first_held_right_submission_seconds": 0.039,
+    "first_held_down_submission_seconds": 0.049,
+    "scope": "Actual application and panel with scripted held keys. Completion times include X4WaitDisplay and controller BUSY; submission times do not measure visible latency."
+  },
+  "full_refresh_ms": 3769.001,
+  "physical_regression_checks": 276,
+  "partial_soak_updates": 200,
+  "sleep_wake_cycles": 3,
+  "native_tests": 11,
+  "sanitizer_tests": 7,
+  "qemu_consecutive_boots": 20,
+  "emulator_tetris_journeys": 24,
+  "binary_sha256": {
+    "paper": "4346366fb0290e1af3ff176d842839f5d6edb484522ff819b1093ff98d1d3cf0",
+    "tetris": "2d21a4900129d221a0d9282a6a66cfedcf5dd9ba7d2c2f48ddc54f3502efb843",
+    "diagnostics": "3b1448b6fdd620f3734fdb724f90a9d70a4a668c5ae24684f133ebc75d6444f1",
+    "paper_benchmark": "40442c04d4daa3c2214334e0339b5530c09c3a5838a92a2ee21fa41603d0ed20",
+    "tetris_qa": "20411eb8b6499d7a6618312a6d7802b45c502b6841b993e35f0f5d803f9634f2",
+    "tetris_pace": "42cb58a8aa09e2d8cca3a21c3c4b772c660270b0100d3c802784e6c94388fb0e",
+    "async_fixture": "7fa5eeb7864535713caae77c219af39d4c67ecacf07ecf4eadebd094996098d8"
+  },
+  "policy": "Factory temperature-selected OTP waveforms only, no custom LUT/voltage/temperature override; 20 MHz SPI. Rails off after 2 seconds idle, temperature reload after 30 seconds.",
+  "measurement_scope": "Paper action timings use synchronous presentation through BUSY completion and isolated real SD saves. One original X4 and card at room temperature; small sample counts, no mechanical debounce, input queue wait, optical settling or ghosting measurement.",
+  "owner_visual_check": "Not performed during this pass; owner unavailable.",
+  "retained_scene_hashes_match_baseline": true,
+  "evidence": [
+    "speed-performance.log",
+    "async-display-test.log",
+    "tetris-speed-pace.log",
+    "tetris-speed-test.log",
+    "speed-regression/report.json",
+    "speed-sleep.log"
+  ]
+}

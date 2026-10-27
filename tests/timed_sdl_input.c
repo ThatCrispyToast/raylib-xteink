@@ -92,3 +92,15 @@ void SDL_Delay(Uint32 ms)
     }
     original(ms);
 }
+
+SDL_TimerID SDL_AddTimer(Uint32 ms, SDL_TimerCallback callback, void *param)
+{
+    static SDL_TimerID (*original)(Uint32, SDL_TimerCallback, void *);
+    if (!original) original=dlsym(RTLD_NEXT,"SDL_AddTimer");
+    if (ms == 400 && pause_frame && frames == pause_frame) {
+        fprintf(stderr,"QA_PAUSE %.6f %u\n",elapsed(),pause_ms);
+        if (pause_ms>ms) ms=pause_ms;
+        pause_frame=0;
+    }
+    return original(ms,callback,param);
+}

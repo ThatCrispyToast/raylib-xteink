@@ -52,7 +52,7 @@ int main(void)
     bool dirty=true, in_menu=false, help=false, sleep=false;
     const char *notice=NULL;
     bool confirmation_shown=false, discard_queued_enter=false;
-    struct { int kind, cursor, menu; uint32_t board, turns; PaperSaveStatus status; const char *notice; } drawn={0};
+    struct { int kind, page, cursor, menu; uint32_t board, turns; PaperSaveStatus status; const char *notice; } drawn={0};
     Image checker=GenImageChecked(32,32,4,4,WHITE,BLACK);
     Texture2D tile=LoadTextureFromImage(checker); UnloadImage(checker);
     while (!WindowShouldClose() && !sleep) {
@@ -200,8 +200,10 @@ int main(void)
                 label("Power: clean and update this status.",28,662,20);
             }
         }
-        EndDrawing(); dirty=false;
-        drawn.kind=kind; drawn.cursor=state.cursor; drawn.menu=menu;
+        X4SetAsyncRefresh(kind == drawn.kind && page == drawn.page && !confirm && !sleep);
+        EndDrawing();
+        dirty=false;
+        drawn.kind=kind; drawn.page=page; drawn.cursor=state.cursor; drawn.menu=menu;
         drawn.board=state.board; drawn.turns=state.turns; drawn.status=state.status; drawn.notice=notice;
         if (confirm && !confirmation_shown) {
             // A confirmation requires a fresh press after its dialog is visible.
@@ -214,6 +216,7 @@ int main(void)
                 device.free_heap,device.minimum_heap,device.largest_block,device.storage_mounted);
         }
     }
+    X4WaitDisplay();
     UnloadTexture(tile);
     X4Stats stats=X4GetStats();
     printf("X4: frames=%u full=%u partial=%u unchanged=%u errors=%u buffers=%zu\n",

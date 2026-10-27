@@ -6,7 +6,10 @@
 #define CHECK(x) do { if (!(x)) { fprintf(stderr,"%s:%d: %s\n",__FILE__,__LINE__,#x); exit(1); } } while (0)
 static uint8_t cmd, bw[X4_FRAME_BYTES], red[X4_FRAME_BYTES];
 static uint8_t frame[X4_FRAME_BYTES], previous[X4_FRAME_BYTES];
-static unsigned int activations, slept;
+static unsigned int activations, displays, slept, lut_loads;
+static uint64_t clock_us;
+static unsigned int write_us;
+static bool clock_on, analog_on;
 static bool fail_write, stuck_busy, ping_pong;
 static uint8_t mode;
 static int x0, x1, y0, y1, x, y;
@@ -14,17 +17,27 @@ static unsigned int le16(const uint8_t *p) { return p[0] | (p[1]<<8); }
 static bool write_bus(bool data, const uint8_t *bytes, size_t size)
 {
     if (fail_write) return false;
+    clock_us+=write_us;
     if (!data) {
         CHECK(size == 1); cmd = *bytes;
+        CHECK(cmd != 0x2a && cmd != 0x30 && cmd != 0x36 && cmd != 0x39);
+        CHECK(cmd != 0x03 && cmd != 0x04 && cmd != 0x2c && cmd != 0x32 && cmd != 0x1a);
         if (cmd == 0x20) {
             activations++;
-            if (mode == 0xf7 || mode == 0xff) {
+            if (mode & 0x80) clock_on=true;
+            if (mode & 0x40) analog_on=true;
+            CHECK(clock_on);
+            if (mode & 0x10) lut_loads++;
+            if (mode & 0x04) {
+                CHECK(analog_on); displays++;
                 CHECK(!memcmp(bw,frame,sizeof(frame)));
-                CHECK(!memcmp(red,mode == 0xf7 ? frame : previous,sizeof(frame)));
-                if (mode == 0xff && ping_pong) for (size_t i=0; i<sizeof(bw); i++) {
+                CHECK(!memcmp(red,(mode & 0x08) ? previous : frame,sizeof(frame)));
+                if ((mode & 0x08) && ping_pong) for (size_t i=0; i<sizeof(bw); i++) {
                     uint8_t temp=bw[i]; bw[i]=red[i]; red[i]=temp;
                 }
             }
+            if (mode & 0x02) analog_on=false;
+            if (mode & 0x01) clock_on=false;
         }
     } else if (cmd == 0x24 || cmd == 0x26) {
         for (size_t i=0; i<size; i++) {
@@ -46,13 +59,14 @@ static bool write_bus(bool data, const uint8_t *bytes, size_t size)
     return true;
 }
 static bool busy(void) { return stuck_busy; }
-static void reset(bool high) { (void)high; }
-static void sleep_ms(unsigned int ms) { slept+=ms; }
+static void reset(bool high) { if (!high) clock_on=analog_on=false; }
+static void sleep_ms(unsigned int ms) { slept+=ms; clock_us+=(uint64_t)ms*1000; }
+static uint64_t time_us(void) { return clock_us; }
 static void present(bool full, unsigned int bytes, unsigned int width, unsigned int height)
 {
-    unsigned int before=activations;
+    unsigned int before=displays;
     CHECK(x4_epd_present(frame,full ? NULL : previous,full));
-    CHECK(activations == before+1 && mode == (full ? 0xf7 : 0xff));
+    CHECK(displays == before+1 && ((mode & 0x08) != 0) == !full);
     CHECK(!memcmp(bw,frame,sizeof(frame)) && !memcmp(red,frame,sizeof(frame)));
     X4EpdStats s=x4_epd_stats();
     CHECK(s.ram_bytes == bytes && s.window_width == width && s.window_height == height);
@@ -60,11 +74,12 @@ static void present(bool full, unsigned int bytes, unsigned int width, unsigned 
 }
 int main(void)
 {
-    X4EpdIO io={write_bus,busy,reset,sleep_ms,NULL};
+    X4EpdIO io={write_bus,busy,reset,sleep_ms,time_us};
     CHECK(!x4_epd_init(NULL)); CHECK(x4_epd_init(&io));
     CHECK(!x4_epd_present(frame,previous,false));
     memset(frame,0xa5,sizeof(frame));
     present(true,3*X4_FRAME_BYTES,X4_PANEL_WIDTH,X4_PANEL_HEIGHT);
+    CHECK(!clock_on && !analog_on && lut_loads == 1);
     for (int swap=0; swap<2; swap++) {
         ping_pong=swap;
         frame[123]^=0xff; present(false,3,8,1);
@@ -79,11 +94,51 @@ int main(void)
         CHECK(x4_epd_present(frame,previous,false));
         CHECK(activations == before && x4_epd_stats().ram_bytes == 0);
     }
+    CHECK(lut_loads == 2 && clock_on && analog_on);
+    unsigned int before=activations;
+    CHECK(x4_epd_idle()); CHECK(activations == before);
+    clock_us+=2000000;
+    CHECK(x4_epd_idle()); CHECK(activations == before+1 && !clock_on && !analog_on);
+    CHECK(x4_epd_idle()); CHECK(activations == before+1);
+    frame[42]^=1; present(false,3,8,1);
+    CHECK(mode == 0xcc && lut_loads == 2 && clock_on && analog_on);
+    clock_us+=30000000;
+    frame[42]^=1; present(false,3,8,1); CHECK(lut_loads == 3);
+    present(true,3*X4_FRAME_BYTES,X4_PANEL_WIDTH,X4_PANEL_HEIGHT);
+    CHECK(lut_loads == 4 && !analog_on);
+    frame[42]^=1; present(false,3,8,1); CHECK(lut_loads == 5);
     CHECK(x4_epd_sleep()); CHECK(!x4_epd_present(frame,previous,false));
+    CHECK(!clock_on && !analog_on);
+    // A bus without a clock falls back to powering down after every frame.
+    io.time_us=NULL; CHECK(x4_epd_init(&io));
+    present(true,3*X4_FRAME_BYTES,X4_PANEL_WIDTH,X4_PANEL_HEIGHT);
+    frame[42]^=1; present(false,3,8,1); CHECK(!clock_on && !analog_on);
+    before=lut_loads; frame[42]^=1; present(false,3,8,1); CHECK(lut_loads == before+1);
+    CHECK(x4_epd_sleep()); io.time_us=time_us;
+    CHECK(x4_epd_init(&io)); present(true,3*X4_FRAME_BYTES,X4_PANEL_WIDTH,X4_PANEL_HEIGHT);
+    write_us=1500;
+    frame[42]^=1; CHECK(x4_epd_begin(frame,previous,false));
+    write_us=0;
+    CHECK(x4_epd_busy()); before=activations;
+    clock_us+=1999; CHECK(x4_epd_busy());
+    clock_us++; CHECK(!x4_epd_busy());
+    CHECK(!x4_epd_begin(frame,previous,false)); CHECK(x4_epd_idle() && activations == before);
+    clock_us+=500000; CHECK(!x4_epd_busy()); CHECK(x4_epd_finish());
+    CHECK(!memcmp(bw,frame,sizeof(frame)) && !memcmp(red,frame,sizeof(frame)));
+    memcpy(previous,frame,sizeof(frame));
+    frame[42]^=1; CHECK(x4_epd_begin(frame,previous,false)); stuck_busy=true;
+    clock_us+=15000000; CHECK(!x4_epd_busy() && !x4_epd_finish()); stuck_busy=false;
+    CHECK(x4_epd_init(&io)); present(true,3*X4_FRAME_BYTES,X4_PANEL_WIDTH,X4_PANEL_HEIGHT);
+    frame[42]^=1; CHECK(x4_epd_begin(frame,previous,false)); stuck_busy=true;
+    clock_us+=14900000; slept=0;
+    CHECK(!x4_epd_finish() && slept<=102); stuck_busy=false;
+    CHECK(x4_epd_init(&io)); present(true,3*X4_FRAME_BYTES,X4_PANEL_WIDTH,X4_PANEL_HEIGHT);
+    frame[42]^=1; CHECK(x4_epd_begin(frame,previous,false)); clock_us+=15000000;
+    CHECK(!x4_epd_finish()); // A late blocking finish must share the same deadline.
     CHECK(x4_epd_init(&io)); fail_write=true;
     CHECK(!x4_epd_present(frame,previous,true)); fail_write=false;
     CHECK(!x4_epd_present(frame,previous,true));
     CHECK(x4_epd_init(&io)); stuck_busy=true; slept=0;
     CHECK(!x4_epd_present(frame,previous,true)); CHECK(slept>=15000 && slept<15100);
-    puts("PASS: SSD1677 region addressing, chunked writes, RAM ping-pong, refresh modes, baseline sync, sleep, SPI failure, BUSY timeout");
+    puts("PASS: SSD1677 regions, RAM ping-pong, cached LUT, temperature expiry, idle power, sleep, SPI failure, BUSY timeout");
 }

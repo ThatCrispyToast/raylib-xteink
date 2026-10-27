@@ -234,6 +234,9 @@ int main(void)
         else if (screen == PAUSE && drawn == PAUSE && practice == drawn_practice) menu_cursor(drawn_menu,menu);
         else draw_page(screen,&game,menu,practice,sleep_confirmation);
         unsigned int full_before=X4GetStats().full_refreshes;
+        // Finish critical frames before EndDrawing polls the next input batch.
+        X4SetAsyncRefresh(!new_piece && screen == PLAY && drawn == PLAY &&
+            TetrisFits(&game,game.x,game.y+1,game.rotation));
         EndDrawing();
         last_visible=GetTime(); dirty=false;
         // Ordinary refreshes count toward falling; cleans and unseen new pieces do not.
@@ -250,8 +253,9 @@ int main(void)
             fflush(stdout);
         }
     }
+    X4WaitDisplay();
     X4Stats s=X4GetStats();
-    printf("TETRIS: screen=%d score=%u lines=%u pieces=%u x=%d y=%d rotation=%u practice=%d frames=%u full=%u partial=%u errors=%u\n",
-        screen,(unsigned)game.score,(unsigned)game.lines,(unsigned)game.pieces,game.x,game.y,game.rotation,practice,s.frames,s.full_refreshes,s.partial_refreshes,s.errors);
+    printf("TETRIS: screen=%d score=%u lines=%u pieces=%u x=%d y=%d rotation=%u practice=%d frames=%u full=%u partial=%u errors=%u coalesced=%u\n",
+        screen,(unsigned)game.score,(unsigned)game.lines,(unsigned)game.pieces,game.x,game.y,game.rotation,practice,s.frames,s.full_refreshes,s.partial_refreshes,s.errors,s.coalesced_frames);
     CloseWindow(); return s.errors ? 1 : 0;
 }

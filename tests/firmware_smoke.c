@@ -11,8 +11,11 @@
 static size_t free_at_boot;
 bool x4_hal_init(const char *title) { (void)title; return true; }
 void x4_hal_close(void) {}
-bool x4_hal_present(const uint8_t *frame, const uint8_t *previous, bool full)
+bool x4_hal_begin_present(const uint8_t *frame, const uint8_t *previous, bool full)
 { (void)frame; (void)previous; (void)full; return true; }
+bool x4_hal_present_busy(void) { return false; }
+bool x4_hal_display_idle(void) { return true; }
+bool x4_hal_finish_present(void) { return true; }
 X4Input x4_hal_poll(void) { return (X4Input){0}; }
 double x4_hal_time(void) { return esp_timer_get_time()/1000000.0; }
 void x4_hal_sleep(double seconds) { vTaskDelay(pdMS_TO_TICKS((unsigned int)(seconds*1000))+1); }

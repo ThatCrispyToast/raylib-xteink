@@ -40,7 +40,7 @@ static bool write_spi(bool data, const uint8_t *bytes, size_t size)
     while (size && ok) {
         size_t length = size > 4092 ? 4092 : size;
         spi_transaction_t transaction = { .length = length*8, .tx_buffer = bytes };
-        ok = spi_device_transmit(spi, &transaction) == ESP_OK;
+        ok = spi_device_polling_transmit(spi, &transaction) == ESP_OK;
         bytes += length; size -= length;
     }
     gpio_set_level(GPIO_NUM_21, 1);
@@ -138,8 +138,11 @@ void x4_hal_close(void)
     if (spi) { spi_bus_remove_device(spi); spi = NULL; }
     if (bus_initialized) { spi_bus_free(SPI2_HOST); bus_initialized = false; }
 }
-bool x4_hal_present(const uint8_t *frame, const uint8_t *previous, bool full)
-{ return x4_epd_present(frame, previous, full); }
+bool x4_hal_begin_present(const uint8_t *frame, const uint8_t *previous, bool full)
+{ return x4_epd_begin(frame, previous, full); }
+bool x4_hal_present_busy(void) { return x4_epd_busy(); }
+bool x4_hal_finish_present(void) { return x4_epd_finish(); }
+bool x4_hal_display_idle(void) { return !panel_initialized || x4_epd_idle(); }
 X4Input x4_hal_poll(void)
 {
     portENTER_CRITICAL(&input_lock);

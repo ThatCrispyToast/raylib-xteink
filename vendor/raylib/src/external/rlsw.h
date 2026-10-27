@@ -5758,6 +5758,11 @@ static void SW_RASTER_QUAD(const sw_vertex_t *a, const sw_vertex_t *b,
     !((SW_RASTER_QUAD_FLAGS) & (SW_STATE_COLOR_INTERP | SW_STATE_DEPTH_TEST))
     // Quantize constant colors once; the C3 has no floating-point unit.
     uint8_t shades[4];
+#if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
+    if (flatColor[3] == 1.0f && RLSW.blendFunc == sw_blend_SRC_ALPHA_ONE_MINUS_SRC_ALPHA)
+        memset(shades,x4_gray2_quantize(flatColor),sizeof(shades));
+    else
+#endif
     for (int level=0; level<4; level++)
     {
     #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
@@ -5800,6 +5805,20 @@ static void SW_RASTER_QUAD(const sw_vertex_t *a, const sw_vertex_t *b,
             int sy=(int)((font->tWrap == SW_REPEAT ? sw_fract(v) : sw_saturate(v))*font->height);
             sy=sw_clamp_int(sy,0,font->hMinus1);
             int offset=y*stride+xLoopMin;
+            if (solid) {
+                int run=-1;
+                for (int x=xLoopMin; x<=xLoopMax; x++) {
+                    bool ink=x<xLoopMax;
+                #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
+                    ink=ink && pixels[2*(sy*font->width+columns[x-xLoopMin])+1];
+                #endif
+                    if (ink && run<0) run=x;
+                    if (!ink && run>=0) {
+                        x4_gray2_span(cPixels,y*stride+run,x-run,shades[0]); run=-1;
+                    }
+                }
+                continue;
+            }
             for (int x=xLoopMin; x<xLoopMax; x++,offset++)
             {
             #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND

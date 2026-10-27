@@ -1,0 +1,19 @@
+{
+  "result": "PASS",
+  "version": "1.1.2",
+  "application_sha256": "564471c2f0360bc952f046901a47ce9b78e9d3bcc524982f90bd3ad8c09bb75d",
+  "flash_verified": true,
+  "free_heap": 69800,
+  "minimum_heap": 65700,
+  "largest_block": 29696,
+  "storage_mounted": true,
+  "physical_regression_checks": 276,
+  "physical_regression_report": "artifacts/hardware/region-regression/report.json",
+  "physical_performance_log": "artifacts/hardware/region-performance.log",
+  "no_clean_soak_updates": 200,
+  "native_tests": 8,
+  "retained_render_comparisons": 47,
+  "current_application_hardware_scope": "Production flash verification and boot; same driver and renderer passed 276 physical checks including 200 partial updates without cleaning. Actual Paper code benchmarked with isolated real SD saves.",
+  "input_scope": "Ordered rapid taps and confirmation guards tested through independently timed SDL events; no new owner button-to-photon measurement.",
+  "optical_scope": "Owner observation of the 200-update soak was requested for visual inspection; no reply received at release restoration. No optical ghosting or settling measurement claimed."
+}

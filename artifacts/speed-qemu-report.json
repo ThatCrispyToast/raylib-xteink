@@ -1,0 +1,113 @@
+{
+  "result": "PASS",
+  "boots": 20,
+  "icount": 3,
+  "interrupt_watchdog_enabled": true,
+  "binary_sha256": "cb7c3d3886d89489f898d7b6b136b51923c77e2a2dab3c038599d3314b01328c",
+  "prior_failure": "Interrupt watchdog in esp_cpu_wait_for_intr / prvIdleTask; reproduced on boot 9 without icount.",
+  "fix": "Use -icount 3 as required by Espressif ESP32-C3 emulator documentation; retain enabled interrupt watchdog.",
+  "source": "https://github.com/espressif/esp-toolchain-docs/blob/main/qemu/esp32c3/README.md",
+  "runner_negative_test": "PASS: a synthetic panic followed by a success marker in the same stream is rejected.",
+  "runs": [
+    {
+      "run": 1,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 2,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 3,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 4,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 5,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 6,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 7,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 8,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 9,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 10,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 11,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 12,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 13,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 14,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 15,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 16,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 17,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 18,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 19,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    },
+    {
+      "run": 20,
+      "log_sha256": "412121f958bd189273dce97b4da38d6827ededc0864fdbfc7dbcf510bd45007d",
+      "result": "PASS"
+    }
+  ]
+}

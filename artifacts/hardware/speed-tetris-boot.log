@@ -1,0 +1,7 @@
+I (253) sdspi_transaction: cmd=52, R1 response: command not supported
+I (296) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+TETRIS: ready heap=73884 minimum=73884 largest=36864 sd=1

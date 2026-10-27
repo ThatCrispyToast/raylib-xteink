@@ -80,6 +80,9 @@ def main():
                   (1900,"Return"),(2100,"Return")], 2700, dict(screen=4,pieces=0))
             timed("real-time-gravity", [(100,"Return")], 6000,
                   dict(screen=1,y=lambda y: y>=6,pieces=0,full=1))
+            timed("busy-opposite-taps", [(100,"Down"),(700,"Return"),(1300,"Right"),
+                  (1390,"Right"),(1480,"Left"),(1570,"Left")], 2300,
+                  dict(screen=1,x=3,y=0,pieces=0,practice=1,coalesced=lambda n:n>=1))
             for name,key,release,quit_ms,expected in [
                     ("held-soft-drop", "Down", 2800, 3200, dict(screen=1,y=18,pieces=0,score=18,practice=1)),
                     ("held-movement-release", "Right", 2050, 2250, dict(screen=1,x=lambda x: x>=6,pieces=0,practice=1))]:

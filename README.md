@@ -8,7 +8,7 @@ Includes **Paper**, a drawing showcase and playable Lights Out puzzle with SD-ca
 
 Paper saves the board, cursor, starting puzzle, move count, and last 64 undo moves in `raylib-x4/paper-a.sav` and `paper-b.sav` on the SD card. Alternating, versioned, checksummed records preserve the previous save if a write is incomplete. A valid old `paper.txt` is imported without changing it; unrelated files are preserved. Save failures and no-card play are shown directly below the puzzle. Without storage, progress lasts only until the application exits.
 
-Paper 1.1.2 measures about 0.68 seconds for cursor/menu updates on the physical X4, down from 0.73 seconds in 1.1.1 and 2.45/2.08 seconds originally. Puzzle flips with SD saves measure about 0.77 seconds. Rapid taps keep their order. Paper cleans on startup/wake and when you press Power; navigation, idle time, and entering Sleep no longer schedule a full-screen flash. Press Power if ghosting becomes distracting. The stock panel waveform accounts for about 0.64 seconds of a partial update; full cleans take about 3.8 seconds. See [physical performance measurements](docs/performance.md).
+Version 1.2.0 brings ordinary cursor/menu actions down to about **0.44 seconds** on the physical X4, from 0.68 seconds in 1.1.2. The presenter keeps factory waveforms, caches their setup, and powers down after two seconds of inactivity. Paper and Tetris process ordinary input while the panel refreshes and retain the latest pending frame. They clean on startup/wake and Power; navigation and idle time do not schedule flashes. Full cleans still take about 3.8 seconds. See [measurements and limits](docs/performance.md).
 
 ## Tetris example
 
@@ -20,7 +20,7 @@ After the native build below, run `./build/x4_tetris`. Left/Right moves, Up rota
 
 Normal mode counts ordinary refresh time toward gravity: the initial fall interval is 0.8 seconds of real time, decreasing to a 0.12-second minimum as levels rise. At higher levels, several rows may advance in one display update. Pausing, full cleaning, and showing a new piece freeze the clock. A landed piece waits 0.55 seconds of visible time before locking, with at most 15 movement/rotation resets. Practice disables both automatic fall and automatic locking; Enter places the piece. Only changed cells are redrawn during play. Full cleans happen initially and on Power, with no periodic flashing.
 
-Measured on the X4, held soft drop reaches the floor in 2.1 seconds (previously 12.7), held movement from spawn to the right edge takes 1.4 seconds (previously 2.7), and six automatic rows take 5.5 seconds (previously 13.6). Steady level-one falls are about 0.8 seconds apart. Individual screen updates still take about 0.65–0.7 seconds with the stock waveform. See `artifacts/hardware/tetris-pace-report.json` for measurement scope.
+Ordinary movement no longer blocks the game loop for the whole display refresh. The physical stress test processed frame submissions in 7 ms on average; Tetris movement processing took about 40–50 ms including its drawing and conversion. These are software response times: a factory-waveform update still needs about 0.42 seconds, and an input arriving during one may wait for the next update. New pieces, grounded pieces, confirmation dialogs, and page changes wait for presentation before continuing. See [physical performance](docs/performance.md) for complete-frame timings.
 
 Scoring is 100/300/500/800 points for clearing one/two/three/four rows, multiplied by the level before the clear; soft/hard drops add one/two points per row. Every ten cleared rows increases the level, capped at 20. Rotation uses simple position adjustments, not the full competitive SRS rule set; hold pieces and T-spin/combo bonuses are outside this example.
 
@@ -124,7 +124,7 @@ idf.py -C firmware -B "$PWD/build-my-app-firmware" \
   -DX4_APP_SOURCE=/absolute/path/to/application.c build
 ```
 
-The application supplies `int main(void)`. The firmware wrapper invokes it on the FreeRTOS main task and sleeps when it returns zero; a nonzero exit keeps USB available for recovery. Keep raylib calls on that task. Use a low target frame rate, or redraw only when state changes and call `PollInputEvents()` and `WaitTime()` while idle. `EndDrawing()` compares the output frame and skips unchanged display updates.
+The application supplies `int main(void)`. The firmware wrapper invokes it on the FreeRTOS main task and sleeps when it returns zero; a nonzero exit keeps USB available for recovery. Keep raylib calls on that task. Use a low target frame rate, or redraw only when state changes and call `PollInputEvents()` and `WaitTime()` while idle. `EndDrawing()` compares the output frame and skips unchanged display updates. Presentation is synchronous by default. Set `X4SetAsyncRefresh(true)` to submit ordinary updates without waiting for the waveform. Input polling services completion and starts the newest queued snapshot; older queued snapshots are replaced. The in-flight snapshot stays immutable, using the same 192 KB pixel-buffer budget. Call `X4WaitDisplay()` to drain output, or set async mode false before `EndDrawing()` when a confirmation or new game state must be visible before the next input poll. Startup, full cleans, and closing always wait. Call `PollInputEvents()` during idle loops so completion and automatic power-down can run.
 
 | Physical input | raylib key | Emulator key |
 |---|---|---|
@@ -140,9 +140,12 @@ Buttons are debounced and sampled every 5 ms on hardware. Presses are latched ac
 |---|---|
 | `X4RefreshFull()` | Force the next frame to clean the panel |
 | `X4SetRefreshInterval(n)` | Clean after `n` partial updates; default 12, zero always cleans |
-| `X4GetStats()` | Refresh/error/buffer counters and conversion/presentation timings |
+| `X4SetAsyncRefresh(bool)` | Select blocking or nonblocking presentation for subsequent frames |
+| `X4WaitDisplay()` | Finish in-flight and queued frames; returns success |
+| `X4IsDisplayBusy()` | Query pending/in-flight output without advancing it |
+| `X4GetStats()` | Completed refreshes, coalesced frames, errors, memory, and timings |
 | `X4GetStatus()` | Calibrated battery voltage, raw button ADCs, button mask, heap, and SD status |
-| `X4GetPanelFrame()` | Read-only last presented 48 KB panel buffer; 1 means white |
+| `X4GetPanelFrame()` | Read-only completed 48 KB frame; NULL while async output is in flight; 1 means white |
 | `X4GetStoragePath()` | `/sd`, the emulator SD directory, or `NULL` |
 
 Use `X4GetStoragePath()` when forming asset/save paths. Working-directory-relative paths are not automatically mapped to SD. Limit textures and decoded images to fit the remaining heap. Loading a full-screen RGBA image requires 1.5 MB and is unsuitable for this MCU.
@@ -151,7 +154,7 @@ The default font's atlas and glyph images live in flash. The software renderer s
 
 Supported: 2D shapes, default bitmap text, bitmap fonts, small textures, alpha blending, camera transforms, scissor clipping, raymath, keyboard edges/repeat, timing, and SD files. Colors are quantized to four luminance levels during rendering and spatially dithered to monochrome during presentation. Image support includes PNG, BMP, TGA, and QOI; TTF, JPEG, and animated GIF are disabled in this profile.
 
-Out of scope for this constrained target: 3D/depth, audio, render textures, programmable shaders, multitouch, mouse/gamepads, window management, wireless services, and OTA. This is an e-paper target for interfaces and turn-based games; its refresh latency is not suitable for conventional real-time action games. The hardware display calls block until the waveform completes, with a 15-second BUSY timeout.
+Out of scope for this constrained target: 3D/depth, audio, render textures, programmable shaders, multitouch, mouse/gamepads, window management, wireless services, and OTA. This is an e-paper target for interfaces and turn-based games; its refresh latency is not suitable for conventional real-time action games. Presentation waits for completion by default; optional async presentation keeps input processing active during partial updates. Both modes enforce a single 15-second BUSY deadline from activation.
 
 ## Verification
 

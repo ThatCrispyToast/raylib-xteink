@@ -58,7 +58,7 @@ if tetris.exists() and 'examples/tetris.c' in tetris_cache:
 for name in ["LICENSE", "THIRD_PARTY.md"]:
     shutil.copy2(root / name, dist / name)
 (dist / "manifest.json").write_text(json.dumps({
-    "target": "original Xteink X4 / ESP32-C3", "version": "1.1.2", "application_sha256": application_hash,
+    "target": "original Xteink X4 / ESP32-C3", "version": "1.2.0", "application_sha256": application_hash,
     "flash_size": "16MB", "flash_mode": "dio", "flash_frequency": "40m",
     "merged_image": {"file": "raylib-x4.bin", "offset": 0},
     "parts": [{"file": name, "offset": offset} for offset, _, name in parts],
@@ -66,7 +66,7 @@ for name in ["LICENSE", "THIRD_PARTY.md"]:
     "diagnostics_image": {"file":"diagnostics.bin","offset":65536} if (dist/'diagnostics.bin').exists() else None,
     "tetris_example": tetris_info,
     "validation": "microreader desktop emulator, native ASan/UBSan, ESP32-C3 QEMU renderer smoke" +
-        (", original X4 production boot and physical storage regression; historical platform acceptance in docs/validation.md" if args.hardware_tested else "")
+        (", original X4 factory-waveform async/idle/expiry stress, production boots, storage regression and timer wake; historical platform acceptance in docs/validation.md" if args.hardware_tested else "")
 }, indent=2) + "\n")
 paths = ["CMakeLists.txt", "cmake", "src", "include", "examples", "tests", "scripts",
          "docs", "patches", "README.md", "LICENSE", "THIRD_PARTY.md", "flake.nix", "flake.lock",
@@ -75,7 +75,17 @@ paths = ["CMakeLists.txt", "cmake", "src", "include", "examples", "tests", "scri
          "artifacts/demo.png", "artifacts/puzzle.png", "artifacts/status.png", "artifacts/tetris.png",
          "artifacts/native-tests.txt", "artifacts/sanitizer-tests.txt", "artifacts/tetris-pace-tests.txt", "artifacts/qemu-test.log",
          "artifacts/firmware-build.log", "artifacts/minimal-build.log", "artifacts/image-info.txt"]
+paths += ["artifacts/speed-firmware-build.log", "artifacts/speed-native-tests.txt", "artifacts/speed-sanitizer-tests.txt",
+          "artifacts/speed-qemu-1.log", "artifacts/speed-qemu-2.log", "artifacts/speed-qemu-3.log",
+          "artifacts/speed-qemu-report.json", "artifacts/speed-qemu-before-icount.log"]
 if args.hardware_tested:
+    paths += ["artifacts/hardware/speed-performance.log", "artifacts/hardware/speed-report.json",
+              "artifacts/hardware/async-display-test.log", "artifacts/hardware/tetris-speed-test.log",
+              "artifacts/hardware/tetris-speed-pace.log", "artifacts/hardware/speed-sleep.log",
+              "artifacts/hardware/speed-paper-boot.log", "artifacts/hardware/speed-tetris-boot.log",
+              "artifacts/hardware/speed-archive-check.log",
+              "artifacts/hardware/qa-release-report-1.1.2.json", "artifacts/hardware/tetris-report-1.1.2.json",
+              "artifacts/hardware/speed-regression/report.json", "artifacts/hardware/speed-regression/partial-soak.png"]
     paths += ["artifacts/hardware/tetris-pace-before.log", "artifacts/hardware/tetris-pace-after.log",
               "artifacts/hardware/tetris-pace-report.json", "artifacts/hardware/tetris-before-pace-report.json",
               "artifacts/hardware/tetris-report.json", "artifacts/hardware/tetris-test.log", "artifacts/hardware/tetris-boot.log",

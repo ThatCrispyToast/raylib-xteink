@@ -12,6 +12,7 @@ static unsigned frame;
 static double draw_start, action_start;
 static char benchmark_directory[96];
 static bool delivered;
+static void benchmark_async(bool enabled) { (void)enabled; X4SetAsyncRefresh(false); }
 static bool benchmark_done(void);
 static int benchmark_key(void) { if (delivered || benchmark_done()) return 0; delivered=true; return actions[frame]; }
 static bool benchmark_pressed(int key) { return !benchmark_done() && actions[frame] == key; }
@@ -61,6 +62,7 @@ static void benchmark_end(void)
 #define BeginDrawing benchmark_begin
 #define EndDrawing benchmark_end
 #define X4GetStoragePath benchmark_storage
+#define X4SetAsyncRefresh benchmark_async
 #include "../examples/paper.c"
 #undef main
 #undef X4GetStoragePath

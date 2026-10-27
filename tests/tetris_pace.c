@@ -34,9 +34,14 @@ static bool pace_closed(void)
 {
     if (!observed || !epoch) return false;
     if (GetTime()-epoch>50) return true;
-    return scenario == 0 ? observed->y>=6 : scenario == 1 ?
+    bool done=scenario == 0 ? observed->y>=6 : scenario == 1 ?
         !TetrisFits(observed,observed->x,observed->y+1,observed->rotation) :
         !TetrisFits(observed,observed->x+1,observed->y,observed->rotation);
+    if (done) {
+        X4WaitDisplay();
+        printf("TETRIS_PACE_DONE mode=%u seconds=%.3f\n",scenario,GetTime()-epoch); fflush(stdout);
+    }
+    return done;
 }
 static int pace_random(int min, int max) { (void)min; (void)max; return 42; }
 static void pace_end(void)

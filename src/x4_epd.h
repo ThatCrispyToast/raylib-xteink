@@ -17,5 +17,10 @@ typedef struct X4EpdStats {
 X4EpdStats x4_epd_stats(void);
 bool x4_epd_init(const X4EpdIO *io);
 bool x4_epd_present(const uint8_t *frame, const uint8_t *previous, bool full);
+// Frame must stay immutable until finish; no panel commands while busy.
+bool x4_epd_begin(const uint8_t *frame, const uint8_t *previous, bool full);
+bool x4_epd_busy(void);
+bool x4_epd_finish(void);
+bool x4_epd_idle(void);
 bool x4_epd_sleep(void);
 #endif

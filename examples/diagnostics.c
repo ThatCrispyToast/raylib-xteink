@@ -11,6 +11,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -23,6 +24,16 @@ static void record_presses(void)
     const int keys[]={KEY_ESCAPE,KEY_ENTER,KEY_LEFT,KEY_RIGHT,KEY_UP,KEY_DOWN,KEY_P};
     for (int i=0;i<7;i++) if (IsKeyPressed(keys[i])) pressed_seen |= 1u<<i;
 }
+// VFS printf sends individual bytes and may drop them after a 50 ms USB stall.
+static void reply(const char *format, ...)
+{
+    char line[768]; va_list args;
+    va_start(args,format); int size=vsnprintf(line,sizeof(line),format,args); va_end(args);
+    if (size>0 && size<(int)sizeof(line))
+        usb_serial_jtag_write_bytes(line,(size_t)size,pdMS_TO_TICKS(2000));
+}
+static void reply_line(const char *line) { reply("%s\n",line); }
+
 static uint32_t hash_frame(void)
 {
     const uint8_t *frame = X4GetPanelFrame();
@@ -34,7 +45,7 @@ static uint32_t hash_frame(void)
 static void status(const char *event)
 {
     X4Stats s = X4GetStats(); X4Status h = X4GetStatus();
-    printf("X4 {\"event\":\"%s\",\"scene\":%u,\"revision\":%u,\"frames\":%u,\"full\":%u,\"partial\":%u,"
+    reply("X4 {\"event\":\"%s\",\"scene\":%u,\"revision\":%u,\"frames\":%u,\"full\":%u,\"partial\":%u,"
         "\"skipped\":%u,\"errors\":%u,\"convert_ms\":%.3f,\"present_ms\":%.3f,\"hash\":%lu,"
         "\"heap\":%zu,\"minimum_heap\":%zu,\"largest_block\":%zu,\"stack_free\":%u,\"heap_ok\":%s,"
         "\"sd\":%s,\"adc_front\":%d,\"adc_side\":%d,\"battery_mv\":%d,\"buttons\":%u,\"input_events\":%u,\"pressed_seen\":%u,\"reset_reason\":%d,\"wake_reason\":%d}\n",
@@ -90,7 +101,7 @@ static void draw_scene(void)
     else if (scene == 5) ClearBackground(WHITE);
     EndDrawing();
     record_presses();
-    printf("X4 {\"event\":\"render_time\",\"ms\":%.3f}\n",(GetTime()-start)*1000);
+    reply("X4 {\"event\":\"render_time\",\"ms\":%.3f}\n",(GetTime()-start)*1000);
     status("frame");
 }
 
@@ -118,7 +129,7 @@ static void sd_test(void)
             if (unlink(path)) ok = false;
         }
     }
-    printf("X4 {\"event\":\"sd_test\",\"ok\":%s}\n",ok ? "true":"false");
+    reply("X4 {\"event\":\"sd_test\",\"ok\":%s}\n",ok ? "true":"false");
     status("status");
 }
 
@@ -126,7 +137,7 @@ static void asset_test(void)
 {
     char path[256];
     const char *root=X4GetStoragePath();
-    if (!root) { puts("X4 {\"event\":\"asset_test\",\"ok\":false}"); return; }
+    if (!root) { reply_line("X4 {\"event\":\"asset_test\",\"ok\":false}"); return; }
     snprintf(path,sizeof(path),"%s/.raylib-x4",root); mkdir(path,0775);
     snprintf(path,sizeof(path),"%s/.raylib-x4/acceptance.png",root);
     bool ok=SaveFileData(path,(void *)diagnostic_png,sizeof(diagnostic_png));
@@ -147,7 +158,7 @@ static void asset_test(void)
     }
     UnloadTexture(texture);
     if (unlink(path)) ok=false;
-    printf("X4 {\"event\":\"asset_test\",\"ok\":%s}\n",ok ? "true":"false");
+    reply("X4 {\"event\":\"asset_test\",\"ok\":%s}\n",ok ? "true":"false");
     status("status");
 }
 
@@ -175,7 +186,7 @@ static bool command(char *line)
             if (pixel.r!=((x==3 && y==4) ? 0:255) || pixel.a!=255) ok=false;
         }
         UnloadImage(result); UnloadTexture(texture);
-        printf("X4 {\"event\":\"texture_test\",\"ok\":%s}\n",ok ? "true":"false");
+        reply("X4 {\"event\":\"texture_test\",\"ok\":%s}\n",ok ? "true":"false");
     }
     else if (!strcmp(line,"oom")) {
         size_t before=esp_get_free_heap_size();
@@ -183,7 +194,7 @@ static bool command(char *line)
         if (texture) rlUnloadTexture(texture);
         Image screenshot=LoadImageFromScreen();
         bool rejected=!IsImageValid(screenshot); UnloadImage(screenshot);
-        printf("X4 {\"event\":\"oom_test\",\"ok\":%s}\n",
+        reply("X4 {\"event\":\"oom_test\",\"ok\":%s}\n",
             !texture && rejected && esp_get_free_heap_size()==before && heap_caps_check_integrity_all(true) ? "true":"false");
     }
     else if (!strcmp(line,"reopen")) {
@@ -197,29 +208,29 @@ static bool command(char *line)
     else if (!strcmp(line,"sleep3")) { esp_sleep_enable_timer_wakeup(3000000); status("sleep"); vTaskDelay(pdMS_TO_TICKS(100)); return false; }
     else if (!strcmp(line,"frame")) {
         const uint8_t *frame = X4GetPanelFrame();
-        if (!frame) puts("X4 {\"event\":\"error\",\"message\":\"No frame\"}");
+        if (!frame) reply_line("X4 {\"event\":\"error\",\"message\":\"No frame\"}");
         else {
-            printf("X4 FRAME %d %lu\n",X4_FRAME_BYTES,(unsigned long)hash_frame());
+            reply("X4 FRAME %d %lu\n",X4_FRAME_BYTES,(unsigned long)hash_frame());
             for (int i=0;i<X4_FRAME_BYTES;i+=128) {
                 char hex[257]; static const char digits[]="0123456789abcdef";
                 for (int j=0;j<128;j++) { hex[j*2]=digits[frame[i+j]>>4]; hex[j*2+1]=digits[frame[i+j]&15]; }
                 hex[256]='\n';
                 if (usb_serial_jtag_write_bytes(hex,sizeof(hex),pdMS_TO_TICKS(2000)) != sizeof(hex)) break;
             }
-            puts("X4 END");
+            reply_line("X4 END");
         }
-    } else puts("X4 {\"event\":\"error\",\"message\":\"Unknown command\"}");
+    } else reply_line("X4 {\"event\":\"error\",\"message\":\"Unknown command\"}");
     fflush(stdout);
     return true;
 }
 
 int main(void)
 {
-    usb_serial_jtag_driver_config_t usb = {.tx_buffer_size=1024,.rx_buffer_size=256};
+    usb_serial_jtag_driver_config_t usb = {.tx_buffer_size=2048,.rx_buffer_size=256};
     ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&usb));
     usb_serial_jtag_vfs_use_driver();
     setvbuf(stdout,NULL,_IONBF,0);
-    printf("X4 {\"event\":\"boot\",\"reset_reason\":%d,\"wake_reason\":%d}\n",esp_reset_reason(),esp_sleep_get_wakeup_cause());
+    reply("X4 {\"event\":\"boot\",\"reset_reason\":%d,\"wake_reason\":%d}\n",esp_reset_reason(),esp_sleep_get_wakeup_cause());
     InitWindow(480,800,"X4 Lab"); if (!IsWindowReady()) return 1;
     SetExitKey(KEY_NULL); SetTargetFPS(0);
     draw_scene(); status("ready");

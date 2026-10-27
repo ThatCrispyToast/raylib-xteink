@@ -16,7 +16,8 @@ for offset, name in [(0, "bootloader/bootloader.bin"), (0x8000, "partition_table
     flash[offset:offset + len(data)] = data
 image = build / "qemu-flash.bin"
 image.write_bytes(flash)
-command = ["qemu-system-riscv32", "-nographic", "-machine", "esp32c3", "-drive",
+# Espressif's C3 model requires instruction counting for reliable timer delivery.
+command = ["qemu-system-riscv32", "-nographic", "-icount", "3", "-machine", "esp32c3", "-drive",
            f"file={image},if=mtd,format=raw", "-no-reboot"]
 process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 selector = selectors.DefaultSelector()
@@ -24,6 +25,7 @@ selector.register(process.stdout, selectors.EVENT_READ)
 output = bytearray()
 deadline = time.monotonic() + 120
 passed = False
+failed = False
 try:
     while time.monotonic() < deadline:
         for key, _ in selector.select(1):
@@ -31,10 +33,13 @@ try:
             output.extend(chunk)
             sys.stdout.buffer.write(chunk)
             sys.stdout.buffer.flush()
-        if re.search(rb"X4_QEMU_PASS:[^\r\n]+\r?\n", output):
+        if not failed and (b"X4_QEMU_FAIL:" in output or b"Guru Meditation" in output):
+            failed=True
+            deadline=min(deadline,time.monotonic()+2) # Keep the complete panic trace.
+        if not failed and re.search(rb"X4_QEMU_PASS:[^\r\n]+\r?\n", output):
             passed = True
             break
-        if b"X4_QEMU_FAIL:" in output or b"Guru Meditation" in output or process.poll() is not None:
+        if process.poll() is not None:
             break
 finally:
     process.terminate()

@@ -1,0 +1,224 @@
+Build: firmware-build
+Executing action: all (aliases: build)
+Running ninja in directory /workspace/raylib-x4/firmware/build
+Executing "ninja all"...
+[1/11] Performing build step for 'bootloader'
+[1/1] cd /workspace/raylib-x4/firmware/build/bootloader/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /workspace/raylib-x4/firmware/build/bootloader/bootloader.bin
+Bootloader binary size 0x52b0 bytes. 0x2d50 bytes (35%) free.
+[2/11] No install step for 'bootloader'
+[3/11] Completed 'bootloader'
+[4/11] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_display.c.obj
+[5/11] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_epd.c.obj
+[6/11] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/examples/paper.c.obj
+[7/11] Linking C static library esp-idf/main/libmain.a
+[8/11] Generating esp-idf/esp_system/ld/sections.ld
+[9/11] Linking CXX executable raylib_x4_firmware.elf
+[10/11] Generating binary image from built executable
+esptool.py v4.9.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /workspace/raylib-x4/firmware/build/raylib_x4_firmware.bin
+[11/11] cd /workspace/raylib-x4/firmware/build/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /workspace/raylib-x4/firmware/build/partition_table/partition-table.bin /workspace/raylib-x4/firmware/build/raylib_x4_firmware.bin
+raylib_x4_firmware.bin binary size 0x7c5a0 bytes. Smallest app partition is 0x300000 bytes. 0x283a60 bytes (84%) free.
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x0 firmware/build/bootloader/bootloader.bin 0x8000 firmware/build/partition_table/partition-table.bin 0x10000 firmware/build/raylib_x4_firmware.bin
+or from the "/workspace/raylib-x4/firmware/build" directory
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
+
+Build: build-tetris
+Executing action: all (aliases: build)
+Running ninja in directory /workspace/raylib-x4/build-tetris
+Executing "ninja all"...
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /workspace/raylib-x4/build-tetris/bootloader/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /workspace/raylib-x4/build-tetris/bootloader/bootloader.bin
+Bootloader binary size 0x52b0 bytes. 0x2d50 bytes (35%) free.
+[2/10] No install step for 'bootloader'
+[3/10] Completed 'bootloader'
+[4/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_display.c.obj
+[5/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_epd.c.obj
+[6/10] Linking C static library esp-idf/main/libmain.a
+[7/10] Generating esp-idf/esp_system/ld/sections.ld
+[8/10] Linking CXX executable raylib_x4_firmware.elf
+[9/10] Generating binary image from built executable
+esptool.py v4.9.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /workspace/raylib-x4/build-tetris/raylib_x4_firmware.bin
+[10/10] cd /workspace/raylib-x4/build-tetris/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /workspace/raylib-x4/build-tetris/partition_table/partition-table.bin /workspace/raylib-x4/build-tetris/raylib_x4_firmware.bin
+raylib_x4_firmware.bin binary size 0x7a8b0 bytes. Smallest app partition is 0x300000 bytes. 0x285750 bytes (84%) free.
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x0 build-tetris/bootloader/bootloader.bin 0x8000 build-tetris/partition_table/partition-table.bin 0x10000 build-tetris/raylib_x4_firmware.bin
+or from the "/workspace/raylib-x4/build-tetris" directory
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
+
+Build: build-hardware
+Executing action: all (aliases: build)
+Running ninja in directory /workspace/raylib-x4/build-hardware
+Executing "ninja all"...
+[1/9] Performing build step for 'bootloader'
+[1/1] cd /workspace/raylib-x4/build-hardware/bootloader/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /workspace/raylib-x4/build-hardware/bootloader/bootloader.bin
+Bootloader binary size 0x52b0 bytes. 0x2d50 bytes (35%) free.
+[2/9] No install step for 'bootloader'
+[3/9] Completed 'bootloader'
+[4/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_epd.c.obj
+[5/9] Linking C static library esp-idf/main/libmain.a
+[6/9] Generating esp-idf/esp_system/ld/sections.ld
+[7/9] Linking CXX executable raylib_x4_firmware.elf
+[8/9] Generating binary image from built executable
+esptool.py v4.9.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /workspace/raylib-x4/build-hardware/raylib_x4_firmware.bin
+[9/9] cd /workspace/raylib-x4/build-hardware/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /workspace/raylib-x4/build-hardware/partition_table/partition-table.bin /workspace/raylib-x4/build-hardware/raylib_x4_firmware.bin
+raylib_x4_firmware.bin binary size 0x8c400 bytes. Smallest app partition is 0x300000 bytes. 0x273c00 bytes (82%) free.
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x0 build-hardware/bootloader/bootloader.bin 0x8000 build-hardware/partition_table/partition-table.bin 0x10000 build-hardware/raylib_x4_firmware.bin
+or from the "/workspace/raylib-x4/build-hardware" directory
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
+
+Build: display-speed
+Executing action: all (aliases: build)
+Running ninja in directory /workspace/raylib-x4/build-display-speed
+Executing "ninja all"...
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /workspace/raylib-x4/build-display-speed/bootloader/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /workspace/raylib-x4/build-display-speed/bootloader/bootloader.bin
+Bootloader binary size 0x52b0 bytes. 0x2d50 bytes (35%) free.
+[2/10] No install step for 'bootloader'
+[3/10] Completed 'bootloader'
+[4/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_display.c.obj
+[5/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_epd.c.obj
+[6/10] Linking C static library esp-idf/main/libmain.a
+[7/10] Generating esp-idf/esp_system/ld/sections.ld
+[8/10] Linking CXX executable raylib_x4_firmware.elf
+[9/10] Generating binary image from built executable
+esptool.py v4.9.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /workspace/raylib-x4/build-display-speed/raylib_x4_firmware.bin
+[10/10] cd /workspace/raylib-x4/build-display-speed/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /workspace/raylib-x4/build-display-speed/partition_table/partition-table.bin /workspace/raylib-x4/build-display-speed/raylib_x4_firmware.bin
+raylib_x4_firmware.bin binary size 0x77fb0 bytes. Smallest app partition is 0x300000 bytes. 0x288050 bytes (84%) free.
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x0 build-display-speed/bootloader/bootloader.bin 0x8000 build-display-speed/partition_table/partition-table.bin 0x10000 build-display-speed/raylib_x4_firmware.bin
+or from the "/workspace/raylib-x4/build-display-speed" directory
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
+
+Build: build-paper-perf
+Executing action: all (aliases: build)
+Running ninja in directory /workspace/raylib-x4/build-paper-perf
+Executing "ninja all"...
+[1/11] Performing build step for 'bootloader'
+[1/1] cd /workspace/raylib-x4/build-paper-perf/bootloader/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /workspace/raylib-x4/build-paper-perf/bootloader/bootloader.bin
+Bootloader binary size 0x52b0 bytes. 0x2d50 bytes (35%) free.
+[2/11] No install step for 'bootloader'
+[3/11] Completed 'bootloader'
+[4/11] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_display.c.obj
+[5/11] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_epd.c.obj
+[6/11] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/tests/paper_benchmark.c.obj
+[7/11] Linking C static library esp-idf/main/libmain.a
+[8/11] Generating esp-idf/esp_system/ld/sections.ld
+[9/11] Linking CXX executable raylib_x4_firmware.elf
+[10/11] Generating binary image from built executable
+esptool.py v4.9.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /workspace/raylib-x4/build-paper-perf/raylib_x4_firmware.bin
+[11/11] cd /workspace/raylib-x4/build-paper-perf/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /workspace/raylib-x4/build-paper-perf/partition_table/partition-table.bin /workspace/raylib-x4/build-paper-perf/raylib_x4_firmware.bin
+raylib_x4_firmware.bin binary size 0x7cd20 bytes. Smallest app partition is 0x300000 bytes. 0x2832e0 bytes (84%) free.
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x0 build-paper-perf/bootloader/bootloader.bin 0x8000 build-paper-perf/partition_table/partition-table.bin 0x10000 build-paper-perf/raylib_x4_firmware.bin
+or from the "/workspace/raylib-x4/build-paper-perf" directory
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
+
+Build: build-tetris-qa
+Executing action: all (aliases: build)
+Running ninja in directory /workspace/raylib-x4/build-tetris-qa
+Executing "ninja all"...
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /workspace/raylib-x4/build-tetris-qa/bootloader/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /workspace/raylib-x4/build-tetris-qa/bootloader/bootloader.bin
+Bootloader binary size 0x52b0 bytes. 0x2d50 bytes (35%) free.
+[2/10] No install step for 'bootloader'
+[3/10] Completed 'bootloader'
+[4/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_display.c.obj
+[5/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_epd.c.obj
+[6/10] Linking C static library esp-idf/main/libmain.a
+[7/10] Generating esp-idf/esp_system/ld/sections.ld
+[8/10] Linking CXX executable raylib_x4_firmware.elf
+[9/10] Generating binary image from built executable
+esptool.py v4.9.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /workspace/raylib-x4/build-tetris-qa/raylib_x4_firmware.bin
+[10/10] cd /workspace/raylib-x4/build-tetris-qa/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /workspace/raylib-x4/build-tetris-qa/partition_table/partition-table.bin /workspace/raylib-x4/build-tetris-qa/raylib_x4_firmware.bin
+raylib_x4_firmware.bin binary size 0x7aad0 bytes. Smallest app partition is 0x300000 bytes. 0x285530 bytes (84%) free.
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x0 build-tetris-qa/bootloader/bootloader.bin 0x8000 build-tetris-qa/partition_table/partition-table.bin 0x10000 build-tetris-qa/raylib_x4_firmware.bin
+or from the "/workspace/raylib-x4/build-tetris-qa" directory
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
+
+Build: build-tetris-pace
+Executing action: all (aliases: build)
+Running ninja in directory /workspace/raylib-x4/build-tetris-pace
+Executing "ninja all"...
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /workspace/raylib-x4/build-tetris-pace/bootloader/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /workspace/raylib-x4/build-tetris-pace/bootloader/bootloader.bin
+Bootloader binary size 0x52b0 bytes. 0x2d50 bytes (35%) free.
+[2/10] No install step for 'bootloader'
+[3/10] Completed 'bootloader'
+[4/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_display.c.obj
+[5/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/workspace/raylib-x4/src/x4_epd.c.obj
+[6/10] Linking C static library esp-idf/main/libmain.a
+[7/10] Generating esp-idf/esp_system/ld/sections.ld
+[8/10] Linking CXX executable raylib_x4_firmware.elf
+[9/10] Generating binary image from built executable
+esptool.py v4.9.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /workspace/raylib-x4/build-tetris-pace/raylib_x4_firmware.bin
+[10/10] cd /workspace/raylib-x4/build-tetris-pace/esp-idf/esptool_py && /nix/store/yxn8caq88x7ncmsbvqn51wk7pwqmvivc-python3-3.13.9-env/bin/python /nix/store/l0jv0bsvgw61r5bks54yb5f2xy16bmlb-esp-idf-v5.5.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /workspace/raylib-x4/build-tetris-pace/partition_table/partition-table.bin /workspace/raylib-x4/build-tetris-pace/raylib_x4_firmware.bin
+raylib_x4_firmware.bin binary size 0x7abd0 bytes. Smallest app partition is 0x300000 bytes. 0x285430 bytes (84%) free.
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 40m 0x0 build-tetris-pace/bootloader/bootloader.bin 0x8000 build-tetris-pace/partition_table/partition-table.bin 0x10000 build-tetris-pace/raylib_x4_firmware.bin
+or from the "/workspace/raylib-x4/build-tetris-pace" directory
+ python -m esptool --chip esp32c3 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"

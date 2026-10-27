@@ -1,5 +1,4 @@
 diff --git a/src/config.h b/src/config.h
-index 016cea5..c353c9e 100644
 --- a/src/config.h
 +++ b/src/config.h
 @@ -89,7 +89,7 @@
@@ -12,10 +11,9 @@ index 016cea5..c353c9e 100644
      // but then runs a busy loop at the end for accuracy
      #define SUPPORT_PARTIALBUSY_WAIT_LOOP   1
 diff --git a/src/external/rlsw.h b/src/external/rlsw.h
-index 68639f3..ba6bcf4 100644
 --- a/src/external/rlsw.h
 +++ b/src/external/rlsw.h
-@@ -494,7 +494,7 @@ typedef double              GLclampd;
+@@ -494,7 +494,7 @@
  #define glShadeModel(X)                             ((void)(X))
  #define glFrontFace(X)                              ((void)(X))
  #define glDepthFunc(X)                              ((void)(X))
@@ -24,7 +22,7 @@ index 68639f3..ba6bcf4 100644
  #define glNormal3f(X,Y,Z)                           ((void)(X),(void)(Y),(void)(Z))
  #define glNormal3fv(X)                              ((void)(X))
  #define glNormalPointer(X,Y,Z)                      ((void)(X),(void)(Y),(void)(Z))
-@@ -742,15 +742,16 @@ SWAPI void swBindArray(SWarray type, void *buffer);
+@@ -742,15 +742,16 @@
  SWAPI void swDrawArrays(SWdraw mode, int offset, int count);
  SWAPI void swDrawElements(SWdraw mode, int count, int type, const void *indices);
  
@@ -45,7 +43,7 @@ index 68639f3..ba6bcf4 100644
  SWAPI void swBindFramebuffer(uint32_t id);
  SWAPI void swFramebufferTexture2D(SWattachment attach, uint32_t texture);
  SWAPI SWfbstatus swCheckFramebufferStatus(void);
-@@ -903,10 +904,18 @@ SWAPI void swGetFramebufferAttachmentParameteriv(SWattachment attachment, SWatta
+@@ -903,9 +904,17 @@
  #define SW_CONCAT(a, b)                     a##b
  #define SW_CONCATX(a, b)                    SW_CONCAT(a, b)
  
@@ -58,13 +56,12 @@ index 68639f3..ba6bcf4 100644
  #define SW_FRAMEBUFFER_COLOR8_GET(c,p,o)    SW_CONCATX(sw_pixel_read_color8_, RLSW_FRAMEBUFFER_COLOR_TYPE)((c),(p),(o))
  #define SW_FRAMEBUFFER_COLOR_GET(c,p,o)     SW_CONCATX(sw_pixel_read_color_, RLSW_FRAMEBUFFER_COLOR_TYPE)((c),(p),(o))
  #define SW_FRAMEBUFFER_COLOR_SET(p,c,o)     SW_CONCATX(sw_pixel_write_color_, RLSW_FRAMEBUFFER_COLOR_TYPE)((p),(c),(o))
- 
-+#endif
 +
++#endif
+ 
  #define SW_FRAMEBUFFER_DEPTH_GET(p,o)       SW_CONCATX(sw_pixel_read_depth_, RLSW_FRAMEBUFFER_DEPTH_TYPE)((p),(o))
  #define SW_FRAMEBUFFER_DEPTH_SET(p,d,o)     SW_CONCATX(sw_pixel_write_depth_, RLSW_FRAMEBUFFER_DEPTH_TYPE)((p),(d),(o))
- 
-@@ -996,6 +1005,7 @@ typedef struct sw_vertex {
+@@ -996,6 +1005,7 @@
  } sw_vertex_t;
  
  typedef struct sw_texture {
@@ -72,7 +69,7 @@ index 68639f3..ba6bcf4 100644
      void *pixels;                       // Texture pixels
      sw_pixel_read_color8_f readColor8;  // Texel read RGBA8
      sw_pixel_read_color_f readColor;    // Texel read RGBA32F
-@@ -2295,6 +2305,12 @@ static void sw_pixel_write_depth_D32(void *pixels, float depth, uint32_t offset)
+@@ -2295,6 +2305,12 @@
  //-------------------------------------------------------------------------------------------
  static bool sw_texture_alloc(sw_texture_t *texture, const void *data, int w, int h, sw_pixelformat_t format)
  {
@@ -85,7 +82,7 @@ index 68639f3..ba6bcf4 100644
      bool isDepth = sw_pixel_is_depth_format(format);
      int bpp = SW_PIXELFORMAT_SIZE[format];
      int newSize = w*h*bpp;
-@@ -2364,7 +2380,7 @@ static bool sw_texture_alloc(sw_texture_t *texture, const void *data, int w, int
+@@ -2364,7 +2380,7 @@
  
  static void sw_texture_free(sw_texture_t *texture)
  {
@@ -94,7 +91,7 @@ index 68639f3..ba6bcf4 100644
  }
  
  static void sw_texture_sample_nearest(float *SW_RESTRICT color, const sw_texture_t *SW_RESTRICT tex, float u, float v)
-@@ -2467,10 +2483,27 @@ static sw_texture_sampler_f sw_texture_pick_sampler(const sw_texture_t *tex, con
+@@ -2467,10 +2483,27 @@
  }
  //-------------------------------------------------------------------------------------------
  
@@ -122,7 +119,7 @@ index 68639f3..ba6bcf4 100644
      if (!sw_texture_alloc(&fb->color, NULL, w, h, SW_FRAMEBUFFER_COLOR_FORMAT))
      {
          return false;
-@@ -2488,6 +2521,7 @@ static bool sw_default_framebuffer_alloc(sw_default_framebuffer_t *fb, int w, in
+@@ -2488,6 +2521,7 @@
          return false;
      }
  
@@ -130,7 +127,7 @@ index 68639f3..ba6bcf4 100644
      return true;
  }
  
-@@ -2502,41 +2536,26 @@ static void sw_default_framebuffer_free(sw_default_framebuffer_t *fb)
+@@ -2502,41 +2536,26 @@
  
  static void sw_framebuffer_fill_color(sw_texture_t *colorBuffer, const float color[4])
  {
@@ -158,11 +155,12 @@ index 68639f3..ba6bcf4 100644
 -                for (int b = 0; b < SW_FRAMEBUFFER_COLOR_SIZE; b++) row[b] = pixel[b];
 -            }
 -        }
+-    }
 +        x0 = sw_clamp_int(RLSW.scMin[0], 0, x1);
 +        y0 = sw_clamp_int(RLSW.scMin[1], 0, y1);
 +        x1 = sw_clamp_int(RLSW.scMax[0], 0, x1);
 +        y1 = sw_clamp_int(RLSW.scMax[1], 0, y1);
-     }
++    }
 +#if defined(RLSW_FRAMEBUFFER_GRAY2)
      else
      {
@@ -174,11 +172,12 @@ index 68639f3..ba6bcf4 100644
 -                dst[i*SW_FRAMEBUFFER_COLOR_SIZE + b] = pixel[b];
 -            }
 -        }
+-    }
 +        uint8_t value = 0;
 +        for (int i = 0; i < 4; i++) x4_gray2_write(&value, color, i);
 +        memset(colorBuffer->pixels, value, ((size_t)x1*y1 + 3)/4);
 +        return;
-     }
++    }
 +#endif
 +    for (int y = y0; y < y1; y++)
 +        for (int x = x0; x < x1; x++)
@@ -186,7 +185,7 @@ index 68639f3..ba6bcf4 100644
  }
  
  static void sw_framebuffer_fill_depth(sw_texture_t *depthBuffer, float depth)
-@@ -2625,18 +2644,18 @@ static void sw_framebuffer_output_copy(void *dst, const sw_texture_t *buffer, in
+@@ -2625,18 +2644,18 @@
      int dstPixelSize = SW_PIXELFORMAT_SIZE[format];
      sw_pixel_write_color8_f setColor8 = sw_pixel_get_write_color8_func(format);
  
@@ -208,7 +207,7 @@ index 68639f3..ba6bcf4 100644
  
              #if RLSW_FRAMEBUFFER_OUTPUT_BGRA
              if (format == SW_PIXELFORMAT_COLOR_R8G8B8A8 || format == SW_PIXELFORMAT_COLOR_R8G8B8)
-@@ -2646,11 +2665,11 @@ static void sw_framebuffer_output_copy(void *dst, const sw_texture_t *buffer, in
+@@ -2646,11 +2665,11 @@
              #endif
  
              setColor8(dline, color, 0);
@@ -222,7 +221,7 @@ index 68639f3..ba6bcf4 100644
          d += w*dstPixelSize;
      }
  }
-@@ -2673,16 +2692,16 @@ static void sw_framebuffer_output_blit(void *dst, const sw_texture_t *buffer,
+@@ -2673,16 +2692,16 @@
      for (int dy = 0; dy < hDst; dy++)
      {
          int sy = ySrcLast - (int)(dy*yScale >> 16);
@@ -242,7 +241,7 @@ index 68639f3..ba6bcf4 100644
  
              #if RLSW_FRAMEBUFFER_OUTPUT_BGRA
              if (format == SW_PIXELFORMAT_COLOR_R8G8B8A8 || format == SW_PIXELFORMAT_COLOR_R8G8B8)
-@@ -3882,6 +3901,9 @@ bool swInit(int w, int h)
+@@ -3882,6 +3901,9 @@
  
      RLSW.colorBuffer = &RLSW.framebuffer.color;
      RLSW.depthBuffer = &RLSW.framebuffer.depth;
@@ -252,7 +251,7 @@ index 68639f3..ba6bcf4 100644
  
      swViewport(0, 0, w, h);
      swScissor(0, 0, w, h);
-@@ -3986,7 +4008,11 @@ void swReadPixels(int x, int y, int w, int h, SWformat format, SWtype type, void
+@@ -3986,7 +4008,11 @@
  
      if ((x >= w) || (y >= h)) return;
  
@@ -265,7 +264,7 @@ index 68639f3..ba6bcf4 100644
      {
          sw_framebuffer_output_fast(pixels, RLSW.colorBuffer);
      }
-@@ -4049,6 +4075,9 @@ void swSwapColorBuffers(void)
+@@ -4049,6 +4075,9 @@
  
  void swEnable(SWstate state)
  {
@@ -275,7 +274,7 @@ index 68639f3..ba6bcf4 100644
      switch (state)
      {
          case SW_SCISSOR_TEST: RLSW.userState |= SW_STATE_SCISSOR_TEST; break;
-@@ -4839,7 +4868,7 @@ void swDrawElements(SWdraw mode, int count, int type, const void *indices)
+@@ -4839,7 +4868,7 @@
      sw_immediate_end();
  }
  
@@ -284,7 +283,7 @@ index 68639f3..ba6bcf4 100644
  {
      if (sw_immediate_is_active())
      {
-@@ -4857,7 +4886,7 @@ void swGenTextures(int count, sw_handle_t *textures)
+@@ -4857,7 +4886,7 @@
      }
  }
  
@@ -293,7 +292,7 @@ index 68639f3..ba6bcf4 100644
  {
      if (sw_immediate_is_active())
      {
-@@ -4963,6 +4992,29 @@ void swTexImage2D(int width, int height, SWformat format, SWtype type, const voi
+@@ -4963,6 +4992,29 @@
      (void)sw_texture_alloc(RLSW.boundTexture, data, width, height, pixelFormat);
  }
  
@@ -323,10 +322,12 @@ index 68639f3..ba6bcf4 100644
  void swTexSubImage2D(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels)
  {
      if (sw_immediate_is_active())
-@@ -4983,6 +5035,15 @@ void swTexSubImage2D(GLint x, GLint y, GLsizei width, GLsizei height, GLenum for
+@@ -4981,6 +5033,15 @@
+     {
+         RLSW.errCode = SW_INVALID_VALUE;
          return;
-     }
- 
++    }
++
 +    if (RLSW.boundTexture->borrowed)
 +    {
 +        void *copy = SW_MALLOC(RLSW.boundTexture->allocSz);
@@ -334,12 +335,10 @@ index 68639f3..ba6bcf4 100644
 +        memcpy(copy, RLSW.boundTexture->pixels, RLSW.boundTexture->allocSz);
 +        RLSW.boundTexture->pixels = copy;
 +        RLSW.boundTexture->borrowed = false;
-+    }
-+
+     }
+ 
      sw_pixel_write_color_f writeColor = sw_pixel_get_write_color_func(RLSW.boundTexture->format);
-     if (writeColor == NULL) // probably a depth format
-     {
-@@ -5029,8 +5090,8 @@ void swTexSubImage2D(GLint x, GLint y, GLsizei width, GLsizei height, GLenum for
+@@ -5029,8 +5090,8 @@
          for (int i = 0; i < width; ++i)
          {
              float color[4];
@@ -350,13 +349,14 @@ index 68639f3..ba6bcf4 100644
  
              readColor(color, srcBytes, srcPixelOffset);
              alphaFound |= (color[3] < 1.0f);
-@@ -5092,8 +5153,13 @@ void swTexParameteri(int param, int value)
+@@ -5092,8 +5153,13 @@
      }
  }
  
 -void swGenFramebuffers(int count, uint32_t *framebuffers)
+-{
 +void swGenFramebuffers(int count, unsigned int *framebuffers)
- {
++{
 +#if defined(RLSW_FRAMEBUFFER_GRAY2)
 +    for (int i = 0; i < count; i++) framebuffers[i] = 0;
 +    RLSW.errCode = SW_INVALID_OPERATION;
@@ -365,7 +365,7 @@ index 68639f3..ba6bcf4 100644
      if (sw_immediate_is_active())
      {
          RLSW.errCode = SW_INVALID_OPERATION;
-@@ -5110,7 +5176,7 @@ void swGenFramebuffers(int count, uint32_t *framebuffers)
+@@ -5110,7 +5176,7 @@
      }
  }
  
@@ -374,7 +374,7 @@ index 68639f3..ba6bcf4 100644
  {
      if (sw_immediate_is_active())
      {
-@@ -5130,6 +5196,9 @@ void swDeleteFramebuffers(int count, uint32_t *framebuffers)
+@@ -5130,6 +5196,9 @@
              RLSW.boundFramebufferId = SW_HANDLE_NULL;
              RLSW.colorBuffer = &RLSW.framebuffer.color;
              RLSW.depthBuffer = &RLSW.framebuffer.depth;
@@ -384,7 +384,7 @@ index 68639f3..ba6bcf4 100644
          }
  
          sw_pool_free(&RLSW.framebufferPool, framebuffers[i]);
-@@ -5149,6 +5218,9 @@ void swBindFramebuffer(uint32_t id)
+@@ -5149,6 +5218,9 @@
          RLSW.boundFramebufferId = SW_HANDLE_NULL;
          RLSW.colorBuffer = &RLSW.framebuffer.color;
          RLSW.depthBuffer = &RLSW.framebuffer.depth;
@@ -394,7 +394,7 @@ index 68639f3..ba6bcf4 100644
          return;
      }
  
-@@ -5349,7 +5421,8 @@ static void SW_RASTER_TRIANGLE_SPAN(const sw_vertex_t *start, const sw_vertex_t
+@@ -5349,7 +5421,8 @@
  
      // Pre-calculate the starting pointers for the framebuffer row
      int baseOffset = y*RLSW.colorBuffer->width + xLoopStart;
@@ -404,20 +404,20 @@ index 68639f3..ba6bcf4 100644
  #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_DEPTH_TEST
      uint8_t *dPtr = (uint8_t *)(RLSW.depthBuffer->pixels) + baseOffset*SW_FRAMEBUFFER_DEPTH_SIZE;
  #endif
-@@ -5373,6 +5446,12 @@ static void SW_RASTER_TRIANGLE_SPAN(const sw_vertex_t *start, const sw_vertex_t
+@@ -5371,6 +5444,12 @@
+ #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_TEXTURE_2D
+     float texcoord[2];
      SW_VEC_OP(texcoord[i] = start->texcoord[i] + ctx->dTdx[i]*xOffset, i, 2);
- #endif
- 
++#endif
++
 +#if defined(RLSW_FRAMEBUFFER_GRAY2) && !defined(X4_DISABLE_FAST_RASTER) && \
 +    !((SW_RASTER_TRIANGLE_FLAGS) & (SW_STATE_COLOR_INTERP | SW_STATE_DEPTH_TEST | SW_STATE_TEXTURE_2D | SW_STATE_BLEND))
 +    x4_gray2_span(cPtr,cOffset,xLoopEnd-xLoopStart,x4_gray2_quantize(srcColor));
 +    return;
-+#endif
-+
- #define SW_AFFINE_BLOCK 16
+ #endif
  
-     int x = xLoopStart;
-@@ -5430,12 +5509,12 @@ static void SW_RASTER_TRIANGLE_SPAN(const sw_vertex_t *start, const sw_vertex_t
+ #define SW_AFFINE_BLOCK 16
+@@ -5430,12 +5509,12 @@
              #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_BLEND
              {
                  float dstColor[4];
@@ -433,7 +433,7 @@ index 68639f3..ba6bcf4 100644
              #endif
  
              #undef SW_FINAL_COLOR
-@@ -5445,7 +5524,7 @@ static void SW_RASTER_TRIANGLE_SPAN(const sw_vertex_t *start, const sw_vertex_t
+@@ -5445,7 +5524,7 @@
          #endif
  
              // Advance unconditionally: depth test only guards the write above
@@ -442,7 +442,7 @@ index 68639f3..ba6bcf4 100644
          #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_DEPTH_TEST
              dPtr += SW_FRAMEBUFFER_DEPTH_SIZE;
              z += ctx->dZdx;
-@@ -5675,10 +5754,70 @@ static void SW_RASTER_QUAD(const sw_vertex_t *a, const sw_vertex_t *b,
+@@ -5675,10 +5754,89 @@
      sw_texture_sampler_f sample = sw_texture_pick_sampler(RLSW.boundTexture, dTdx, dTdy);
  #endif
  
@@ -450,6 +450,11 @@ index 68639f3..ba6bcf4 100644
 +    !((SW_RASTER_QUAD_FLAGS) & (SW_STATE_COLOR_INTERP | SW_STATE_DEPTH_TEST))
 +    // Quantize constant colors once; the C3 has no floating-point unit.
 +    uint8_t shades[4];
++#if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
++    if (flatColor[3] == 1.0f && RLSW.blendFunc == sw_blend_SRC_ALPHA_ONE_MINUS_SRC_ALPHA)
++        memset(shades,x4_gray2_quantize(flatColor),sizeof(shades));
++    else
++#endif
 +    for (int level=0; level<4; level++)
 +    {
 +    #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
@@ -492,6 +497,20 @@ index 68639f3..ba6bcf4 100644
 +            int sy=(int)((font->tWrap == SW_REPEAT ? sw_fract(v) : sw_saturate(v))*font->height);
 +            sy=sw_clamp_int(sy,0,font->hMinus1);
 +            int offset=y*stride+xLoopMin;
++            if (solid) {
++                int run=-1;
++                for (int x=xLoopMin; x<=xLoopMax; x++) {
++                    bool ink=x<xLoopMax;
++                #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
++                    ink=ink && pixels[2*(sy*font->width+columns[x-xLoopMin])+1];
++                #endif
++                    if (ink && run<0) run=x;
++                    if (!ink && run>=0) {
++                        x4_gray2_span(cPixels,y*stride+run,x-run,shades[0]); run=-1;
++                    }
++                }
++                continue;
++            }
 +            for (int x=xLoopMin; x<xLoopMax; x++,offset++)
 +            {
 +            #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
@@ -514,7 +533,7 @@ index 68639f3..ba6bcf4 100644
      #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_DEPTH_TEST
          uint8_t *dPtr = dPixels + baseOffset*SW_FRAMEBUFFER_DEPTH_SIZE;
          float z = zRow;
-@@ -5722,11 +5861,11 @@ static void SW_RASTER_QUAD(const sw_vertex_t *a, const sw_vertex_t *b,
+@@ -5722,11 +5880,11 @@
  
              #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
                  float dstColor[4];
@@ -529,7 +548,7 @@ index 68639f3..ba6bcf4 100644
              #endif
  
          #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_DEPTH_TEST
-@@ -5747,7 +5886,7 @@ static void SW_RASTER_QUAD(const sw_vertex_t *a, const sw_vertex_t *b,
+@@ -5747,7 +5905,7 @@
              SW_VEC_OP(tc[i] += dTdx[i], i, 2);
          #endif
  
@@ -538,7 +557,7 @@ index 68639f3..ba6bcf4 100644
          }
  
          // The for loop is clamped to the right side of the screen
-@@ -5838,7 +5977,8 @@ static void SW_RASTER_LINE_THIN(const sw_vertex_t *v0, const sw_vertex_t *v1)
+@@ -5838,7 +5996,8 @@
          int py = y;
  
          int baseOffset = py*fbWidth + px;
@@ -548,7 +567,7 @@ index 68639f3..ba6bcf4 100644
      #if (SW_RASTER_LINE_FLAGS) & SW_STATE_DEPTH_TEST
          uint8_t *dPtr = dPixels + baseOffset*SW_FRAMEBUFFER_DEPTH_SIZE;
      #endif
-@@ -5858,11 +5998,11 @@ static void SW_RASTER_LINE_THIN(const sw_vertex_t *v0, const sw_vertex_t *v1)
+@@ -5858,11 +6017,11 @@
  
          #if (SW_RASTER_LINE_FLAGS) & SW_STATE_BLEND
              float dstColor[4];
@@ -563,7 +582,7 @@ index 68639f3..ba6bcf4 100644
          #endif
  
      #if (SW_RASTER_LINE_FLAGS) & SW_STATE_DEPTH_TEST
-@@ -5963,18 +6103,19 @@ static void SW_RASTER_POINT_PIXEL(int x, int y, float z, const float color[4])
+@@ -5963,18 +6122,19 @@
      }
      #endif
  
@@ -588,7 +607,6 @@ index 68639f3..ba6bcf4 100644
      #endif
  }
 diff --git a/src/rcore.c b/src/rcore.c
-index cbb2761..33d302e 100644
 --- a/src/rcore.c
 +++ b/src/rcore.c
 @@ -109,6 +109,7 @@
@@ -599,7 +617,7 @@ index cbb2761..33d302e 100644
  #include <stdarg.h>                 // Required for: va_list, va_start(), va_end() [Used in TraceLog()]
  
  #ifndef PICO_RP2350
-@@ -515,7 +516,9 @@ const char *TextFormat(const char *text, ...); // Formatting of text with variab
+@@ -515,7 +516,9 @@
  #endif
  
  // Include platform-specific submodules
@@ -610,7 +628,7 @@ index cbb2761..33d302e 100644
      #include "platforms/rcore_desktop_glfw.c"
  #elif defined(PLATFORM_DESKTOP_SDL)
      #include "platforms/rcore_desktop_sdl.c"
-@@ -676,6 +679,14 @@ void InitWindow(int width, int height, const char *title)
+@@ -676,6 +679,14 @@
      // Initialize rlgl default data (buffers and shaders)
      // NOTE: Current fbo size stored as globals in rlgl for convenience
      rlglInit(CORE.Window.render.width, CORE.Window.render.height);
@@ -625,7 +643,7 @@ index cbb2761..33d302e 100644
  
      // Setup default viewport
      SetupViewport(CORE.Window.render.width, CORE.Window.render.height);
-@@ -684,7 +695,18 @@ void InitWindow(int width, int height, const char *title)
+@@ -684,7 +695,18 @@
      // Load default font
      // WARNING: External function: Module required: rtext
      LoadFontDefault();
@@ -644,15 +662,15 @@ index cbb2761..33d302e 100644
      // Set font white rectangle for shapes drawing, so shapes and text can be batched together
      // WARNING: rshapes module is required, if not available, default internal white rectangle is used
      Rectangle rec = GetFontDefault().recs[95];
-@@ -699,6 +721,7 @@ void InitWindow(int width, int height, const char *title)
+@@ -698,6 +720,7 @@
+         // NOTE: Set up a 1px padding on char rectangle to avoid pixel bleeding
          SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
      }
-     #endif
 +    #endif
+     #endif
  #else
      #if SUPPORT_MODULE_RSHAPES
-     // Set default texture and rectangle to be used for shapes drawing
-@@ -1666,6 +1689,10 @@ void WaitTime(double seconds)
+@@ -1666,6 +1689,10 @@
          double sleepSeconds = seconds;
      #endif
  
@@ -663,7 +681,7 @@ index cbb2761..33d302e 100644
      // System halt functions
      #if defined(_WIN32)
          Sleep((unsigned long)(sleepSeconds*1000.0));
-@@ -1963,9 +1990,9 @@ unsigned char *LoadFileData(const char *fileName, int *dataSize)
+@@ -1963,9 +1990,9 @@
          {
              // WARNING: On binary streams SEEK_END could not be found,
              // using fseek() and ftell() could not work in some (rare) cases
@@ -676,7 +694,7 @@ index cbb2761..33d302e 100644
  
              if (size > 0)
              {
-@@ -2113,9 +2140,9 @@ char *LoadFileText(const char *fileName)
+@@ -2113,9 +2140,9 @@
              // WARNING: When reading a file as 'text' file,
              // text mode causes carriage return-linefeed translation...
              // ...but using fseek() should return correct byte-offset
@@ -689,7 +707,7 @@ index cbb2761..33d302e 100644
  
              if (size > 0)
              {
-@@ -2127,12 +2154,22 @@ char *LoadFileText(const char *fileName)
+@@ -2127,12 +2154,22 @@
  
                      // WARNING: \r\n is converted to \n on reading, so,
                      // read bytes count gets reduced by the number of lines
@@ -719,10 +737,9 @@ index cbb2761..33d302e 100644
                  else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to allocated memory for file reading", fileName);
              }
 diff --git a/src/rlgl.h b/src/rlgl.h
-index 8f96afd..fc1f7b9 100644
 --- a/src/rlgl.h
 +++ b/src/rlgl.h
-@@ -3280,7 +3280,13 @@ unsigned int rlLoadTexture(const void *data, int width, int height, int format,
+@@ -3280,7 +3280,13 @@
  
      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
  
@@ -736,10 +753,11 @@ index 8f96afd..fc1f7b9 100644
  
      glBindTexture(GL_TEXTURE_2D, id);
  
-@@ -3338,6 +3344,16 @@ unsigned int rlLoadTexture(const void *data, int width, int height, int format,
+@@ -3337,6 +3343,16 @@
+         if (mipWidth < 1) mipWidth = 1;
          if (mipHeight < 1) mipHeight = 1;
      }
- 
++
 +    #if defined(PLATFORM_XTEINK_X4)
 +    if (glGetError() != GL_NO_ERROR)
 +    {
@@ -749,11 +767,10 @@ index 8f96afd..fc1f7b9 100644
 +        return 0;
 +    }
 +    #endif
-+
+ 
      // Texture parameters configuration
      // NOTE: glTexParameteri does NOT affect texture uploading
- #if defined(GRAPHICS_API_OPENGL_ES2)
-@@ -3793,6 +3809,7 @@ void rlResizeFramebuffer(int width, int height)
+@@ -3793,6 +3809,7 @@
  unsigned char *rlReadScreenPixels(int width, int height)
  {
      unsigned char *imgData = (unsigned char *)RL_CALLOC(width*height*4, sizeof(unsigned char));
@@ -762,10 +779,9 @@ index 8f96afd..fc1f7b9 100644
      // NOTE: Buffer retrieved is GL_FRONT in single-buffered configurations
      // and GL_BACK in double-buffered configurations, make sure to call it at the end of frame
 diff --git a/src/rshapes.c b/src/rshapes.c
-index 7009140..0a7925d 100644
 --- a/src/rshapes.c
 +++ b/src/rshapes.c
-@@ -98,6 +98,9 @@ void SetShapesTexture(Texture2D texture, Rectangle rec)
+@@ -98,6 +98,9 @@
      if ((texture.id == 0) || (rec.width == 0) || (rec.height == 0))
      {
          texShapes = (Texture2D){ 1, 1, 1, 1, 7 };
@@ -776,10 +792,9 @@ index 7009140..0a7925d 100644
      }
      else
 diff --git a/src/rtext.c b/src/rtext.c
-index eabb1e5..100168c 100644
 --- a/src/rtext.c
 +++ b/src/rtext.c
-@@ -154,6 +154,11 @@ extern void UnloadFontDefault(void);
+@@ -154,6 +154,11 @@
  // Load raylib default font
  extern void LoadFontDefault(void)
  {
@@ -791,7 +806,7 @@ index eabb1e5..100168c 100644
      #define BIT_CHECK(a,b) ((a) & (1u << (b)))
  
      // Check to see if the font for an image has already been allocated,
-@@ -318,6 +323,12 @@ extern void LoadFontDefault(void)
+@@ -318,6 +323,12 @@
  // Unload raylib default font
  extern void UnloadFontDefault(void)
  {
