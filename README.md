@@ -27,6 +27,21 @@ cmake --build build --parallel
 ./build/x4_demo
 ```
 
+<details>
+<summary>Quickstart with Nix (x86_64 Linux)</summary>
+
+Nix supplies the pinned build dependencies. Run from the project root:
+
+```sh
+nix develop path:.
+python3 scripts/fetch-emulator.py
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+./build/x4_demo
+```
+
+</details>
+
 Run `./build/x4_tetris` for Tetris. Use the arrow keys, Enter to confirm, Escape to go back, and `P` to clean the display. See [example controls](docs/examples.md) for each game.
 
 The [emulator guide](docs/emulator.md) covers dependency installation, optional Nix setup, virtual SD storage, and screenshots.
