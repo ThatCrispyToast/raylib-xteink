@@ -1,0 +1,77 @@
+Adding SPI flash device
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x1 (POWERON),boot:0x8 (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x3fcd5820,len:0x15c4
+load:0x403cbf10,len:0xc84
+load:0x403ce710,len:0x2fd0
+entry 0x403cbf1a
+I (1) boot: ESP-IDF v5.5.2 2nd stage bootloader
+I (1) boot: compile time Jan  1 1980 00:00:00
+I (5) boot: chip revision: v0.3
+I (6) boot: efuse block revision: v1.3
+I (7) boot.esp32c3: SPI Speed      : 40MHz
+I (7) boot.esp32c3: SPI Mode       : SLOW READ
+I (7) boot.esp32c3: SPI Flash Size : 16MB
+I (9) boot: Enabling RNG early entropy source...
+I (12) boot: Partition Table:
+I (13) boot: ## Label            Usage          Type ST Offset   Length
+I (13) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (13) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (13) boot:  2 factory          factory app      00 00 00010000 00300000
+I (14) boot: End of partition table
+I (14) esp_image: segment 0: paddr=00010020 vaddr=3c040020 size=150b8h ( 86200) map
+I (27) esp_image: segment 1: paddr=000250e0 vaddr=3fc87800 size=012f4h (  4852) load
+I (28) esp_image: segment 2: paddr=000263dc vaddr=40380000 size=077e4h ( 30692) load
+I (33) esp_image: segment 3: paddr=0002dbc8 vaddr=50000000 size=00020h (    32) load
+I (33) esp_image: segment 4: paddr=0002dbf0 vaddr=00000000 size=02428h (  9256) 
+I (35) esp_image: segment 5: paddr=00030020 vaddr=42000020 size=36e2ch (224812) map
+I (64) boot: Loaded app from partition at offset 0x10000
+I (64) boot: Disabling RNG early entropy source...
+I (71) cpu_start: Unicore app
+I (81) cpu_start: GPIO 20 and 21 are used as console UART I/O pins
+I (82) cpu_start: Pro cpu start user code
+I (82) cpu_start: cpu freq: 160000000 Hz
+I (82) app_init: Application information:
+I (82) app_init: Project name:     raylib_x4_firmware
+I (82) app_init: App version:      1
+I (82) app_init: Compile time:     Jan  1 1980 00:00:00
+I (83) app_init: ELF file SHA256:  e9d27ff79...
+I (83) app_init: ESP-IDF:          v5.5.2
+I (83) efuse_init: Min chip rev:     v0.3
+I (83) efuse_init: Max chip rev:     v1.99 
+I (83) efuse_init: Chip rev:         v0.3
+I (83) heap_init: Initializing. RAM available for dynamic allocation:
+I (83) heap_init: At 3FCA2830 len 0001D7D0 (117 KiB): RAM
+I (84) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (84) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (84) heap_init: At 50000020 len 00001FC8 (7 KiB): RTCRAM
+I (88) spi_flash: detected chip: issi
+I (88) spi_flash: flash io: dio
+I (88) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (88) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (91) main_task: Started on CPU0
+I (93) main_task: Calling app_main()
+X4_QEMU: boot_heap=231912
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+INFO: TEXTURE: [ID 2] Texture loaded successfully (32x32 | R8G8B8A8 | 1 mipmaps)
+X4_QEMU: active_heap=114980 minimum_heap=110880 buffers=192000
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+X4_QEMU_PASS: frames=3 full=1 partial=2 final_heap=231708

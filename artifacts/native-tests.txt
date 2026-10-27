@@ -1,0 +1,11 @@
+Test project /workspace/raylib-x4/build
+    Start 1: x4_core
+1/3 Test #1: x4_core ..........................   Passed    0.00 sec
+    Start 2: x4_epd
+2/3 Test #2: x4_epd ...........................   Passed    0.00 sec
+    Start 3: x4_emulator
+3/3 Test #3: x4_emulator ......................   Passed    3.64 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   3.64 sec

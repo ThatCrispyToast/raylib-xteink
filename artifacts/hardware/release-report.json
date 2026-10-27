@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "application_sha256": "02952e2efdcc4377764ea6471bffeeff022be788695ea5fdf2a31d9027ba0ad5",
+  "merged_sha256": "096fa79c52baae309ffd929eb450500d25ef2b94c01a25cdadcf9c575ae6775e",
+  "free_heap": 70176,
+  "minimum_heap": 66076,
+  "largest_block": 30720,
+  "storage_mounted": true,
+  "flash_verified": true,
+  "power_wake_confirmed": true,
+  "power_wake_evidence": {
+    "owner_confirmation": "After Back, a three-second wait, and Power, the screen flashed and returned to the Paper screen.",
+    "usb_disconnect_at": "2026-10-26T20:41:04-04:00",
+    "usb_reconnect_at": "2026-10-26T20:41:07-04:00",
+    "usb_event_source": "Test host kernel journal, Espressif 303a:1001",
+    "serial_wake_reason_captured": false
+  }
+}
