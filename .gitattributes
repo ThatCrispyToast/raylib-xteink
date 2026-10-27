@@ -1,0 +1,6 @@
+# Preserve captured serial bytes and upstream patch context verbatim.
+artifacts/*.log -text -whitespace
+artifacts/**/*.log -text -whitespace
+patches/*.patch -whitespace
+*.png binary
+*.ico binary

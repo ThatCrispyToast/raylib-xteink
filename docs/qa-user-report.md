@@ -1,12 +1,12 @@
 # Independent user acceptance report
 
-Baseline: `6f7168f` (`Add hardware-validated raylib target for Xteink X4`). Date: 2026-10-26. The tester acted as a first-time Paper user and a developer integrating the target. The baseline findings below are historical; the follow-up section records the completed retest of the QA fixes.
+Baseline: `db93a26` (`Add hardware-validated raylib target for Xteink X4`). Date: 2026-10-26. The tester acted as a first-time Paper user and a developer integrating the target. The baseline findings below are historical; the follow-up section records the completed retest of the QA fixes.
 
 ## Method and boundaries
 
 A clean `git archive` was extracted to `/tmp/x4-user-qa/baseline`. The pinned microreader emulator was fetched using the README command, and the project was built with its declared Nix environment in `/tmp/x4-user-qa/build`. Tests used microreader's actual SDL runtime and display, `SDL_VIDEODRIVER=offscreen`, independent virtual SD directories, scripted SDL key events, and screenshot readback. Screenshots were visually inspected. Most cases used `X4_EMULATOR_FAST=1`, so they assess controls, state, rendering, and persistence rather than realistic panel latency.
 
-No physical buttons were pressed by this tester, no firmware was flashed, and the physical reader was not accessed. Deep sleep, physical button ergonomics, battery behavior, and analog gray appearance therefore remain outside this independent pass. The parent agent has separate hardware evidence.
+No physical buttons were pressed by this tester, no firmware was flashed, and the physical reader was not accessed. Deep sleep, physical button ergonomics, battery behavior, and analog gray appearance therefore remain outside this independent pass. Hardware evidence is recorded separately in [validation](validation.md).
 
 Reproduction harness and individual inputs, logs, SD directories, and screenshots are under `/tmp/x4-user-qa/`. They are temporary local evidence, not a dependency of the product.
 
@@ -187,7 +187,7 @@ Local evidence is under `/tmp/x4-user-qa/timing-baseline/`, `/tmp/x4-user-qa/tim
 
 ### Physical latency acceptance boundary
 
-These results establish input preservation, ordering, confirmation safety, held-key release behavior, and retained-render correctness under controlled pauses. They do not establish the physical reader's end-to-end response time. The main agent is separately measuring and validating actual firmware.
+These results establish input preservation, ordering, confirmation safety, held-key release behavior, and retained-render correctness under controlled pauses. They do not establish the physical reader's end-to-end response time. Physical firmware measurements are recorded separately in [performance](performance.md).
 
 A physical latency run should timestamp the debounced press, delivery to Paper, completion of state changes and SD sync, drawing, framebuffer conversion, SPI transfer, and completion of panel BUSY. Report ordinary cursor/menu navigation, Enter with writable SD storage, no-card Enter, and full cleaning separately. Include rapid taps, held navigation/release, and at least fourteen consecutive updates so periodic-clean behavior is exercised. Draw timing alone excludes the synchronous save that precedes rendering. Physical acceptance should disclose the actual median, upper-percentile, and worst response times rather than infer responsiveness from correct final screenshots or native frame counts.
 
@@ -218,7 +218,7 @@ python3 scripts/test-paper-rendering.py build --output /tmp/x4-paper-rendering
 
 **All 47 comparisons passed with byte-identical screenshots and unchanged save records.** Coverage includes a flip at every one of the 25 cells, four transitions into the solved state, leaving and navigating a solved board, repeated and overlapping flips, undo and menu transitions, clearing notices, move-counter width changes, the uint32 move limit, save failure, recovery-status changes, and no-card play. The save-failure fixture blocks the alternate journal with a directory, making the failure deterministic without relying on user permissions. Representative solved, unsolved, move-limit, and failed-save screens were also visually inspected and remained clear.
 
-The tested retained-puzzle emulator SHA-256 was `b1e515e6e4fb53eb9003bc5656a067c599ad262e193738f931d5b64ff1689d90`. Local comparison evidence is `/tmp/x4-user-qa/flip-rendering/run-j1gg07c0/`; policy results are recorded in the native CTest log. The main agent separately performs the physical response-time measurements and extended partial-refresh soak described in [performance measurements](performance.md). This independent pass did not access the reader, evaluate panel ghosting, change voltage/LUT settings, or certify physical waveform behavior.
+The tested retained-puzzle emulator SHA-256 was `b1e515e6e4fb53eb9003bc5656a067c599ad262e193738f931d5b64ff1689d90`. Local comparison evidence is `/tmp/x4-user-qa/flip-rendering/run-j1gg07c0/`; policy results are recorded in the native CTest log. Physical response-time measurements and the extended partial-refresh soak are described in [performance measurements](performance.md). This independent pass did not access the reader, evaluate panel ghosting, change voltage/LUT settings, or certify physical waveform behavior.
 
 
 ## Factory-waveform responsiveness (1.2.0)

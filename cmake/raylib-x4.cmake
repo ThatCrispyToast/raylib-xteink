@@ -11,6 +11,7 @@ function(x4_configure target)
     target_include_directories(${target} PUBLIC ${X4_ROOT}/include ${X4_ROOT}/vendor/raylib/src
         PRIVATE ${X4_ROOT}/src)
     target_compile_options(${target} PRIVATE -include ${X4_ROOT}/src/x4_config.h
-        -ffunction-sections -fdata-sections)
+        -ffunction-sections -fdata-sections
+        "-fmacro-prefix-map=${X4_ROOT}/=")
     target_compile_features(${target} PUBLIC c_std_99)
 endfunction()

@@ -1,6 +1,6 @@
 {
   "result": "PASS",
-  "baseline_commit": "c425531",
+  "baseline_commit": "d0f6aae",
   "version": "1.1.1",
   "scope": "Actual Paper code on original physical X4; timings end when controller BUSY completes. Synthetic application actions exclude mechanical debounce, queued wait before dispatch, and optical settling. Before: navigation without app persistence; after: navigation plus two flips with real SD saves in an isolated temporary directory.",
   "samples": {

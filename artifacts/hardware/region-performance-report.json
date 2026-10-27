@@ -1,7 +1,7 @@
 {
   "result": "PASS",
   "version": "1.1.2",
-  "baseline_commit": "0d06fd6",
+  "baseline_commit": "3552ebc",
   "scope": "Same scripted application actions on physical X4, through BUSY completion; excludes mechanical debounce, waiting in the input queue, and optical pixel settling. Isolated real SD saves. Room temperature, one reader/card, small sample counts.",
   "samples": {
     "cursor": {

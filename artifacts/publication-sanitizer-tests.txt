@@ -1,0 +1,21 @@
+Test project /workspace/raylib-x4/build-test
+    Start 6: tetris_render
+    Start 3: x4_raster_equivalence
+    Start 1: x4_package
+    Start 4: paper_state
+1/8 Test #4: paper_state ......................   Passed    0.05 sec
+    Start 5: tetris_game
+2/8 Test #5: tetris_game ......................   Passed    0.01 sec
+    Start 7: x4_core
+3/8 Test #7: x4_core ..........................   Passed    0.02 sec
+    Start 8: x4_epd
+4/8 Test #8: x4_epd ...........................   Passed    0.01 sec
+    Start 2: x4_public_audit
+5/8 Test #2: x4_public_audit ..................   Passed    0.02 sec
+6/8 Test #1: x4_package .......................   Passed    0.20 sec
+7/8 Test #6: tetris_render ....................   Passed    0.23 sec
+8/8 Test #3: x4_raster_equivalence ............   Passed    0.24 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   0.24 sec

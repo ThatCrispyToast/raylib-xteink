@@ -1,6 +1,6 @@
 {
   "result": "PASS",
-  "baseline_commit": "722c3a4",
+  "baseline_commit": "2a470e5",
   "measurements": {
     "before": {
       "six_rows_seconds": 13.64,

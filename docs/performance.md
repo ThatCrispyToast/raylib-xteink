@@ -26,7 +26,7 @@ On the physical device, 200 rapid submissions averaged **7.18 ms**, with a **12.
 
 The actual Tetris benchmark also drains the last frame before recording each result:
 
-| Scenario | Previous build (`834aafa`) | 1.2.0 |
+| Scenario | Previous build (`fed5877`) | 1.2.0 |
 |---|---:|---:|
 | Hold Right from spawn to the edge | 1.390 s | 0.897 s |
 | Hold Down from spawn to the floor | 2.105 s | 1.790 s |
@@ -42,7 +42,7 @@ Native tests cover snapshot ownership, coalescing, final-frame drains, refresh o
 
 The on-device stress fixture additionally checks 200 coalesced snapshots, manual clean ordering, stable heap, idle wake, and temperature expiry. The full diagnostic regression passes 276 checks, including real SD access and 200 consecutive completed partial refreshes with stable heap and no display errors. Three deep-sleep/timer-wake cycles and all 29 scripted Tetris actions also pass. See [validation](validation.md) and the matching hardware reports for the final counts.
 
-No optical or button-to-photon measurement is claimed. The owner selected factory waveforms and was unavailable for visual inspection during these tests. The experimental candidate was never flashed and is absent from the delivered target.
+No optical or button-to-photon measurement is claimed. This validation uses factory waveforms and does not include a new visual inspection. The experimental candidate was never flashed and is absent from the delivered target.
 
 ## Reproduce
 

@@ -1,7 +1,7 @@
 {
   "result": "PASS",
   "version": "1.2.0",
-  "baseline_commit": "834aafa",
+  "baseline_commit": "fed5877",
   "samples": {
     "cursor": {
       "samples": 9,

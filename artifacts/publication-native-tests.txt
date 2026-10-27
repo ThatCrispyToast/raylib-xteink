@@ -1,0 +1,29 @@
+Test project /workspace/raylib-x4/build
+      Start 10: x4_input_timing
+      Start  7: tetris_emulator
+      Start 11: x4_emulator
+      Start 12: x4_paper_rendering
+ 1/12 Test #12: x4_paper_rendering ...............   Passed   10.89 sec
+      Start  3: x4_raster_equivalence
+ 2/12 Test  #3: x4_raster_equivalence ............   Passed    0.18 sec
+      Start  6: tetris_render
+ 3/12 Test  #6: tetris_render ....................   Passed    0.08 sec
+      Start  4: paper_state
+ 4/12 Test  #4: paper_state ......................   Passed    0.04 sec
+      Start  1: x4_package
+ 5/12 Test  #1: x4_package .......................   Passed    0.19 sec
+      Start  5: tetris_game
+ 6/12 Test  #5: tetris_game ......................   Passed    0.00 sec
+      Start  8: x4_core
+ 7/12 Test  #8: x4_core ..........................   Passed    0.01 sec
+      Start  9: x4_epd
+ 8/12 Test  #9: x4_epd ...........................   Passed    0.00 sec
+      Start  2: x4_public_audit
+ 9/12 Test  #2: x4_public_audit ..................   Passed    0.02 sec
+10/12 Test  #7: tetris_emulator ..................   Passed   17.17 sec
+11/12 Test #10: x4_input_timing ..................   Passed   30.05 sec
+12/12 Test #11: x4_emulator ......................   Passed   36.75 sec
+
+100% tests passed, 0 tests failed out of 12
+
+Total Test time (real) =  36.75 sec

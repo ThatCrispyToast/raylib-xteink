@@ -1,0 +1,44 @@
+name: Build and test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: emulator
+            emulator: 'ON'
+            sanitize: 'OFF'
+            build_type: Release
+          - name: sanitizers
+            emulator: 'OFF'
+            sanitize: 'ON'
+            build_type: Debug
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: cachix/install-nix-action@d9186cbdca7adedf113a159fa91f725a27866771 # v31
+      - name: Audit public history
+        run: nix develop path:. -c python3 scripts/public_audit.py --history
+      - name: Fetch pinned emulator
+        if: matrix.emulator == 'ON'
+        run: nix develop path:. -c python3 scripts/fetch-emulator.py
+      - name: Configure
+        run: >-
+          nix develop path:. -c cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DX4_BUILD_EMULATOR=${{ matrix.emulator }}
+          -DX4_SANITIZE=${{ matrix.sanitize }}
+      - name: Build
+        run: nix develop path:. -c cmake --build build --parallel 2
+      - name: Test
+        run: nix develop path:. -c ctest --test-dir build --output-on-failure --parallel 2

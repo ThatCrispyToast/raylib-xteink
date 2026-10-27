@@ -11,6 +11,7 @@ with tempfile.TemporaryDirectory(prefix="x4-package-test-") as temporary:
     test=Path(temporary)
     (test/"scripts").mkdir()
     shutil.copy2(root/"scripts/package.py",test/"scripts/package.py")
+    shutil.copy2(root/"scripts/public_audit.py",test/"scripts/public_audit.py")
     (test/"firmware/build").mkdir(parents=True)
     (test/"firmware/build/raylib_x4_firmware.bin").write_bytes(b"changed firmware")
     (test/"artifacts/hardware").mkdir(parents=True)
@@ -28,5 +29,37 @@ with tempfile.TemporaryDirectory(prefix="x4-package-test-") as temporary:
     result=subprocess.run([sys.executable,test/"scripts/package.py"],capture_output=True,text=True)
     assert result.returncode != 0 and "Tetris QEMU" in result.stderr, result
     assert not (test/"dist/tetris.bin").exists()
+    (test/"build-tetris/CMakeCache.txt").write_text("X4_QEMU_SMOKE:BOOL=OFF\n")
+    output=test/"dist"
+    output.mkdir()
+    (output/"application.bin").write_bytes(b"previous release")
+    (output/"notes.txt").write_bytes(b"unrelated file")
+    result=subprocess.run([sys.executable,test/"scripts/package.py"],capture_output=True,text=True)
+    assert result.returncode != 0 and "unexpected files" in result.stderr, result
+    assert (output/"notes.txt").read_bytes()==b"unrelated file"
+    (output/"notes.txt").unlink()
+    application=test/"firmware/build/raylib_x4_firmware.bin"
+    application.write_bytes(b"firmware\0" + b"/home/" + b"builder/project.c\0")
+    result=subprocess.run([sys.executable,test/"scripts/package.py"],capture_output=True,text=True)
+    assert result.returncode != 0 and "home directory" in result.stderr, result
+    application.write_bytes(b"clean firmware")
+    for name in ("bootloader/bootloader.bin","partition_table/partition-table.bin"):
+        path=test/"firmware/build"/name; path.parent.mkdir(exist_ok=True); path.write_bytes(b"fixture")
+    (test/"LICENSE").write_text("fixture")
+    (test/"THIRD_PARTY.md").write_text("fixture")
+    (test/"CMakeLists.txt").write_bytes(b"/home/" + b"builder/project/source")
+    result=subprocess.run([sys.executable,test/"scripts/package.py"],capture_output=True,text=True)
+    assert result.returncode != 0 and "home directory" in result.stderr, result
+    assert (output/"application.bin").read_bytes()==b"previous release"
+    assert list(output.iterdir())==[output/"application.bin"]
+    assert not list(test.glob('build-package-*'))
+    (test/'build-hardware').mkdir()
+    (test/'build-hardware/raylib_x4_firmware.bin').write_bytes(b'test-only firmware')
+    (test/'build-hardware/CMakeCache.txt').write_text('X4_APP_SOURCE:FILEPATH=/example/examples/diagnostics.c\nX4_QEMU_SMOKE:BOOL=ON\n')
+    result=subprocess.run([sys.executable,test/"scripts/package.py"],capture_output=True,text=True)
+    assert result.returncode != 0 and "diagnostic QEMU" in result.stderr, result
+    assert (output/"application.bin").read_bytes()==b"previous release"
 print("PASS: missing and stale hardware attestations rejected before packaging")
 print("PASS: Tetris QEMU image rejected before packaging firmware")
+print("PASS: private binary/source content and unexpected files rejected; previous release preserved")
+print("PASS: diagnostic QEMU image rejected before packaging firmware")

@@ -4,6 +4,8 @@ A native **480 × 800, 2D raylib target for the original ESP32-C3 Xteink X4**, w
 
 ![Paper running in microreader's X4 emulator](artifacts/demo.png)
 
+[Emulator](#run-the-emulator) · [Hardware installation](#build-and-flash-the-device) · [Application API](#use-it-in-an-application) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
+
 Includes **Paper**, a drawing showcase and playable Lights Out puzzle with SD-card persistence. Enter opens the puzzle; arrows move around its grid and Enter flips a square and its orthogonal neighbors. Back opens a menu with undo, restart, new puzzle, help, device status, and sleep. Restart and new puzzle ask for confirmation. Power (`P` in the emulator) cleans the display and returns to the current screen. Sleep leaves a wake instruction on the panel; Power wakes the device and resumes a saved game.
 
 Paper saves the board, cursor, starting puzzle, move count, and last 64 undo moves in `raylib-x4/paper-a.sav` and `paper-b.sav` on the SD card. Alternating, versioned, checksummed records preserve the previous save if a write is incomplete. A valid old `paper.txt` is imported without changing it; unrelated files are preserved. Save failures and no-card play are shown directly below the puzzle. Without storage, progress lasts only until the application exits.
@@ -43,7 +45,7 @@ The portable gameplay model is in [tetris_game.c](examples/tetris_game.c). `ctes
 
 ## Run the emulator
 
-On NixOS, from this directory:
+On NixOS, from the project root:
 
 ```sh
 python3 scripts/fetch-emulator.py
@@ -54,7 +56,7 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 ```
 
-The explicit `path:.` also works in a directory without Git metadata. The flake locks the native tools, ESP-IDF 5.5.2, RISC-V toolchain, and Espressif QEMU. On other Linux systems, CMake ≥3.20, a C99/C++17 compiler, Python 3, and SDL2 ≥2.0.22 development files suffice for the native build.
+The explicit `path:.` also works in a directory without Git metadata. The flake locks the native tools, ESP-IDF 5.5.2, RISC-V toolchain, and Espressif QEMU. On other Linux systems, CMake ≥3.20, a C99/C++17 compiler, Python ≥3.9, and SDL2 ≥2.0.22 development files suffice for the native build.
 
 The emulator compiles microreader's real `DesktopEmulatorDisplay` and `DesktopRuntime`, including its panel crop, rotation, paper palette, and refresh delays. The adapter provides raylib input and filesystem access. It is a native firmware simulator, not a CPU emulator. `X4_SD_ROOT` selects the virtual SD directory (default `./sdcard`). Set `X4_SD_ROOT=''` to emulate no card. An unavailable root also runs without storage; an existing read-only directory lets you test save-failure feedback.
 
@@ -70,13 +72,13 @@ idf.py -C firmware build
 idf.py -C firmware size
 ```
 
-The build produces `firmware/build/raylib_x4_firmware.bin` and the bootloader and partition table. A packaged image and checksums are in `dist/` after running `python3 scripts/package.py`. The optional `--hardware-tested` flag requires a passing physical QA report whose application SHA-256 matches the current binary; older evidence cannot attest a new build.
+The build produces `firmware/build/raylib_x4_firmware.bin` and the bootloader and partition table. A packaged image and checksums are in `dist/` after running `python3 scripts/package.py`. Packaging rejects common private-data leaks and unexpected release files. See [release preparation](docs/releasing.md) for source-archive verification and publishing. The optional `--hardware-tested` flag requires a passing physical QA report whose application SHA-256 matches the current binary; older evidence cannot attest a new build.
 
-**This replaces the device firmware and partition table.** Use an original, unlocked ESP32-C3 X4; X3, X4 Pro, and newer locked variants are not this target. Back up the full flash before installing. With the appropriate serial port substituted:
+**This replaces the device firmware and partition table.** Use an original, unlocked ESP32-C3 X4; X3, X4 Pro, and newer locked variants are not this target. Back up the full flash before installing. With the appropriate serial port and a backup path outside the project substituted:
 
 ```sh
-python -m esptool --chip esp32c3 --port /dev/ttyACM0 read_flash 0 0x1000000 x4-backup.bin
-python -m esptool --chip esp32c3 --port /dev/ttyACM0 verify_flash 0 x4-backup.bin
+python -m esptool --chip esp32c3 --port /dev/ttyACM0 read_flash 0 0x1000000 /path/outside/project/x4-backup.bin
+python -m esptool --chip esp32c3 --port /dev/ttyACM0 verify_flash 0 /path/outside/project/x4-backup.bin
 idf.py -C firmware -p /dev/ttyACM0 flash monitor
 ```
 
@@ -86,7 +88,7 @@ Alternatively, the packaged merged image is flashed at address **0**:
 python -m esptool --chip esp32c3 --port /dev/ttyACM0 write_flash 0 dist/raylib-x4.bin
 ```
 
-Never flash the application-only `.bin` at address 0; its address is `0x10000`. To restore a full backup, use `python -m esptool --chip esp32c3 --port /dev/ttyACM0 write_flash 0 x4-backup.bin`. The firmware mounts an existing FAT SD card at `/sd` and never formats it. Without a card, the example runs without persistence.
+Never flash the application-only `.bin` at address 0; its address is `0x10000`. To restore a full backup, use `python -m esptool --chip esp32c3 --port /dev/ttyACM0 write_flash 0 /path/outside/project/x4-backup.bin`. The firmware mounts an existing FAT SD card at `/sd` and never formats it. Without a card, the example runs without persistence.
 
 If Linux serial access is denied, an administrator can grant temporary access to this reader with `sudo bash scripts/grant-x4-access.sh SERIAL USER`, substituting its serial from `/dev/serial/by-id/` and your username. This targets one Espressif USB device and expires at reboot.
 
@@ -169,7 +171,7 @@ cmake --build build-test -j
 ctest --test-dir build-test --output-on-failure
 
 # Real RISC-V / ESP-IDF execution with physical I/O replaced by a test HAL
-nix develop path:.#firmware -c idf.py -C firmware -B build-qemu \
+nix develop path:.#firmware -c idf.py -C firmware -B "$PWD/build-qemu" \
   -DX4_QEMU_SMOKE=ON -DSDKCONFIG="$PWD/build-qemu/sdkconfig" build
 nix develop path:.#qemu -c python3 scripts/test-qemu.py
 ```
@@ -180,7 +182,7 @@ To run the USB hardware acceptance app after backing up the device:
 
 ```sh
 nix develop path:.#firmware
-idf.py -C firmware -B build-hardware \
+idf.py -C firmware -B "$PWD/build-hardware" \
   -DX4_APP_SOURCE="$PWD/examples/diagnostics.c" \
   -DSDKCONFIG="$PWD/build-hardware/sdkconfig" build flash
 python scripts/test-device.py --port /dev/ttyACM0

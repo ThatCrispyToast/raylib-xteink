@@ -2,6 +2,12 @@
 
 Latest validation on 2026-10-27 on NixOS x86_64. Exact tool versions are locked in `flake.lock`; the embedded SDK is ESP-IDF 5.5.2 and the emulator is Espressif QEMU 9.2.2. The native display emulator is microreader revision `a4adfdb9a37b83bcb724cac3dc8990f335b49e8a`.
 
+## Publication preparation
+
+The public source and release packages were rechecked after path sanitization. The native suite passes 12/12 tests, sanitizers pass 8/8, and a fresh source-archive build passes 8/8. The added tests reject private data in firmware/source packages, unexpected release files, unsafe archive entries, and QEMU images; failed packaging preserves the previous release. CI is syntax-checked with actionlint and uses the pinned Nix environment. Its hosted run awaits publication.
+
+Paper and Tetris release binaries retain their previously tested hashes. Diagnostics was rebuilt to remove local `__FILE__` paths and was not flashed again. Historical logs retain their measurements with local checkout paths redacted. See `artifacts/publication-report.json` and the publication test logs for scope, and [release preparation](releasing.md) for the public-file audit.
+
 ## Results
 
 | Check | Result | Evidence |
@@ -36,7 +42,7 @@ The physical diagnostic regression covers 276 checks, including 200 consecutive 
 
 The actual Paper code is benchmarked synchronously for comparable action-through-BUSY timings, using isolated temporary SD saves. The actual Tetris code is exercised by 29 scripted hardware actions and a separate gravity/held-control benchmark that drains the last frame before reporting completion. Exact measurements, current firmware hashes, and limitations are in [performance](performance.md), `artifacts/hardware/speed-report.json`, and the per-application release reports.
 
-The final Paper and Tetris binaries are separately flash-verified and booted with SD mounted; interactive Tetris is left on the reader. Factory-waveform-only operation was explicitly selected by the owner. No custom-waveform candidate was flashed. The owner was unavailable during this pass, so human button feel, optical settling, and ghosting are not newly certified. Earlier owner observations below remain historical evidence.
+The final Paper and Tetris binaries are separately flash-verified and booted with SD mounted; interactive Tetris is left on the reader. Factory-waveform-only operation was explicitly selected by the owner. No custom-waveform candidate was flashed. Human button feel, optical settling, and ghosting were not observed during this pass. Earlier owner observations below remain historical evidence.
 
 ## Tetris timing correction before 1.2.0 (2026-10-27)
 
@@ -125,7 +131,7 @@ The smoke test is **not** evidence of electrical panel behavior or exact 160 MHz
 
 ## Original 1.0.0 physical device acceptance
 
-An original ESP32-C3 revision 0.4 X4 with 16 MB flash and an inserted FAT microSD card was tested over USB. Before changing firmware, its entire 16 MB flash was read and verified against the device using esptool's digest comparison. The backup and checksum manifest remain local under `artifacts/hardware/backups/` and are excluded from releases.
+An original ESP32-C3 revision 0.4 X4 with 16 MB flash and an inserted FAT microSD card was tested over USB. Before changing firmware, its entire 16 MB flash was read and verified against the device using esptool's digest comparison. The backup and checksum manifest are stored privately outside the project and are excluded from releases.
 
 The final acceptance runner passed 68 checks, including:
 

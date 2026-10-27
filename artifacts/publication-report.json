@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "version": "1.2.0",
+  "scope": "Public source, full reachable Git history, source archive, firmware images, and PNG metadata. Contributor identities and upstream notices retained.",
+  "history_cleanup": "Local checkout paths and private host/notification details removed from all seven pre-publication commits. Original history and device backup preserved privately outside the project.",
+  "privacy_checks": "Configured pattern scan plus manual review; no claim that heuristics detect every possible secret.",
+  "native_tests": 12,
+  "sanitizer_tests": 8,
+  "clean_archive_tests": 8,
+  "ci_workflow": "Validated with actionlint; hosted execution awaits publication.",
+  "production_images_unchanged": true,
+  "paper_sha256": "4346366fb0290e1af3ff176d842839f5d6edb484522ff819b1093ff98d1d3cf0",
+  "tetris_sha256": "2d21a4900129d221a0d9282a6a66cfedcf5dd9ba7d2c2f48ddc54f3502efb843",
+  "diagnostics_sha256": "2a6b75672977dda14c556bb4d86cbaa42c1c775967767fa65d047faccd167827",
+  "diagnostics_scope": "Rebuilt with relative source-file strings and scanned for private paths; not flashed during publication preparation.",
+  "published": false
+}

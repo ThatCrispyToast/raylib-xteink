@@ -9,6 +9,16 @@ __pycache__/
 *.ppm
 /artifacts/hardware/backups/
 /sdcard/
+/backups/
+/private/
+/x4-backup*.bin
+/.agents/
+/.aws/
+/.codex/
+.env
+.env.*
+*.pem
+*.key
 /vendor/raylib/*
 !/vendor/raylib/src/
 !/vendor/raylib/LICENSE
@@ -89,3 +99,8 @@ __pycache__/
 /artifacts/hardware/speed-regression/*
 !/artifacts/hardware/speed-regression/report.json
 !/artifacts/hardware/speed-regression/partial-soak.png
+
+!/artifacts/publication-native-tests.txt
+!/artifacts/publication-sanitizer-tests.txt
+!/artifacts/publication-archive-tests.txt
+!/artifacts/publication-report.json
