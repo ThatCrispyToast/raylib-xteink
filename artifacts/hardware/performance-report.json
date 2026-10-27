@@ -1,0 +1,57 @@
+{
+  "result": "PASS",
+  "baseline_commit": "c425531",
+  "version": "1.1.1",
+  "scope": "Actual Paper code on original physical X4; timings end when controller BUSY completes. Synthetic application actions exclude mechanical debounce, queued wait before dispatch, and optical settling. Before: navigation without app persistence; after: navigation plus two flips with real SD saves in an isolated temporary directory.",
+  "samples": {
+    "before": {
+      "cursor": {
+        "samples": 9,
+        "median_ms": 2453.462,
+        "p95_ms": 2454.476,
+        "max_ms": 2454.476,
+        "median_draw_ms": 1681.931,
+        "median_convert_ms": 65.307
+      },
+      "menu": {
+        "samples": 7,
+        "median_ms": 2078.477,
+        "p95_ms": 5146.489,
+        "max_ms": 5146.489,
+        "median_draw_ms": 1307.515,
+        "median_convert_ms": 64.659
+      }
+    },
+    "after": {
+      "cursor": {
+        "samples": 9,
+        "median_ms": 733.408,
+        "p95_ms": 733.428,
+        "max_ms": 733.428,
+        "median_draw_ms": 8.473,
+        "median_convert_ms": 18.75
+      },
+      "menu": {
+        "samples": 7,
+        "median_ms": 728.143,
+        "p95_ms": 728.172,
+        "max_ms": 728.172,
+        "median_draw_ms": 3.09,
+        "median_convert_ms": 19.025
+      },
+      "save": {
+        "samples": 2,
+        "median_ms": 941.917,
+        "p95_ms": 953.412,
+        "max_ms": 953.412,
+        "median_draw_ms": 171.575,
+        "median_convert_ms": 18.82
+      }
+    }
+  },
+  "physical_regression": "artifacts/hardware/performance-regression/report.json",
+  "input_timing_checks": 9,
+  "raster_reference_scenes": 32,
+  "retained_render_comparisons": 33,
+  "emulator_sha256": "76f4dff3cd0cc2ff53ab1da7803a4e56fe2e657f340e697a435b376e080e08de"
+}

@@ -57,7 +57,7 @@ The default framebuffer's packed format is deliberately private. Textures remain
 
 ## Presentation and controller state
 
-`EndDrawing()` produces a full 800 × 480 MSB-first panel buffer, 1 = white. A byte comparison against the last successfully presented frame avoids unnecessary waveforms. First presentation, an explicit cleaning request, recovery after an error, or the partial-update limit selects a full refresh. The default allows 12 partial updates between full cleans.
+`EndDrawing()` produces a full 800 × 480 MSB-first panel buffer, 1 = white. A byte comparison against the last successfully presented frame avoids unnecessary waveforms. First presentation, an explicit cleaning request, recovery after an error, or the partial-update limit selects a full refresh. The platform default allows 12 partial updates between full cleans. Paper overrides that automatic limit and requests its periodic clean after at least 12 partial updates plus three seconds with no navigation or held button.
 
 The command engine is independent of ESP-IDF and tested with a bus model. It configures the SSD1677's internal temperature sensor, booster, driver output, border, and 16-bit pixel-addressed RAM window. Rows are transferred with X increasing and Y decreasing. A full update writes both RAM planes, uses update control `0xF7`, and bypasses the old-image plane. A differential update writes the previous frame to old-image RAM and the new frame to BW RAM, then uses `0xFC`. The old-image RAM is explicitly reseeded after completion. Partial updates are followed by `0x83` power-off, leaving the panel image intact during idle. No custom voltage or grayscale waveforms are installed.
 
@@ -67,7 +67,7 @@ SPI writes acquire the shared bus while manually controlling EPD CS and DC. Tran
 
 ## Input and power
 
-ADC values are decoded against the established X4 ladder centers: front 3470/2655/1470/3, side 2205/3, tolerance 400, with readings above 3800 treated as released. The timer samples every 5 ms and requires 15 ms stability. The timer and main task share a protected current-state mask and press latch. This preserves brief taps during a blocking waveform, though repeated taps of the same button between polls coalesce.
+ADC values are decoded against the established X4 ladder centers: front 3470/2655/1470/3, side 2205/3, tolerance 400, with readings above 3800 treated as released. The timer samples every 5 ms and requires 15 ms stability. The timer and main task share a protected current-state mask and press queue. This preserves brief taps during a blocking waveform, with up to 64 ordered press edges retained until the next poll. `GetKeyPressed()` drains these in order; the boolean pressed-key APIs still report whether each key appeared in the current batch. Queue overflow is counted. Paper applies the ordered batch before drawing its final visual state, and requires a fresh Enter after a destructive confirmation becomes visible.
 
 The raylib backend maintains current/previous key state and repeat timing. Default Escape closes the window; applications can change it with `SetExitKey()`. Power is exposed as `KEY_P`, leaving its behavior to the application. The example uses it to clean the panel. The firmware wrapper enters deep sleep when the application returns and configures Power as a wake source.
 
@@ -85,3 +85,10 @@ Upstream raylib changes are preserved as a reviewable patch: platform include an
 Paper 1.1.0 keeps two 112-byte records under the SD card's `raylib-x4` directory. Each has an eight-byte version marker, explicitly little-endian sequence/board/initial-board/move-count fields, cursor, bounded undo history, and an FNV-1a checksum. Loading checks the exact file size, checksum, field ranges, and history entries before selecting the newest valid sequence. Save writes the alternate slot, flushes, syncs, and closes it before advancing the in-memory sequence. A partial replacement leaves the previously valid slot available. Recovery is reported on screen; this does not guarantee survival of card-controller or filesystem-wide damage.
 
 The old generic `paper.txt` is read only through a bounded, strict legacy parser and is never overwritten. Saves happen after a move, undo, confirmed restart/new puzzle, and choosing Sleep. Cursor movement alone does not write the card. The UI always exposes save failure or no-card status while permitting in-memory play. Random puzzles are constructed by applying legal toggles to the solved board, guaranteeing solvability; restart remembers each puzzle's initial board. The last 64 moves remain undoable across sleep and relaunch.
+
+
+## MCU rendering performance
+
+Packed uniform-color spans and constant-color quad blending quantize once per primitive/span instead of doing software floating-point conversion per pixel. The default font's immutable white/binary-alpha atlas has a nearest-neighbor path that calculates texture columns once and reuses them across rows. Rotated, filtered, mutable, and non-default textures continue through the general rasterizer. A reference build disables these fast paths; 32 varied scenes must match its packed bytes exactly. Dither/rotation assembles each panel byte directly and is tested against the original per-pixel conversion on randomized input.
+
+Paper retains its framebuffer between frames. Cursor changes redraw the two affected cells; menu selection changes repaint only the old/new outlines. Full page/state changes still use the complete draw path. These optimizations preserve the panel waveform and previous-frame protocol. Physical timings and the independent wall-clock input tests are documented in `docs/performance.md`.

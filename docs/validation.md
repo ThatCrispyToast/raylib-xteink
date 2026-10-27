@@ -7,8 +7,8 @@ Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flak
 | Check | Result | Evidence |
 |---|---|---|
 | Native Release build | Pass | `build/x4_demo`, `build/libraylib_x4.a` |
-| Native CTest suite | 5/5 pass | `artifacts/native-tests.txt` |
-| ASan + UBSan | 4/4 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
+| Native CTest suite | 7/7 pass | `artifacts/native-tests.txt` |
+| ASan + UBSan | 5/5 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
 | Hardware ESP32-C3 compile/link | Pass | `firmware/build/raylib_x4_firmware.bin`, `artifacts/firmware-build.log` |
 | Alternative application build | Pass | `build-minimal/raylib_x4_firmware.bin`, `artifacts/minimal-build.log` |
 | ESP32-C3 QEMU boot and renderer | Pass | `artifacts/qemu-test.log` |
@@ -17,12 +17,18 @@ Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flak
 | Seven physical buttons and visual panel check | Pass | `artifacts/hardware/buttons-report.json` |
 | Deep sleep and timer wake | 3/3 cycles pass | `artifacts/hardware/sleep-console.log` |
 | Physical Back/Power sleep and wake | Pass: owner confirmation and USB disconnect/reconnect | `artifacts/hardware/release-report.json` |
-| Paper 1.1.0 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
-| Physical Paper storage regression | 228 checks pass | `artifacts/hardware/qa-paper.log` |
-| Independent user acceptance | Seven baseline findings fixed and retested | `docs/qa-user-report.md` |
-| Clean build from release source archive | 4/4 tests pass | `artifacts/hardware/archive-check.log` |
+| Paper 1.1.1 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
+| Physical Paper 1.1.0 storage regression | 228 checks pass | `artifacts/hardware/qa-paper.log` |
+| Independent user acceptance | Functional and wall-clock timing failures fixed and retested | `docs/qa-user-report.md` |
+| Clean build from release source archive | 5/5 tests pass | `artifacts/hardware/archive-check.log` |
 
 The tests deliberately trigger a rejected window size and display failure. Their expected error messages do not indicate a failing test.
+
+## Paper 1.1.1 performance follow-up
+
+The owner's physical-latency report prompted direct MCU measurements. Cursor/menu navigation now takes about 0.73 seconds, versus 2.45/2.08 seconds previously; most remaining time is the unchanged panel waveform. Drawing, conversion, input ordering, retained selection updates, and idle cleaning were fixed. Nine wall-clock input checks, 32 reference-renderer scenes, 33 retained/full-redraw comparisons, and a fresh 68-check physical regression pass. See [performance measurements and limits](performance.md).
+
+Production 1.1.1 was flash-verified and booted with SD mounted: 69,920 bytes free heap, a 65,820-byte minimum, and a largest free block of 29,696 bytes. The current exact binary is recorded in `artifacts/hardware/qa-release-report.json`; historical 1.1.0 evidence is preserved separately in `qa-1.1.0-report.json`.
 
 ## Paper 1.1.0 QA
 
@@ -32,7 +38,7 @@ The expanded native suite tests bounded file reads (directories and files larger
 
 On the physical X4, `tests/paper_device.c` ran 228 checks against the actual FAT SD card and raylib renderer. These include 70 save/reload cycles, persisted undo, deliberate truncation of the newest journal slot and recovery from the older slot, subsequent save repair, restart, safe directory rejection by both file-loading APIs, and heap integrity. It used a unique temporary directory, removed its test files, and preserved existing game data. The test reported 74,408 bytes free heap, a 57,592-byte minimum, and 10,868 bytes of main-task stack headroom. This tests interrupted-record handling, not arbitrary electrical failure or whole-filesystem corruption.
 
-Production Paper 1.1.0 was then restored with flash digest verification and booted with SD mounted: 70,192 bytes free heap, a 66,092-byte minimum, and a largest free block of 30,720 bytes. Its exact binary hash is recorded in `artifacts/hardware/qa-release-report.json`. Packaging with `--hardware-tested` rejects a different binary. The new menu and sleep-screen flows were tested in the emulator; physical button and Power-wake observations below are historical 1.0.0 evidence, not a repeated owner check of the new UI.
+Production Paper 1.1.0 was then restored with flash digest verification and booted with SD mounted: 70,192 bytes free heap, a 66,092-byte minimum, and a largest free block of 30,720 bytes. Its exact binary hash is recorded in `artifacts/hardware/qa-1.1.0-report.json`. Packaging with `--hardware-tested` rejects a different binary. The new menu and sleep-screen flows were tested in the emulator; physical button and Power-wake observations below are historical 1.0.0 evidence, not a repeated owner check of the new UI.
 
 To reproduce the isolated physical save regression, build and flash it as an alternate application, then restore the default Paper firmware:
 
@@ -65,10 +71,10 @@ Measured heap values from that run:
 
 | Point | Free heap, bytes |
 |---|---:|
-| Before `InitWindow` | 231,912 |
-| Active with font, texture, and framebuffers | 114,980 |
-| Lowest during initialization/rendering | 110,880 |
-| After texture unload and `CloseWindow` | 231,708 |
+| Before `InitWindow` | 231,720 |
+| Active with font, texture, and framebuffers | 114,932 |
+| Lowest during initialization/rendering | 110,832 |
+| After texture unload and `CloseWindow` | 231,524 |
 
 The 192,000-byte buffer figure includes two static 48,000-byte panel frames and the dynamic 96,000-byte grayscale framebuffer. Static buffers are already excluded from the reported boot heap. Additional hardware peripheral allocations are not represented by the smoke HAL; the hardware executable is separately linked with the actual GPIO, ADC, SPI, FAT, and SDSPI drivers. The 16 KB main stack is configured in both images.
 

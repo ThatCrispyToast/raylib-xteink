@@ -5,7 +5,12 @@
 extern "C" {
 #endif
 enum { X4_BACK, X4_CONFIRM, X4_LEFT, X4_RIGHT, X4_UP, X4_DOWN, X4_POWER, X4_BUTTON_COUNT };
-typedef struct X4Input { uint8_t down, pressed; bool quit; } X4Input;
+#define X4_INPUT_CAPACITY 64
+typedef struct X4Input {
+    uint8_t down, pressed;
+    bool quit;
+    uint8_t press_count, press_order[X4_INPUT_CAPACITY];
+} X4Input;
 bool x4_hal_init(const char *title);
 void x4_hal_close(void);
 bool x4_hal_present(const uint8_t *frame, const uint8_t *previous, bool full);

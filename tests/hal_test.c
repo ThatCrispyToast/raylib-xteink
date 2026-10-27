@@ -7,7 +7,7 @@ bool x4_hal_init(const char *title) { (void)title; return true; }
 void x4_hal_close(void) {}
 bool x4_hal_present(const uint8_t *frame, const uint8_t *previous, bool full)
 { (void)frame; (void)previous; (void)full; test_present_count++; return test_present_ok; }
-X4Input x4_hal_poll(void) { X4Input input = test_input; test_input.pressed = 0; return input; }
+X4Input x4_hal_poll(void) { X4Input input = test_input; test_input.pressed = 0; test_input.press_count = 0; return input; }
 double x4_hal_time(void) { return test_time; }
 void x4_hal_sleep(double seconds) { test_time += seconds; }
 const char *x4_hal_storage(void) { return "/tmp"; }

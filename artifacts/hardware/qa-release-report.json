@@ -1,16 +1,15 @@
 {
   "result": "PASS",
-  "version": "1.1.0",
-  "application_sha256": "e3f08b42e731c4c76f8727cc134b67ebfc0cde6817f6b809e9022bc5706a5cd6",
+  "version": "1.1.1",
+  "application_sha256": "1032d7b9de01a92ac05cfc194cd746bed96d7490a3a3896b7cc4a746040f51d2",
   "flash_verified": true,
-  "free_heap": 70192,
-  "minimum_heap": 66092,
-  "largest_block": 30720,
+  "free_heap": 69920,
+  "minimum_heap": 65820,
+  "largest_block": 29696,
   "storage_mounted": true,
-  "physical_storage_checks": 228,
-  "storage_qa_image_sha256": "c6dad5a59c9e6800eb8328e3ee5a4d8c0b439fdb03cfb4fdce71bbe7e0eba35c",
-  "storage_qa_log": "artifacts/hardware/qa-paper.log",
-  "current_application_hardware_scope": "Verified flash and successful Paper boot with physical panel and SD mounted.",
-  "storage_scope": "Same paper_state.c tested in a separate physical QA app: 70 save/reload cycles, persistent undo, truncated-slot recovery, restart, file API directory rejection, cleanup and heap integrity.",
-  "ui_scope": "New UI flows tested independently in the real microreader SDL emulator; physical button and wake checks from 1.0.0 remain separate historical evidence."
+  "physical_regression_checks": 68,
+  "physical_regression_report": "artifacts/hardware/performance-regression/report.json",
+  "physical_performance_log": "artifacts/hardware/performance-after.log",
+  "current_application_hardware_scope": "Production flash verification and boot; same renderer/HAL passed 68 hardware regression checks; actual Paper code benchmarked on physical X4 with isolated SD saves.",
+  "input_scope": "Ordered rapid taps and confirmation guards tested through independent wall-clock SDL events; no new owner button-response measurement or camera latency measurement."
 }

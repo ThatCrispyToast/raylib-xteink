@@ -8,6 +8,8 @@ Includes **Paper**, a drawing showcase and playable Lights Out puzzle with SD-ca
 
 Paper saves the board, cursor, starting puzzle, move count, and last 64 undo moves in `raylib-x4/paper-a.sav` and `paper-b.sav` on the SD card. Alternating, versioned, checksummed records preserve the previous save if a write is incomplete. A valid old `paper.txt` is imported without changing it; unrelated files are preserved. Save failures and no-card play are shown directly below the puzzle. Without storage, progress lasts only until the application exits.
 
+The 1.1.1 performance fix reduces measured physical cursor updates from 2.45 seconds to about 0.73 seconds, and menu selection updates from 2.08 seconds to about 0.73 seconds. Rapid taps keep their order. Paper redraws only changed selections and waits for three seconds of idle time before its periodic cleaning refresh (after at least 12 partial updates). Power still requests a clean immediately. The current panel waveform takes about 0.7 seconds for a partial update and 3.8 seconds for a full clean; this remains an e-paper interface. See [physical performance measurements](docs/performance.md).
+
 ## Run the emulator
 
 On NixOS, from this directory:
@@ -101,7 +103,7 @@ The application supplies `int main(void)`. The firmware wrapper invokes it on th
 | Side Up / Down | `KEY_UP` / `KEY_DOWN` | Up / Down |
 | Power | `KEY_P` | P |
 
-Buttons are debounced and sampled every 5 ms on hardware. Presses are latched across blocking display refreshes. Keys held longer than 450 ms generate `IsKeyPressedRepeat()` events at 150 ms intervals. A resistor ladder cannot distinguish every simultaneous button combination.
+Buttons are debounced and sampled every 5 ms on hardware. Presses are latched across blocking display refreshes. Use `GetKeyPressed()` in a loop when input order or repeated taps matter: up to 64 press edges survive a blocking refresh. `IsKeyPressed()` remains a per-frame boolean. `X4GetStatus().dropped_input_presses` reports queue overflow. Keys held longer than 450 ms become eligible for `IsKeyPressedRepeat()` every 150 ms; at most one repeat is delivered per poll, so blocking refreshes reduce the observed rate. A resistor ladder cannot distinguish every simultaneous button combination.
 
 | X4 extension | Purpose |
 |---|---|

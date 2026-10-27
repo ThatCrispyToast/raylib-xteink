@@ -342,7 +342,7 @@ void PollInputEvents(void)
         CORE.Input.Keyboard.currentKeyState[key] = down || pressed;
         if (pressed || (down && !CORE.Input.Keyboard.previousKeyState[key]))
         {
-            if (CORE.Input.Keyboard.keyPressedQueueCount < MAX_KEY_PRESSED_QUEUE)
+            if (!input.press_count && CORE.Input.Keyboard.keyPressedQueueCount < MAX_KEY_PRESSED_QUEUE)
                 CORE.Input.Keyboard.keyPressedQueue[CORE.Input.Keyboard.keyPressedQueueCount++] = key;
             x4_repeat_at[i] = now + 0.45;
             if (key == CORE.Input.Keyboard.exitKey) CORE.Window.shouldClose = true;
@@ -353,6 +353,9 @@ void PollInputEvents(void)
             x4_repeat_at[i] = now + 0.15;
         }
     }
+    for (int i=0; i<input.press_count && CORE.Input.Keyboard.keyPressedQueueCount<MAX_KEY_PRESSED_QUEUE; i++)
+        if (input.press_order[i]<X4_BUTTON_COUNT)
+            CORE.Input.Keyboard.keyPressedQueue[CORE.Input.Keyboard.keyPressedQueueCount++]=x4_keys[input.press_order[i]];
     if (input.quit) CORE.Window.shouldClose = true;
 }
 

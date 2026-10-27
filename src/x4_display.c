@@ -17,20 +17,27 @@ void x4_reset(void)
 
 void x4_convert_frame(const uint8_t *gray, uint8_t *out)
 {
-    static const uint8_t bayer[4][4] = {
-        { 0, 8, 2, 10 }, { 12, 4, 14, 6 }, { 3, 11, 1, 9 }, { 15, 7, 13, 5 }
+    // Each mask selects which of the four shades is white at this Bayer position.
+    static const uint8_t masks[4][4] = {
+        {14,12,14,12}, {8,14,8,12}, {14,8,14,12}, {8,12,8,12}
     };
-    memset(out, 0, X4_FRAME_BYTES);
-    for (int y = 0; y < X4_HEIGHT; y++)
-        for (int x = 0; x < X4_WIDTH; x++)
+    const int stride=X4_WIDTH/4;
+    for (int x=0; x<X4_WIDTH; x++)
+    {
+        unsigned int shift=6-2*(x%4);
+        const uint8_t m0=masks[0][x%4], m1=masks[1][x%4];
+        const uint8_t m2=masks[2][x%4], m3=masks[3][x%4];
+        uint8_t *row=out+(X4_WIDTH-1-x)*(X4_HEIGHT/8);
+        for (int y=0; y<X4_HEIGHT/8; y++)
         {
-            // rlsw stores bottom-up; the panel is landscape, rotated clockwise by the emulator.
-            unsigned int i = (X4_HEIGHT - 1 - y)*X4_WIDTH + x;
-            unsigned int shade = (gray[i/4] >> (6 - 2*(i%4))) & 3;
-            bool white = shade == 3 || (shade != 0 && shade*16 > bayer[y%4][x%4]*3 + 1);
-            unsigned int p = (X4_WIDTH - 1 - x)*X4_PANEL_WIDTH + y;
-            if (white) out[p/8] |= (uint8_t)(0x80u >> (p%8));
+            const uint8_t *p=gray+(X4_HEIGHT-1-y*8)*stride+x/4;
+            #define WHITE_AT(n,m) (((m) >> ((p[-(n)*stride] >> shift) & 3)) & 1)
+            row[y]=(uint8_t)((WHITE_AT(0,m0)<<7) | (WHITE_AT(1,m1)<<6) |
+                (WHITE_AT(2,m2)<<5) | (WHITE_AT(3,m3)<<4) | (WHITE_AT(4,m0)<<3) |
+                (WHITE_AT(5,m1)<<2) | (WHITE_AT(6,m2)<<1) | WHITE_AT(7,m3));
+            #undef WHITE_AT
         }
+    }
 }
 
 bool x4_present(const uint8_t *gray)

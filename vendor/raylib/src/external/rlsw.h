@@ -5446,6 +5446,12 @@ static void SW_RASTER_TRIANGLE_SPAN(const sw_vertex_t *start, const sw_vertex_t 
     SW_VEC_OP(texcoord[i] = start->texcoord[i] + ctx->dTdx[i]*xOffset, i, 2);
 #endif
 
+#if defined(RLSW_FRAMEBUFFER_GRAY2) && !defined(X4_DISABLE_FAST_RASTER) && \
+    !((SW_RASTER_TRIANGLE_FLAGS) & (SW_STATE_COLOR_INTERP | SW_STATE_DEPTH_TEST | SW_STATE_TEXTURE_2D | SW_STATE_BLEND))
+    x4_gray2_span(cPtr,cOffset,xLoopEnd-xLoopStart,x4_gray2_quantize(srcColor));
+    return;
+#endif
+
 #define SW_AFFINE_BLOCK 16
 
     int x = xLoopStart;
@@ -5746,6 +5752,65 @@ static void SW_RASTER_QUAD(const sw_vertex_t *a, const sw_vertex_t *b,
 
     // Constant across the whole quad: resolved once, called directly per pixel
     sw_texture_sampler_f sample = sw_texture_pick_sampler(RLSW.boundTexture, dTdx, dTdy);
+#endif
+
+#if defined(RLSW_FRAMEBUFFER_GRAY2) && !defined(X4_DISABLE_FAST_RASTER) && \
+    !((SW_RASTER_QUAD_FLAGS) & (SW_STATE_COLOR_INTERP | SW_STATE_DEPTH_TEST))
+    // Quantize constant colors once; the C3 has no floating-point unit.
+    uint8_t shades[4];
+    for (int level=0; level<4; level++)
+    {
+    #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
+        float result[4] = { level/3.0f, level/3.0f, level/3.0f, 1.0f };
+        RLSW.blendFunc(result, flatColor);
+        shades[level] = x4_gray2_quantize(result);
+    #else
+        shades[level] = x4_gray2_quantize(flatColor);
+    #endif
+    }
+    bool solid = shades[0] == shades[1] && shades[0] == shades[2] && shades[0] == shades[3];
+#if !((SW_RASTER_QUAD_FLAGS) & SW_STATE_TEXTURE_2D)
+    for (int y=yLoopMin; y<yLoopMax; y++)
+    {
+        int offset=y*stride+xLoopMin;
+        if (solid) x4_gray2_span(cPixels,offset,xLoopMax-xLoopMin,shades[0]);
+        else for (int x=xLoopMin; x<xLoopMax; x++,offset++)
+            x4_gray2_set(cPixels,offset,shades[x4_gray2_get(cPixels,offset)]);
+    }
+    return;
+#else
+    // The immutable default atlas is a white, binary-alpha mask. Preserve the
+    // reference sampler's floating-point stepping, but compute each column once.
+    const sw_texture_t *font=RLSW.boundTexture;
+    if (font->borrowed && font->format == SW_PIXELFORMAT_COLOR_GRAYALPHA &&
+        sample == sw_texture_sample_nearest && dTdx[1] == 0 && dTdy[0] == 0 &&
+        xLoopMax-xLoopMin <= 480 && font->width <= 65535 &&
+        RLSW.blendFunc == sw_blend_SRC_ALPHA_ONE_MINUS_SRC_ALPHA)
+    {
+        uint16_t columns[480];
+        float u=tcRow[0], v=tcRow[1];
+        for (int x=xLoopMin; x<xLoopMax; x++,u+=dTdx[0])
+        {
+            int sx=(int)((font->sWrap == SW_REPEAT ? sw_fract(u) : sw_saturate(u))*font->width);
+            columns[x-xLoopMin]=sw_clamp_int(sx,0,font->wMinus1);
+        }
+        const uint8_t *pixels=font->pixels;
+        for (int y=yLoopMin; y<yLoopMax; y++,v+=dTdy[1])
+        {
+            int sy=(int)((font->tWrap == SW_REPEAT ? sw_fract(v) : sw_saturate(v))*font->height);
+            sy=sw_clamp_int(sy,0,font->hMinus1);
+            int offset=y*stride+xLoopMin;
+            for (int x=xLoopMin; x<xLoopMax; x++,offset++)
+            {
+            #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
+                if (!pixels[2*(sy*font->width+columns[x-xLoopMin])+1]) continue;
+            #endif
+                x4_gray2_set(cPixels,offset,solid ? shades[0] : shades[x4_gray2_get(cPixels,offset)]);
+            }
+        }
+        return;
+    }
+#endif
 #endif
 
     for (int y = yLoopMin; y < yLoopMax; y++)

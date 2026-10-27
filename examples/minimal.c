@@ -5,15 +5,21 @@ int main(void)
 {
     InitWindow(480, 800, "Hello X4");
     if (!IsWindowReady()) return 1;
-    SetTargetFPS(2);
+    SetTargetFPS(10);
     int count = 0;
+    bool dirty = true;
     while (!WindowShouldClose()) {
-        if (IsKeyPressed(KEY_ENTER)) count++;
+        int key;
+        while ((key = GetKeyPressed()) != 0) {
+            if (key == KEY_ENTER) { count++; dirty = true; }
+        }
+        if (!dirty) { WaitTime(0.02); PollInputEvents(); continue; }
         BeginDrawing();
         ClearBackground(RAYWHITE);
         DrawText("Hello, Xteink!", 30, 80, 40, BLACK);
         DrawText(TextFormat("%d button presses", count), 30, 150, 24, BLACK);
         EndDrawing();
+        dirty = false;
     }
     CloseWindow();
     return 0;

@@ -1,5 +1,6 @@
 #include "x4_hal.h"
 #include "x4_epd.h"
+#include "x4_input_queue.h"
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "driver/sdspi_host.h"
@@ -21,7 +22,8 @@ static adc_cali_handle_t battery_calibration;
 static sdmmc_card_t *sd;
 static bool bus_initialized, panel_initialized;
 static portMUX_TYPE input_lock = portMUX_INITIALIZER_UNLOCKED;
-static uint8_t stable, candidate, latched;
+static uint8_t stable, candidate;
+static X4InputQueue presses;
 static int64_t changed_at, battery_sample_at;
 static int last_front = -1, last_side = -1, battery_mv = -1;
 
@@ -66,7 +68,8 @@ static void sample_buttons(void *arg)
     if (raw != candidate) { candidate = raw; changed_at = now; }
     if (now - changed_at >= 15000) {
         portENTER_CRITICAL(&input_lock);
-        latched |= candidate & ~stable;
+        uint8_t edges=candidate & ~stable;
+        for (int i=0; i<X4_BUTTON_COUNT; i++) if (edges & (1u<<i)) x4_input_push(&presses,i);
         stable = candidate;
         portEXIT_CRITICAL(&input_lock);
     }
@@ -75,7 +78,8 @@ static void sample_buttons(void *arg)
 bool x4_hal_init(const char *title)
 {
     (void)title;
-    stable = candidate = latched = 0;
+    stable = candidate = 0;
+    memset(&presses,0,sizeof(presses));
     last_front = last_side = battery_mv = -1;
     battery_sample_at = 0;
     changed_at = esp_timer_get_time();
@@ -138,8 +142,8 @@ bool x4_hal_present(const uint8_t *frame, const uint8_t *previous, bool full)
 X4Input x4_hal_poll(void)
 {
     portENTER_CRITICAL(&input_lock);
-    X4Input input = { .down = stable, .pressed = latched };
-    latched = 0;
+    X4Input input = { .down = stable };
+    x4_input_drain(&presses,&input);
     portEXIT_CRITICAL(&input_lock);
     return input;
 }
@@ -149,7 +153,7 @@ const char *x4_hal_storage(void) { return sd ? "/sd" : NULL; }
 X4Status x4_hal_status(void)
 {
     portENTER_CRITICAL(&input_lock);
-    X4Status status = { .front_adc = last_front, .side_adc = last_side, .battery_mv = battery_mv, .buttons = stable };
+    X4Status status = { .front_adc = last_front, .side_adc = last_side, .battery_mv = battery_mv, .buttons = stable, .dropped_input_presses=presses.dropped };
     portEXIT_CRITICAL(&input_lock);
     status.free_heap = esp_get_free_heap_size();
     status.minimum_heap = esp_get_minimum_free_heap_size();

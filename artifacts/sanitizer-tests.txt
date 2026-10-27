@@ -1,18 +1,44 @@
--- Found Python3: /nix/store/jj6jldlw37r8yy9kc1smrax9dhnjm2x4-python3-3.13.9/bin/python3.13 (found version "3.13.9") found components: Interpreter
 -- Configuring done (0.1s)
 -- Generating done (0.0s)
 -- Build files have been written to: /workspace/raylib-x4/build-test
-ninja: no work to do.
+[1/26] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_font.c.o
+[2/26] Building C object CMakeFiles/raylib_x4.dir/src/x4_font.c.o
+[3/26] Building C object CMakeFiles/raylib_x4.dir/src/x4_display.c.o
+[4/26] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_display.c.o
+[5/26] Building C object CMakeFiles/x4_raster_fast.dir/tests/hal_test.c.o
+[6/26] Building C object CMakeFiles/x4_raster_fast.dir/tests/test_raster_compare.c.o
+[7/26] Building C object CMakeFiles/x4_raster_reference.dir/tests/hal_test.c.o
+[8/26] Building C object CMakeFiles/x4_raster_reference.dir/tests/test_raster_compare.c.o
+[9/26] Building C object CMakeFiles/x4_tests.dir/tests/hal_test.c.o
+[10/26] Building C object CMakeFiles/x4_epd_tests.dir/tests/test_epd.c.o
+[11/26] Building C object CMakeFiles/x4_epd_tests.dir/src/x4_epd.c.o
+[12/26] Linking C executable x4_epd_tests
+[13/26] Building C object CMakeFiles/x4_tests.dir/tests/test_x4.c.o
+[14/26] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtext.c.o
+[15/26] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtext.c.o
+[16/26] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rshapes.c.o
+[17/26] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rshapes.c.o
+[18/26] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rcore.c.o
+[19/26] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rcore.c.o
+[20/26] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtextures.c.o
+[21/26] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtextures.c.o
+[22/26] Linking C static library libraylib_x4_reference.a
+[23/26] Linking C static library libraylib_x4.a
+[24/26] Linking C executable x4_raster_reference
+[25/26] Linking C executable x4_tests
+[26/26] Linking C executable x4_raster_fast
 Test project /workspace/raylib-x4/build-test
     Start 1: x4_package
-1/4 Test #1: x4_package .......................   Passed    0.07 sec
-    Start 2: paper_state
-2/4 Test #2: paper_state ......................   Passed    0.05 sec
-    Start 3: x4_core
-3/4 Test #3: x4_core ..........................   Passed    0.02 sec
-    Start 4: x4_epd
-4/4 Test #4: x4_epd ...........................   Passed    0.01 sec
+1/5 Test #1: x4_package .......................   Passed    0.07 sec
+    Start 2: x4_raster_equivalence
+2/5 Test #2: x4_raster_equivalence ............   Passed    0.26 sec
+    Start 3: paper_state
+3/5 Test #3: paper_state ......................   Passed    0.05 sec
+    Start 4: x4_core
+4/5 Test #4: x4_core ..........................   Passed    0.01 sec
+    Start 5: x4_epd
+5/5 Test #5: x4_epd ...........................   Passed    0.00 sec
 
-100% tests passed, 0 tests failed out of 4
+100% tests passed, 0 tests failed out of 5
 
-Total Test time (real) =   0.14 sec
+Total Test time (real) =   0.39 sec

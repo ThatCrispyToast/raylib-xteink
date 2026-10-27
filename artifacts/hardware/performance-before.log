@@ -1,0 +1,72 @@
+I (132) esp_image: segment 4: paddr=000837d0 vaddr=4038334c size=06504h ( 25860) load
+I (139) esp_image: segment 5: paddr=00089cdc vaddr=50000000 size=00034h (    52) load
+I (142) boot: Loaded app from partition at offset 0x10000
+I (142) boot: Disabling RNG early entropy source...
+I (143) cpu_start: Unicore app
+I (152) cpu_start: Pro cpu start user code
+I (152) cpu_start: cpu freq: 160000000 Hz
+I (152) app_init: Application information:
+I (152) app_init: Project name:     raylib_x4_firmware
+I (152) app_init: App version:      1.1.0
+I (152) app_init: Compile time:     Jan  1 1980 00:00:00
+I (152) app_init: ELF file SHA256:  14bd1fded...
+I (152) app_init: ESP-IDF:          v5.5.2
+I (153) efuse_init: Min chip rev:     v0.3
+I (153) efuse_init: Max chip rev:     v1.99 
+I (153) efuse_init: Chip rev:         v0.4
+I (153) heap_init: Initializing. RAM available for dynamic allocation:
+I (153) heap_init: At 3FCA54E0 len 0001AB20 (106 KiB): RAM
+I (153) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (154) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (154) heap_init: At 50000034 len 00001FB4 (7 KiB): RTCRAM
+I (155) spi_flash: detected chip: generic
+I (156) spi_flash: flash io: dio
+I (156) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (157) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (158) main_task: Started on CPU0
+I (159) main_task: Calling app_main()
+X4: reset=11 wake=0
+X4: boot heap=216024 largest=114688
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+I (210) sdspi_transaction: cmd=52, R1 response: command not supported
+I (253) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 100.000 milliseconds
+INFO: TEXTURE: [ID 2] Texture loaded successfully (32x32 | R8G8B8A8 | 1 mipmaps)
+PAPER_PERF frame=0 key=0 draw_ms=1905.703 convert_ms=66.010 present_ms=3773.286 total_ms=5745.470 full=1 partial=0 errors=0
+X4: Paper ready heap=70176 minimum=66076 largest=30720 sd=1
+PAPER_PERF frame=1 key=257 draw_ms=1680.436 convert_ms=65.328 present_ms=705.301 total_ms=2451.602 full=1 partial=1 errors=0
+PAPER_PERF frame=2 key=262 draw_ms=1681.210 convert_ms=65.439 present_ms=705.877 total_ms=2453.462 full=1 partial=2 errors=0
+PAPER_PERF frame=3 key=262 draw_ms=1681.320 convert_ms=65.307 present_ms=705.054 total_ms=2452.481 full=1 partial=3 errors=0
+PAPER_PERF frame=4 key=264 draw_ms=1681.768 convert_ms=65.446 present_ms=705.466 total_ms=2453.480 full=1 partial=4 errors=0
+PAPER_PERF frame=5 key=263 draw_ms=1682.334 convert_ms=65.302 present_ms=706.039 total_ms=2454.476 full=1 partial=5 errors=0
+PAPER_PERF frame=6 key=265 draw_ms=1680.987 convert_ms=65.318 present_ms=705.075 total_ms=2452.448 full=1 partial=6 errors=0
+PAPER_PERF frame=7 key=256 draw_ms=1306.829 convert_ms=64.658 present_ms=705.569 total_ms=2077.571 full=1 partial=7 errors=0
+PAPER_PERF frame=8 key=264 draw_ms=1307.374 convert_ms=64.665 present_ms=705.920 total_ms=2078.474 full=1 partial=8 errors=0
+PAPER_PERF frame=9 key=264 draw_ms=1307.515 convert_ms=64.779 present_ms=705.677 total_ms=2078.486 full=1 partial=9 errors=0
+PAPER_PERF frame=10 key=264 draw_ms=1307.489 convert_ms=64.650 present_ms=705.824 total_ms=2078.477 full=1 partial=10 errors=0
+PAPER_PERF frame=11 key=264 draw_ms=1307.657 convert_ms=64.661 present_ms=705.649 total_ms=2078.482 full=1 partial=11 errors=0
+PAPER_PERF frame=12 key=264 draw_ms=1307.761 convert_ms=64.659 present_ms=705.542 total_ms=2078.477 full=1 partial=12 errors=0
+PAPER_PERF frame=13 key=265 draw_ms=1307.586 convert_ms=64.658 present_ms=3773.731 total_ms=5146.489 full=2 partial=12 errors=0
+PAPER_PERF frame=14 key=265 draw_ms=1306.570 convert_ms=64.656 present_ms=705.266 total_ms=2077.011 full=2 partial=13 errors=0
+PAPER_PERF frame=15 key=256 draw_ms=1680.803 convert_ms=65.468 present_ms=705.711 total_ms=2452.497 full=2 partial=14 errors=0
+PAPER_PERF frame=16 key=263 draw_ms=1681.931 convert_ms=65.439 present_ms=705.163 total_ms=2453.464 full=2 partial=15 errors=0
+PAPER_PERF frame=17 key=262 draw_ms=1682.142 convert_ms=65.302 present_ms=705.078 total_ms=2453.449 full=2 partial=16 errors=0
+PAPER_PERF frame=18 key=264 draw_ms=1682.169 convert_ms=65.302 present_ms=705.058 total_ms=2453.456 full=2 partial=17 errors=0
+PAPER_PERF frame=19 key=265 draw_ms=1682.656 convert_ms=65.307 present_ms=705.558 total_ms=2454.454 full=2 partial=18 errors=0
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+X4: frames=20 full=2 partial=18 unchanged=0 errors=0 buffers=192000
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+PAPER_PERF_DONE result=0

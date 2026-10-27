@@ -24,6 +24,7 @@ typedef struct X4Status {
     int front_adc, side_adc, battery_mv; // -1 means unavailable; voltage uses ADC calibration.
     unsigned int buttons;              // Bits: Back, Confirm, Left, Right, Up, Down, Power.
     size_t free_heap, minimum_heap, largest_block;
+    unsigned int dropped_input_presses; // Queue overflow; zero during normal use.
     bool storage_mounted;
 } X4Status;
 

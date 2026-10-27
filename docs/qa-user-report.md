@@ -114,7 +114,7 @@ It was configured with `BUILD_TESTING=OFF` and built in `/tmp/x4-user-qa/custom-
 
 The revised 1.1.0 application was tested with the same actual microreader SDL runtime, isolated virtual SD directories, and screenshot inspection. The tested emulator binary SHA-256 was `b8d3cd749127d86af4082704f43f69986ee27464cbb59074ef72d5b555f50c70`. The current workspace `build/x4_demo` was used for application scenarios; a separate `/tmp/x4-user-qa/native-custom-build` rebuilt the target for the custom-application check. The original clean archive and baseline evidence remain separate.
 
-All seven reproduced baseline findings have been addressed in this pass. No remaining functional blocker was found in the tested user journeys.
+All seven reproduced baseline findings were addressed in this functional pass. It did not establish acceptable hardware responsiveness: the owner subsequently reported severe sluggishness, prompting the wall-clock acceptance pass below.
 
 | Finding / goal | Retest result |
 |---|---|
@@ -135,3 +135,61 @@ A further play → clean → undo scenario ran with microreader’s normal refre
 The revised welcome, puzzle, solved, menu, help, device-status, save-failure, recovery, and sleep screens were visually inspected at the emulator's 480 × 786 output size. Text, control hints, and cursor outlines were readable without clipping. The maximum-count warning also fits. The menu provides a complete replay/recovery workflow without requiring undocumented key combinations.
 
 Follow-up reproduction scripts are `/tmp/x4-user-qa/retest.py` and `/tmp/x4-user-qa/solve-retest.py`; screenshots and logs are under `/tmp/x4-user-qa/retest/`. The interrupted-save test modifies virtual files between launches; it does not simulate SD-card electrical failure or prove filesystem durability under physical power loss. Likewise, the sleep screen plus process exit tests the application flow, not the hardware's deep-sleep current or wake circuitry.
+
+
+## Wall-clock input and responsiveness follow-up
+
+The owner's report of sluggish physical interaction exposed a gap in the previous acceptance method. Poll-index input scripts waited until the application polled before injecting the next event. They therefore did not represent a person tapping while rendering or display refresh was blocked. Even the earlier normal-delay check used this readiness-dependent input. The desktop emulator also renders the requested image before applying a fixed 400 ms delay for both full and partial refresh; it does not reproduce ESP32 rendering cost or the physical waveform's visible progression.
+
+### Reproduced timing failures
+
+A separate pthread now injects real SDL key events at absolute monotonic-clock deadlines while the application is blocked. Against the preserved 1.1 build, only two of the initial eight timing checks passed:
+
+- Four Right taps 150 ms apart moved three cells, losing a tap.
+- A mixed Right → Enter → Down → Enter sequence lost a flip.
+- Back → Down → Down → Enter selected Undo instead of opening Restart confirmation.
+- Power → Back → Down → Enter during a refresh lost menu actions.
+- Held navigation was limited by refresh cadence; the test does not claim the configured repeat interval is an independently guaranteed physical rate.
+
+The first queue fix passed those eight cases. A further test caught Back being discarded during the first confirmation refresh because the confirmation guard drained every queued key. The final guard preserves cancellation while rejecting Enter events buffered before the confirmation is ready.
+
+### Reproducible acceptance test
+
+Run the checked-in test from the native development shell:
+
+```sh
+python3 scripts/test-input-timing.py build --output /tmp/x4-input-timing
+```
+
+The script compiles `tests/timed_sdl_input.c` into a temporary preload library using the declared SDL2 toolchain. Each case has independent seeded SD storage. Normal emulator refresh delays remain enabled, and selected cases extend one refresh pause to 1.6 seconds. Logs record input and presentation times; saved records verify state; actual SDL screenshots are compared against slowly paced reference journeys. `--output` preserves a separate run directory containing inputs, logs, screenshots, and `results.json`.
+
+The final retained-redraw build, emulator SHA-256 `30382f9c61b36dcf3787b6b54214ca5f66ba76f02a4600fd32caf08480d9b701`, passed **9/9 checks**:
+
+| Timing goal | Result |
+|---|---|
+| Four rapid identical taps | All four movements retained. |
+| Mixed movement and flip order | Both flips apply to their intended cells, in order. |
+| Rapid menu selection | Intended Restart confirmation appears. |
+| Enter buffered before/during confirmation refresh | Existing game remains unchanged; confirmation stays visible. |
+| Back during confirmation refresh | Returns to the menu without changing the game. |
+| Fresh confirmation after the dialog | Restart still works. |
+| Menu input during a 1.6-second clean pause | Back, Down, Enter execute Undo correctly. |
+| Release during a long clean pause | The original press survives; stale held-key repeats are not replayed after release. |
+| Ordinary held navigation | Repeats occur and movement settles within one normal refresh after release. |
+
+Separate timing runs verified the idle-clean policy. Thirteen cursor moves plus one flip produced 14 partial updates and only the initial full refresh while active. Continuing the same run without input produced exactly one additional full clean at 9.815 seconds, about three seconds after the last action at 6.800 seconds. The final game state was identical. This removes the earlier automatic full-clean interruption on the thirteenth navigation update.
+
+### Retained drawing correctness
+
+All 25 cursor positions were reached through a continuous snake traversal and compared byte-for-byte with fresh full renders at the same positions. All eight menu selections were compared against the preserved full-redraw implementation. **All 33 comparisons were identical.** Representative dark-cell, white-cell, and final-menu screenshots were also visually inspected; no stale selection outlines or erased labels were found.
+
+Local evidence is under `/tmp/x4-user-qa/timing-baseline/`, `/tmp/x4-user-qa/timing-retained/`, and `/tmp/x4-user-qa/latency/`. The latter includes the separate idle-clean traces and visual comparison results.
+
+### Physical latency acceptance boundary
+
+These results establish input preservation, ordering, confirmation safety, held-key release behavior, and retained-render correctness under controlled pauses. They do not establish the physical reader's end-to-end response time. The main agent is separately measuring and validating actual firmware.
+
+A physical latency run should timestamp the debounced press, delivery to Paper, completion of state changes and SD sync, drawing, framebuffer conversion, SPI transfer, and completion of panel BUSY. Report ordinary cursor/menu navigation, Enter with writable SD storage, no-card Enter, and full cleaning separately. Include rapid taps, held navigation/release, and at least fourteen consecutive updates so periodic-clean behavior is exercised. Draw timing alone excludes the synchronous save that precedes rendering. Physical acceptance should disclose the actual median, upper-percentile, and worst response times rather than infer responsiveness from correct final screenshots or native frame counts.
+
+
+The final 1.1.1 release rebuild (`76f4dff3cd0cc2ff53ab1da7803a4e56fe2e657f340e697a435b376e080e08de`) also passed the complete seven-test CTest suite, including all nine wall-clock scenarios. Physical measurements and their scope are now recorded separately in [the performance report](performance.md); ordinary selection updates measured about 0.73 seconds, with the unchanged panel waveform accounting for most of that time.

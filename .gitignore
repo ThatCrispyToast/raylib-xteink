@@ -38,3 +38,11 @@ __pycache__/
 
 !/artifacts/hardware/qa-release-report.json
 !/artifacts/hardware/qa-paper.log
+
+!/artifacts/hardware/performance-before.log
+!/artifacts/hardware/performance-after.log
+!/artifacts/hardware/performance-report.json
+!/artifacts/hardware/performance-regression/
+/artifacts/hardware/performance-regression/*
+!/artifacts/hardware/performance-regression/report.json
+!/artifacts/hardware/qa-1.1.0-report.json

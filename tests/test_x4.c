@@ -2,6 +2,7 @@
 #include "rlgl.h"
 #include "hal_test.h"
 #include "x4_gray2.h"
+#include "x4_input_queue.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +50,22 @@ int main(void)
     for (int i = 0; i < 4; i++) CHECK(x4_decode_buttons(front[i], 4095, false) == (1u << i));
     CHECK(x4_decode_buttons(4095,2205,true) == ((1u<<X4_UP)|(1u<<X4_POWER)));
     CHECK(x4_decode_buttons(-1,-1,false) == 0);
+    X4InputQueue queue={0}; X4Input queued={0};
+    for (int i=0; i<X4_INPUT_CAPACITY+5; i++) x4_input_push(&queue,i%X4_BUTTON_COUNT);
+    x4_input_drain(&queue,&queued);
+    CHECK(queued.press_count == X4_INPUT_CAPACITY && queue.dropped == 5 && !queue.count);
+    for (int i=0; i<X4_INPUT_CAPACITY; i++) CHECK(queued.press_order[i] == i%X4_BUTTON_COUNT);
+    // Compare the byte-oriented conversion against the original per-pixel definition.
+    static uint8_t input_gray[X4_GRAY_BYTES], converted[X4_FRAME_BYTES], reference[X4_FRAME_BYTES];
+    unsigned int random=7;
+    for (int i=0; i<X4_GRAY_BYTES; i++) { random=random*1664525u+1013904223u; input_gray[i]=random>>24; }
+    const uint8_t bayer[4][4]={{0,8,2,10},{12,4,14,6},{3,11,1,9},{15,7,13,5}};
+    for (int y=0; y<800; y++) for (int x=0; x<480; x++) {
+        unsigned int i=(799-y)*480+x, shade=(input_gray[i/4]>>(6-2*(i%4))) & 3;
+        unsigned int bit=(479-x)*800+y;
+        if (shade == 3 || (shade && shade*16 > bayer[y%4][x%4]*3+1)) reference[bit/8] |= 0x80u>>(bit%8);
+    }
+    x4_convert_frame(input_gray,converted); CHECK(!memcmp(reference,converted,sizeof(reference)));
     uint8_t packed = 0;
     for (int i = 0; i < 4; i++) { float c[] = {i/3.0f,i/3.0f,i/3.0f,1}; x4_gray2_write(&packed,c,i); }
     CHECK(packed == 0x1b);
@@ -122,6 +139,10 @@ int main(void)
     CHECK(corner.r == 0 && corner.a == 255);
     UnloadImage(atlas);
 
+    test_input=(X4Input){.pressed=(1u<<X4_RIGHT)|(1u<<X4_CONFIRM), .press_count=3,
+        .press_order={X4_RIGHT,X4_RIGHT,X4_CONFIRM}};
+    PollInputEvents();
+    CHECK(GetKeyPressed() == KEY_RIGHT && GetKeyPressed() == KEY_RIGHT && GetKeyPressed() == KEY_ENTER && !GetKeyPressed());
     test_input = (X4Input){ .down=1u<<X4_CONFIRM, .pressed=1u<<X4_CONFIRM };
     PollInputEvents(); CHECK(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_ENTER)); CHECK(GetKeyPressed() == KEY_ENTER);
     test_time += 0.5; PollInputEvents(); CHECK(!IsKeyPressed(KEY_ENTER) && IsKeyPressedRepeat(KEY_ENTER));

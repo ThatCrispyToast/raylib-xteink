@@ -43,7 +43,7 @@ if diagnostic.exists() and 'examples/diagnostics.c' in (diagnostic.parent/'CMake
 for name in ["LICENSE", "THIRD_PARTY.md"]:
     shutil.copy2(root / name, dist / name)
 (dist / "manifest.json").write_text(json.dumps({
-    "target": "original Xteink X4 / ESP32-C3", "version": "1.1.0", "application_sha256": application_hash,
+    "target": "original Xteink X4 / ESP32-C3", "version": "1.1.1", "application_sha256": application_hash,
     "flash_size": "16MB", "flash_mode": "dio", "flash_frequency": "40m",
     "merged_image": {"file": "raylib-x4.bin", "offset": 0},
     "parts": [{"file": name, "offset": offset} for offset, _, name in parts],
@@ -60,7 +60,9 @@ paths = ["CMakeLists.txt", "cmake", "src", "include", "examples", "tests", "scri
          "artifacts/native-tests.txt", "artifacts/sanitizer-tests.txt", "artifacts/qemu-test.log",
          "artifacts/firmware-build.log", "artifacts/minimal-build.log", "artifacts/image-info.txt"]
 if args.hardware_tested:
-    paths += ["artifacts/hardware/qa-release-report.json", "artifacts/hardware/qa-paper.log",
+    paths += ["artifacts/hardware/performance-before.log", "artifacts/hardware/performance-after.log",
+              "artifacts/hardware/performance-report.json", "artifacts/hardware/performance-regression/report.json",
+              "artifacts/hardware/qa-release-report.json", "artifacts/hardware/qa-1.1.0-report.json", "artifacts/hardware/qa-paper.log",
               "artifacts/hardware/final-acceptance/report.json", "artifacts/hardware/buttons-report.json",
               "artifacts/hardware/sleep-console.log", "artifacts/hardware/final-regression.log",
               "artifacts/hardware/release-report.json", "artifacts/hardware/archive-check.log",

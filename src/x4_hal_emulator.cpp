@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 // Adapter to microreader's existing X4 display emulator.
 #include "x4_hal.h"
+#include "x4_input_queue.h"
 #include <SDL.h>
 #include <cstdio>
 #include <cstdlib>
@@ -20,6 +21,7 @@ static void emulator_delay(Uint32 ms)
 static std::unique_ptr<DesktopRuntime> runtime;
 static std::unique_ptr<DesktopEmulatorDisplay> display;
 static uint8_t down;
+static X4InputQueue presses;
 static std::string storage;
 static unsigned int poll_count;
 struct ScriptEvent { unsigned int poll; std::string key, action; };
@@ -56,6 +58,7 @@ extern "C" bool x4_hal_init(const char *title)
             }
         }
         down = 0;
+        presses = {};
         poll_count = 0;
         script.clear();
         if (const char *path = std::getenv("X4_INPUT_SCRIPT")) {
@@ -117,11 +120,12 @@ extern "C" X4Input x4_hal_poll(void)
         if (b < 0) continue;
         uint8_t bit = static_cast<uint8_t>(1u << b);
         if (e.type == SDL_KEYDOWN) {
-            if (!(down & bit)) input.pressed |= bit;
+            if (!(down & bit)) x4_input_push(&presses,b);
             down |= bit;
         } else down &= static_cast<uint8_t>(~bit);
     }
     input.down = down;
+    x4_input_drain(&presses,&input);
     return input;
 }
 extern "C" double x4_hal_time(void)
@@ -133,6 +137,7 @@ extern "C" X4Status x4_hal_status(void)
     X4Status status = {};
     status.front_adc = status.side_adc = status.battery_mv = -1;
     status.buttons = down;
+    status.dropped_input_presses = presses.dropped;
     status.storage_mounted = runtime != nullptr && !storage.empty();
     return status;
 }
