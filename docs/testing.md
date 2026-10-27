@@ -2,6 +2,16 @@
 
 Run commands from the project root. The suites exercise different boundaries: microreader renders native application pixels, QEMU executes RISC-V code with peripheral stubs, and a physical X4 tests the actual display/storage drivers. [Validation](validation.md) records results and their limits.
 
+## Docker
+
+Run the emulator, sanitizer, and QEMU suites without installing their toolchains:
+
+```sh
+docker build --target test --output type=local,dest=build-docker/tests .
+```
+
+The output contains two CTest XML reports and the QEMU serial log. Docker can cache successful tests; see [forcing a fresh test run](docker.md#headless-tests). The same targets run in [Docker CI](../.github/workflows/docker.yml), alongside Paper and Tetris builds. Physical-device checks remain separate.
+
 ## Native tests
 
 Build the [desktop emulator](emulator.md), then run:
@@ -15,8 +25,7 @@ This covers the renderer, input, refresh policy, SSD1677 bus model, game logic, 
 To run only the portable tests without fetching microreader:
 
 ```sh
-nix develop path:.
-cmake -S . -B build-portable -G Ninja \
+cmake -S . -B build-portable \
   -DX4_BUILD_EMULATOR=OFF -DCMAKE_BUILD_TYPE=Release
 cmake --build build-portable -j
 ctest --test-dir build-portable --output-on-failure
@@ -27,7 +36,7 @@ ctest --test-dir build-portable --output-on-failure
 Within the native development environment:
 
 ```sh
-cmake -S . -B build-test -G Ninja -DX4_SANITIZE=ON \
+cmake -S . -B build-test -DX4_SANITIZE=ON \
   -DX4_BUILD_EMULATOR=OFF -DCMAKE_BUILD_TYPE=Debug
 cmake --build build-test -j
 ctest --test-dir build-test --output-on-failure

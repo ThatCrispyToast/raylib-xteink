@@ -13,6 +13,7 @@ from public_audit import check_file
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--hardware-tested',action='store_true',help='Require a matching physical QA report for this application binary')
+parser.add_argument('--firmware-only', action='store_true', help='Export firmware and checksums without a source archive')
 args = parser.parse_args()
 build, destination = root / "firmware/build", root / "dist"
 release_names = {"bootloader.bin", "partition-table.bin", "application.bin", "raylib-x4.bin",
@@ -41,6 +42,8 @@ if args.hardware_tested:
         raise SystemExit('Physical QA report does not match the application being packaged')
 dist.mkdir(exist_ok=True)
 cache = (build / "CMakeCache.txt").read_text()
+application_source = next((line.split('=', 1)[1] for line in cache.splitlines()
+                           if line.startswith('X4_APP_SOURCE:')), 'examples/paper.c')
 def qemu_build(cache):
     return any(line.startswith("X4_QEMU_SMOKE:") and line.endswith(("=ON", "=1", "=TRUE")) for line in cache.splitlines())
 if qemu_build(cache):
@@ -84,6 +87,7 @@ for name in ["LICENSE", "THIRD_PARTY.md"]:
     shutil.copy2(root / name, dist / name)
 (dist / "manifest.json").write_text(json.dumps({
     "target": "original Xteink X4 / ESP32-C3", "version": "1.2.0", "application_sha256": application_hash,
+    "application_source": Path(application_source).name,
     "flash_size": "16MB", "flash_mode": "dio", "flash_frequency": "40m",
     "merged_image": {"file": "raylib-x4.bin", "offset": 0},
     "parts": [{"file": name, "offset": offset} for offset, _, name in parts],
@@ -91,12 +95,11 @@ for name in ["LICENSE", "THIRD_PARTY.md"]:
     "diagnostics_image": {"file":"diagnostics.bin", "offset":65536, "hardware_tested":False,
         "application_sha256":hashlib.sha256(diagnostic.read_bytes()).hexdigest()} if (dist/'diagnostics.bin').exists() else None,
     "tetris_example": tetris_info,
-    "validation": "microreader desktop emulator, native ASan/UBSan, ESP32-C3 QEMU renderer smoke" +
-        (", original X4 factory-waveform async/idle/expiry stress, production boots, storage regression and timer wake; historical platform acceptance in docs/validation.md" if args.hardware_tested else "")
+    "validation": "See docs/validation.md for platform evidence; hardware_tested applies to this exact binary."
 }, indent=2) + "\n")
 paths = ["CMakeLists.txt", "cmake", "src", "include", "examples", "tests", "scripts",
          "docs", "patches", "README.md", "CONTRIBUTING.md", "CHANGELOG.md", "LICENSE", "LICENSES", "THIRD_PARTY.md", "flake.nix", "flake.lock",
-         ".gitignore", ".gitattributes", ".github", "firmware/CMakeLists.txt", "firmware/main", "firmware/partitions.csv",
+         ".gitignore", ".gitattributes", ".dockerignore", "Dockerfile", ".github", "firmware/CMakeLists.txt", "firmware/main", "firmware/partitions.csv",
          "firmware/sdkconfig.defaults", "firmware/sdkconfig.qemu", "vendor/raylib/src", "vendor/raylib/LICENSE",
          "artifacts/demo.png", "artifacts/puzzle.png", "artifacts/status.png", "artifacts/tetris.png",
          "artifacts/native-tests.txt", "artifacts/sanitizer-tests.txt", "artifacts/tetris-pace-tests.txt", "artifacts/qemu-test.log",
@@ -131,22 +134,23 @@ if args.hardware_tested:
 tracked = None
 if (root/'.git').exists():
     tracked = set(subprocess.check_output(['git', '-C', root, 'ls-files', '-z']).decode().split('\0'))
-with tarfile.open(dist / "raylib-x4-source.tar.gz", "w:gz") as archive:
-    def clean(info):
-        if "__pycache__" in info.name or info.name.endswith(".pyc"):
-            return None
-        if not (info.isfile() or info.isdir()):
-            raise SystemExit(f'Public release rejected: nonregular source entry {info.name}')
-        name = info.name.removeprefix('raylib-x4/')
-        if tracked is not None:
-            if info.isfile() and name not in tracked: return None
-            if info.isdir() and not any(p.startswith(name+'/') for p in tracked): return None
-        audit(name, (root/name).read_bytes() if info.isfile() else b'')
-        info.uid = info.gid = 0
-        info.uname = info.gname = ""
-        return info
-    for path in paths:
-        archive.add(root / path, arcname="raylib-x4/" + path, filter=clean)
+if not args.firmware_only:
+    with tarfile.open(dist / "raylib-x4-source.tar.gz", "w:gz") as archive:
+        def clean(info):
+            if "__pycache__" in info.name or info.name.endswith(".pyc"):
+                return None
+            if not (info.isfile() or info.isdir()):
+                raise SystemExit(f'Public release rejected: nonregular source entry {info.name}')
+            name = info.name.removeprefix('raylib-x4/')
+            if tracked is not None:
+                if info.isfile() and name not in tracked: return None
+                if info.isdir() and not any(p.startswith(name+'/') for p in tracked): return None
+            audit(name, (root/name).read_bytes() if info.isfile() else b'')
+            info.uid = info.gid = 0
+            info.uname = info.gname = ""
+            return info
+        for path in paths:
+            archive.add(root / path, arcname="raylib-x4/" + path, filter=clean)
 files = sorted(p for p in dist.iterdir() if p.is_file() and p.name != "SHA256SUMS")
 for file in files:
     if not file.name.endswith('.tar.gz'):
@@ -160,4 +164,4 @@ except OSError:
     if previous.exists(): previous.rename(destination)
     raise
 staging.cleanup()
-print(f"Packaged {len(image):,}-byte merged firmware and source in {destination}")
+print(f"Packaged {len(image):,}-byte merged firmware in {destination}")

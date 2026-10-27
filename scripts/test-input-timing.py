@@ -88,7 +88,7 @@ def main():
     if not binary.is_file():
         parser.error(f"Build Paper first: {binary}")
     if not shutil.which("pkg-config") or not shutil.which("cc"):
-        parser.error("Run inside nix develop path:. (requires cc and SDL2 pkg-config)")
+        parser.error("Install a C compiler, pkg-config, and SDL2 development files")
     with tempfile.TemporaryDirectory(prefix="x4-timed-input-") as temporary:
         if args.output:
             args.output.resolve().mkdir(parents=True, exist_ok=True)

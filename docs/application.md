@@ -9,16 +9,22 @@ The framebuffer covers the full controller area. Keep content at least 14 pixels
 After [setting up the emulator](emulator.md), choose an entry point:
 
 ```sh
-cmake -S . -B build-my-app -G Ninja \
+cmake -S . -B build-my-app \
   -DX4_APP_SOURCE="$PWD/examples/minimal.c"
 cmake --build build-my-app -j
 ./build-my-app/x4_demo
 ```
 
-For firmware, use the [hardware environment](hardware.md) and a separate build directory:
+For firmware, [Docker](docker.md#custom-applications) supplies the SDK:
 
 ```sh
-nix develop path:.#firmware
+docker build --build-arg X4_APP_SOURCE=examples/minimal.c \
+  --output type=local,dest=build-docker/minimal .
+```
+
+Alternatively, use a [local ESP-IDF environment](hardware.md#local-esp-idf-build) and a separate build directory:
+
+```sh
 idf.py -C firmware -B "$PWD/build-my-app-firmware" \
   -DX4_APP_SOURCE="$PWD/examples/minimal.c" \
   -DSDKCONFIG="$PWD/build-my-app-firmware/sdkconfig" build

@@ -3,6 +3,7 @@
 ## Build and use
 
 - [Desktop emulator](emulator.md) — prerequisites, builds, controls, virtual SD, and screenshots.
+- [Docker builds](docker.md) — firmware exports, custom applications, compiler caching, and headless tests.
 - [Hardware installation](hardware.md) — compatible devices, backups, flashing, and restoration.
 - [Application development](application.md) — custom applications, CMake integration, and X4 APIs.
 - [Example applications](examples.md) — Paper and Tetris controls, persistence, and game rules.

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add Docker firmware exports and headless emulator, sanitizer, and QEMU testing with pinned base images.
+- Document native CMake setup and host-side flashing without Nix.
+- Capture emulator screenshots before SDL invalidates the presented backbuffer, fixing pixel checks on Ubuntu.
+
 ## 1.2.0 — 2026-10-27
 
 - Reuse temperature-selected factory partial waveforms during activity; shut panel power down after two idle seconds and refresh temperature selection after 30 seconds.

@@ -4,18 +4,24 @@ Run these commands from the project root. The emulator uses microreader's actual
 
 ## Build
 
-The pinned Nix environment supports x86_64 Linux:
+On Linux, provide Git, CMake ≥3.20, a C99/C++17 compiler, Python ≥3.9, pkg-config, SDL2 ≥2.0.22 development files, and Make or Ninja. On Ubuntu 24.04/Debian 12 or newer:
 
 ```sh
-nix develop path:.
-python3 scripts/fetch-emulator.py
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
+sudo apt update
+sudo apt install build-essential cmake git libsdl2-dev pkg-config python3
 ```
 
-`path:.` works in both a Git checkout and an extracted source archive. The fetch script pins microreader to the revision in [THIRD_PARTY.md](../THIRD_PARTY.md) and refuses to replace a checkout at a different revision.
+Then build from the project root:
 
-Without Nix, provide Git, CMake ≥3.20, Ninja, a C99/C++17 compiler, Python ≥3.9, and SDL2 ≥2.0.22 development files on Linux. Run the same commands after skipping `nix develop`.
+```sh
+python3 scripts/fetch-emulator.py
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+```
+
+The fetch script pins microreader to the revision in [THIRD_PARTY.md](../THIRD_PARTY.md) and refuses to replace a checkout at a different revision. CMake uses your default build tool; add `-G Ninja` when creating a new build directory if preferred.
+
+On x86_64 Linux, Nix users can run `nix develop path:.` before the same commands to supply a pinned environment. `path:.` works in both a Git checkout and an extracted source archive. Docker provides [headless tests](docker.md#headless-tests); the interactive window runs natively. Other desktop operating systems have not been validated.
 
 ## Run
 
@@ -57,4 +63,4 @@ python3 scripts/capture.py artifacts/demo.png 0
 
 Page `0` is the showcase, `1` the puzzle, and `2` device status. The script uses isolated temporary storage and an offscreen SDL session.
 
-Automated tests use `SDL_PushEvent` and pixel readback. `X4_EMULATOR_FAST=1` bypasses display delays; ordinary interactive runs retain the upstream 400 ms refresh delay. See [testing](testing.md) for timed input tests and retained/full-render comparisons.
+Automated tests use `SDL_PushEvent` and pixel readback before presentation. Offscreen sessions default to SDL software rendering, avoiding GPU requirements and offscreen OpenGL resize differences; `SDL_RENDER_DRIVER` can override this for diagnosis. `X4_EMULATOR_FAST=1` bypasses display delays; ordinary interactive runs retain the upstream 400 ms refresh delay. See [testing](testing.md) for timed input tests and retained/full-render comparisons.

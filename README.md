@@ -18,23 +18,30 @@ Build 2D applications for the **original ESP32-C3 Xteink X4** with raylib. Draw 
 
 ## Quickstart
 
-On x86_64 Linux with Nix, run from the project root:
+On Linux, install the [build dependencies](docs/emulator.md#build) (CMake, a C/C++ compiler, Python, Git, and SDL2), then run from the project root:
 
 ```sh
-nix develop path:.
 python3 scripts/fetch-emulator.py
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 ./build/x4_demo
 ```
 
 Run `./build/x4_tetris` for Tetris. Use the arrow keys, Enter to confirm, Escape to go back, and `P` to clean the display. See [example controls](docs/examples.md) for each game.
 
-The [emulator guide](docs/emulator.md) covers building without Nix, virtual SD storage, and screenshots.
+The [emulator guide](docs/emulator.md) covers dependency installation, optional Nix setup, virtual SD storage, and screenshots.
 
 ## Use it on an X4
 
-Follow the [hardware guide](docs/hardware.md) to build firmware, back up the reader, and install Paper or Tetris. **Installation replaces the device firmware and partition table.** This target supports the original, unlocked ESP32-C3 X4; X3, X4 Pro, and locked variants are unsupported.
+Build Paper firmware with Docker:
+
+```sh
+docker build --output type=local,dest=build-docker/paper .
+```
+
+This exports flashable files and checksums using a pinned ESP-IDF toolchain. See [Docker builds](docs/docker.md) for Tetris, custom apps, and headless tests. No local SDK or Nix installation is required.
+
+Follow the [hardware guide](docs/hardware.md) to back up and flash from your host. **Installation replaces the device firmware and partition table.** This target supports the original, unlocked ESP32-C3 X4; X3, X4 Pro, and locked variants are unsupported.
 
 On the tested reader, ordinary cursor/menu updates complete in about **0.44 seconds**, and full cleans take about **3.8 seconds**. Paper and Tetris process ordinary controls during refreshes and clean on startup/wake or Power. See [performance measurements](docs/performance.md) for scope and limits.
 
@@ -49,6 +56,7 @@ This is a 2D target for e-paper interfaces and games. Audio, 3D, shaders, and re
 | Guide | Contents |
 |---|---|
 | [Emulator](docs/emulator.md) | Build, run, virtual SD, screenshots |
+| [Docker](docs/docker.md) | Firmware builds, caching, headless tests |
 | [Hardware](docs/hardware.md) | Back up, flash, switch applications, restore |
 | [Application development](docs/application.md) | Build integration, API, input, memory |
 | [Examples](docs/examples.md) | Paper and Tetris controls, saves, game rules |

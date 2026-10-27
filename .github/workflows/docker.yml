@@ -1,0 +1,28 @@
+name: Docker builds
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  docker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Emulator, sanitizers, and ESP32-C3 QEMU
+        run: docker build --target test --output type=local,dest=build-docker/tests .
+      - name: Paper firmware
+        run: docker build --output type=local,dest=build-docker/paper .
+      - name: Tetris firmware
+        run: >-
+          docker build --build-arg X4_APP_SOURCE=examples/tetris.c
+          --output type=local,dest=build-docker/tetris .
+      - name: Audit exported files
+        run: python3 scripts/public_audit.py --dist build-docker
+      - name: Verify checksums
+        run: |
+          (cd build-docker/paper && sha256sum --check SHA256SUMS)
+          (cd build-docker/tetris && sha256sum --check SHA256SUMS)

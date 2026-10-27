@@ -2,6 +2,16 @@
 
 Latest validation on 2026-10-27 on NixOS x86_64. Exact tool versions are locked in `flake.lock`; the embedded SDK is ESP-IDF 5.5.2 and the emulator is Espressif QEMU 9.2.2. The native display emulator is microreader revision `a4adfdb9a37b83bcb724cac3dc8990f335b49e8a`.
 
+## Docker workflow
+
+The [Docker workflow](docker.md) was exercised with rootless Docker 29.7.2 on x86-64 Linux, using the pinned Ubuntu 24.04 and official ESP-IDF 5.5.2 images. The Docker test target passes 12/12 native/emulator tests, 8/8 ASan/UBSan tests, and the ESP32-C3 QEMU smoke test. Forcing fresh test stages with `--no-cache-filter` also passes. The existing Nix environment passes its full 12-test suite and, after the final headless-renderer change, all four affected emulator suites.
+
+Paper, Tetris, and a custom minimal app with an additional source file build and export successfully. Image checks verify ESP32-C3, 16 MB/DIO/40 MHz headers, application hashes, checksums, component offsets, and host ownership. The merged Paper image matches esptool 5.1.0's merge output byte for byte. Repeated cached builds and a build from the source archive in a path containing spaces reproduce the same cached export. An invalid application path fails without exporting firmware; packaging tests reject QEMU images and preserve the previous output on failure.
+
+Testing Ubuntu exposed two capture issues: reading SDL pixels after presentation, and a partially blank rotated surface with the offscreen OpenGL renderer. Captures now read before presentation; offscreen sessions default to software rendering. The tests retain their exact pixel and input assertions. Interactive sessions still use SDL's default renderer.
+
+The exported Docker build context excludes Git metadata, existing build directories, local SDK configuration, SD data, and backups. Source archives include the Dockerfile, context rules, and CI workflow. Public-file scans and workflow syntax checks pass. Hosted Docker CI, ARM64, and Docker Desktop have not been run locally. No physical reader was connected during this workflow validation, so host flashing was checked through tool installation, command parsing, image validation, and merging; no new physical flash or optical result is claimed.
+
 ## Publication preparation
 
 The public source and release packages were rechecked after path sanitization. The native suite passes 12/12 tests, sanitizers pass 8/8, and a fresh source-archive build passes 8/8. The added tests reject private data in firmware/source packages, unexpected release files, unsafe archive entries, and QEMU images; failed packaging preserves the previous release. CI is syntax-checked with actionlint and uses the pinned Nix environment. Its hosted run awaits publication.

@@ -9,6 +9,7 @@ __pycache__/
 *.ppm
 /artifacts/hardware/backups/
 /sdcard/
+/.venv-flash/
 /backups/
 /private/
 /x4-backup*.bin

@@ -1,8 +1,8 @@
 # Contributing
 
-Use the pinned environments in the [emulator](docs/emulator.md) and [hardware](docs/hardware.md) guides. Keep changes focused and describe the behavior they fix. The target's C code uses four-space indentation and short comments; preserve surrounding style. Changes to vendored raylib must also be reflected in `patches/raylib-x4.patch`, against the revision in [THIRD_PARTY.md](THIRD_PARTY.md).
+Use the [native emulator](docs/emulator.md) or [Docker build and test workflow](docs/docker.md); the guides also describe optional pinned Nix environments. Keep changes focused and describe the behavior they fix. The target's C code uses four-space indentation and short comments; preserve surrounding style. Changes to vendored raylib must also be reflected in `patches/raylib-x4.patch`, against the revision in [THIRD_PARTY.md](THIRD_PARTY.md).
 
-Follow [the testing guide](docs/testing.md): run the native CTest suite for target or example changes, and the ASan/UBSan build for memory-related changes. Controller changes also need the SSD1677 bus-model tests. Report emulator, CPU-emulator, and physical-device results separately. A framebuffer capture does not establish panel ghosting or optical latency. CI runs the native emulator and sanitizer suites with the locked Nix toolchain; it cannot certify physical behavior.
+Follow [the testing guide](docs/testing.md): run the native CTest suite for target or example changes, and the ASan/UBSan build for memory-related changes. Controller changes also need the SSD1677 bus-model tests. Report emulator, CPU-emulator, and physical-device results separately. A framebuffer capture does not establish panel ghosting or optical latency. CI runs Docker firmware builds, emulator/sanitizer/QEMU tests, and a separate native Nix matrix; it cannot certify physical behavior.
 
 Before sharing logs or a release:
 

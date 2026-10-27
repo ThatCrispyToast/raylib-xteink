@@ -24,8 +24,31 @@ static void emulator_delay(Uint32 ms)
         if (!refresh_timer) { SDL_Delay(ms); refresh_busy=false; }
     }
 }
+static bool capture_ok = true;
+static bool capture_frame(SDL_Renderer *renderer)
+{
+    const char *path = std::getenv("X4_SCREENSHOT");
+    if (!path) return true;
+    int width, height;
+    if (SDL_GetRendererOutputSize(renderer, &width, &height) != 0 || width <= 0 || height <= 0) return false;
+    std::vector<uint8_t> rgb(static_cast<size_t>(width)*height*3);
+    if (SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_RGB24, rgb.data(), width*3) != 0) return false;
+    FILE *f = std::fopen(path, "wb");
+    if (!f) return false;
+    std::fprintf(f, "P6\n%d %d\n255\n", width, height);
+    bool ok = std::fwrite(rgb.data(), 1, rgb.size(), f) == rgb.size();
+    return std::fclose(f) == 0 && ok;
+}
+static void emulator_present(SDL_Renderer *renderer)
+{
+    // SDL invalidates the backbuffer after presenting it.
+    capture_ok = capture_frame(renderer) && capture_ok;
+    SDL_RenderPresent(renderer);
+}
 #define SDL_Delay emulator_delay
+#define SDL_RenderPresent emulator_present
 #include "display.h"
+#undef SDL_RenderPresent
 #undef SDL_Delay
 
 static std::unique_ptr<DesktopRuntime> runtime;
@@ -54,6 +77,9 @@ static int button(SDL_Keycode key)
 extern "C" bool x4_hal_init(const char *title)
 {
     try {
+        const char *video = std::getenv("SDL_VIDEODRIVER");
+        if (video && std::strcmp(video, "offscreen") == 0)
+            SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_DEFAULT);
         runtime = std::make_unique<DesktopRuntime>(20);
         if (SDL_InitSubSystem(SDL_INIT_TIMER) != 0) throw std::runtime_error(SDL_GetError());
         display = std::make_unique<DesktopEmulatorDisplay>(*runtime);
@@ -101,22 +127,10 @@ extern "C" bool x4_hal_finish_present(void)
 { while (refresh_busy) SDL_Delay(1); return true; }
 extern "C" bool x4_hal_begin_present(const uint8_t *frame, const uint8_t *previous, bool full)
 {
+    capture_ok = true;
     if (full) display->full_refresh(frame, microreader::RefreshMode::Full, false);
     else display->partial_refresh(frame, previous);
-    if (const char *path = std::getenv("X4_SCREENSHOT")) {
-        int width, height;
-        SDL_GetRendererOutputSize(runtime->renderer(), &width, &height);
-        std::vector<uint8_t> rgb(static_cast<size_t>(width)*height*3);
-        if (SDL_RenderReadPixels(runtime->renderer(), nullptr, SDL_PIXELFORMAT_RGB24, rgb.data(), width*3) != 0)
-            return false;
-        FILE *f = std::fopen(path, "wb");
-        if (!f) return false;
-        std::fprintf(f, "P6\n%d %d\n255\n", width, height);
-        bool ok = std::fwrite(rgb.data(), 1, rgb.size(), f) == rgb.size();
-        ok = std::fclose(f) == 0 && ok;
-        if (!ok) return false;
-    }
-    return true;
+    return capture_ok;
 }
 
 extern "C" X4Input x4_hal_poll(void)
