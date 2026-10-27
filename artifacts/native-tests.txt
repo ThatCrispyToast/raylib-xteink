@@ -1,11 +1,26 @@
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspace/raylib-x4/build
+[1/5] Building C object CMakeFiles/paper_tests.dir/examples/paper_state.c.o
+[2/5] Building C object CMakeFiles/x4_demo.dir/examples/paper_state.c.o
+[3/5] Building C object CMakeFiles/x4_demo.dir/examples/paper.c.o
+[4/5] Linking C executable paper_tests
+[5/5] Linking CXX executable x4_demo
 Test project /workspace/raylib-x4/build
-    Start 1: x4_core
-1/3 Test #1: x4_core ..........................   Passed    0.00 sec
-    Start 2: x4_epd
-2/3 Test #2: x4_epd ...........................   Passed    0.00 sec
-    Start 3: x4_emulator
-3/3 Test #3: x4_emulator ......................   Passed    3.64 sec
+    Start 1: x4_package
+1/5 Test #1: x4_package .......................   Passed    0.07 sec
+    Start 2: paper_state
+2/5 Test #2: paper_state ......................   Passed    0.04 sec
+    Start 3: x4_core
+3/5 Test #3: x4_core ..........................   Passed    0.00 sec
+    Start 4: x4_epd
+4/5 Test #4: x4_epd ...........................   Passed    0.00 sec
+    Start 5: x4_emulator
+5/5 Test #5: x4_emulator ......................   Passed    9.82 sec
 
-100% tests passed, 0 tests failed out of 3
+100% tests passed, 0 tests failed out of 5
 
-Total Test time (real) =   3.64 sec
+Total Test time (real) =   9.93 sec
+/workspace/raylib-x4/artifacts/demo.png
+/workspace/raylib-x4/artifacts/puzzle.png
+/workspace/raylib-x4/artifacts/status.png

@@ -109,6 +109,7 @@
 #include <stdlib.h>                 // Required for: srand(), rand(), exit()
 #include <stdio.h>                  // Required for: FILE, fopen(), fseek(), ftell(), fread(), fwrite(), fprintf(), vprintf(), fclose(), sprintf() [Used in OpenURL()]
 #include <string.h>                 // Required for: strlen(), strcmp(), strrchr(), memset(), memcpy(), strcat()
+#include <limits.h>
 #include <stdarg.h>                 // Required for: va_list, va_start(), va_end() [Used in TraceLog()]
 
 #ifndef PICO_RP2350
@@ -1989,9 +1990,9 @@ unsigned char *LoadFileData(const char *fileName, int *dataSize)
         {
             // WARNING: On binary streams SEEK_END could not be found,
             // using fseek() and ftell() could not work in some (rare) cases
-            fseek(file, 0, SEEK_END);
-            int size = ftell(file);     // WARNING: ftell() returns 'long int', maximum size returned is INT_MAX (2147483647 bytes)
-            fseek(file, 0, SEEK_SET);
+            long length = -1;
+            if (fseek(file, 0, SEEK_END) == 0) length = ftell(file);
+            int size = ((length > 0) && (length <= INT_MAX) && (fseek(file, 0, SEEK_SET) == 0)) ? (int)length : 0;
 
             if (size > 0)
             {
@@ -2139,9 +2140,9 @@ char *LoadFileText(const char *fileName)
             // WARNING: When reading a file as 'text' file,
             // text mode causes carriage return-linefeed translation...
             // ...but using fseek() should return correct byte-offset
-            fseek(file, 0, SEEK_END);
-            unsigned int size = (unsigned int)ftell(file);
-            fseek(file, 0, SEEK_SET);
+            long length = -1;
+            if (fseek(file, 0, SEEK_END) == 0) length = ftell(file);
+            unsigned int size = ((length > 0) && (length < INT_MAX) && (fseek(file, 0, SEEK_SET) == 0)) ? (unsigned int)length : 0;
 
             if (size > 0)
             {
@@ -2153,12 +2154,22 @@ char *LoadFileText(const char *fileName)
 
                     // WARNING: \r\n is converted to \n on reading, so,
                     // read bytes count gets reduced by the number of lines
-                    if (count < size) text = (char *)RL_REALLOC(text, count + 1);
-
-                    // Zero-terminate the string
-                    text[count] = '\0';
-
-                    TRACELOG(LOG_INFO, "FILEIO: [%s] Text file loaded successfully", fileName);
+                    if (ferror(file))
+                    {
+                        RL_FREE(text);
+                        text = NULL;
+                        TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to read text file", fileName);
+                    }
+                    else
+                    {
+                        if (count < size)
+                        {
+                            char *smaller = (char *)RL_REALLOC(text, count + 1);
+                            if (smaller != NULL) text = smaller;
+                        }
+                        text[count] = '\0';
+                        TRACELOG(LOG_INFO, "FILEIO: [%s] Text file loaded successfully", fileName);
+                    }
                 }
                 else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to allocated memory for file reading", fileName);
             }

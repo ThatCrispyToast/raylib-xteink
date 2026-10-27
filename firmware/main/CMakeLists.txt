@@ -9,8 +9,11 @@ endif()
 if(NOT X4_APP_SOURCE)
     set(X4_APP_SOURCE "${X4_ROOT}/examples/paper.c")
 endif()
+if(X4_APP_SOURCE STREQUAL "${X4_ROOT}/examples/paper.c")
+    list(APPEND X4_APP_EXTRA_SOURCES "${X4_ROOT}/examples/paper_state.c")
+endif()
 idf_component_register(SRCS ${X4_RAYLIB_SOURCES} ../../src/x4_epd.c
-    ../../src/x4_hal_espidf.c ${X4_APP_SOURCE} app_main.c
+    ../../src/x4_hal_espidf.c ${X4_APP_SOURCE} ${X4_APP_EXTRA_SOURCES} app_main.c
     INCLUDE_DIRS ../../src ../../include ../../vendor/raylib/src
     REQUIRES esp_driver_gpio esp_driver_spi esp_adc esp_timer fatfs sdmmc esp_driver_sdspi esp_driver_usb_serial_jtag)
 x4_configure(${COMPONENT_LIB})

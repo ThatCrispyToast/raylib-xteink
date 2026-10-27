@@ -35,3 +35,6 @@ __pycache__/
 !/artifacts/hardware/final-acceptance/scene-0.png
 !/artifacts/hardware/final-acceptance/scene-3.png
 !/artifacts/hardware/final-acceptance/sd-asset.png
+
+!/artifacts/hardware/qa-release-report.json
+!/artifacts/hardware/qa-paper.log

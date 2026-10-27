@@ -513,10 +513,18 @@ index 68639f3..e5d4309 100644
      #endif
  }
 diff --git a/src/rcore.c b/src/rcore.c
-index cbb2761..69d9d1a 100644
+index cbb2761..33d302e 100644
 --- a/src/rcore.c
 +++ b/src/rcore.c
-@@ -515,7 +515,9 @@ const char *TextFormat(const char *text, ...); // Formatting of text with variab
+@@ -109,6 +109,7 @@
+ #include <stdlib.h>                 // Required for: srand(), rand(), exit()
+ #include <stdio.h>                  // Required for: FILE, fopen(), fseek(), ftell(), fread(), fwrite(), fprintf(), vprintf(), fclose(), sprintf() [Used in OpenURL()]
+ #include <string.h>                 // Required for: strlen(), strcmp(), strrchr(), memset(), memcpy(), strcat()
++#include <limits.h>
+ #include <stdarg.h>                 // Required for: va_list, va_start(), va_end() [Used in TraceLog()]
+ 
+ #ifndef PICO_RP2350
+@@ -515,7 +516,9 @@ const char *TextFormat(const char *text, ...); // Formatting of text with variab
  #endif
  
  // Include platform-specific submodules
@@ -527,7 +535,7 @@ index cbb2761..69d9d1a 100644
      #include "platforms/rcore_desktop_glfw.c"
  #elif defined(PLATFORM_DESKTOP_SDL)
      #include "platforms/rcore_desktop_sdl.c"
-@@ -676,6 +678,14 @@ void InitWindow(int width, int height, const char *title)
+@@ -676,6 +679,14 @@ void InitWindow(int width, int height, const char *title)
      // Initialize rlgl default data (buffers and shaders)
      // NOTE: Current fbo size stored as globals in rlgl for convenience
      rlglInit(CORE.Window.render.width, CORE.Window.render.height);
@@ -542,7 +550,7 @@ index cbb2761..69d9d1a 100644
  
      // Setup default viewport
      SetupViewport(CORE.Window.render.width, CORE.Window.render.height);
-@@ -684,7 +694,18 @@ void InitWindow(int width, int height, const char *title)
+@@ -684,7 +695,18 @@ void InitWindow(int width, int height, const char *title)
      // Load default font
      // WARNING: External function: Module required: rtext
      LoadFontDefault();
@@ -561,7 +569,7 @@ index cbb2761..69d9d1a 100644
      // Set font white rectangle for shapes drawing, so shapes and text can be batched together
      // WARNING: rshapes module is required, if not available, default internal white rectangle is used
      Rectangle rec = GetFontDefault().recs[95];
-@@ -699,6 +720,7 @@ void InitWindow(int width, int height, const char *title)
+@@ -699,6 +721,7 @@ void InitWindow(int width, int height, const char *title)
          SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
      }
      #endif
@@ -569,7 +577,7 @@ index cbb2761..69d9d1a 100644
  #else
      #if SUPPORT_MODULE_RSHAPES
      // Set default texture and rectangle to be used for shapes drawing
-@@ -1666,6 +1688,10 @@ void WaitTime(double seconds)
+@@ -1666,6 +1689,10 @@ void WaitTime(double seconds)
          double sleepSeconds = seconds;
      #endif
  
@@ -580,6 +588,61 @@ index cbb2761..69d9d1a 100644
      // System halt functions
      #if defined(_WIN32)
          Sleep((unsigned long)(sleepSeconds*1000.0));
+@@ -1963,9 +1990,9 @@ unsigned char *LoadFileData(const char *fileName, int *dataSize)
+         {
+             // WARNING: On binary streams SEEK_END could not be found,
+             // using fseek() and ftell() could not work in some (rare) cases
+-            fseek(file, 0, SEEK_END);
+-            int size = ftell(file);     // WARNING: ftell() returns 'long int', maximum size returned is INT_MAX (2147483647 bytes)
+-            fseek(file, 0, SEEK_SET);
++            long length = -1;
++            if (fseek(file, 0, SEEK_END) == 0) length = ftell(file);
++            int size = ((length > 0) && (length <= INT_MAX) && (fseek(file, 0, SEEK_SET) == 0)) ? (int)length : 0;
+ 
+             if (size > 0)
+             {
+@@ -2113,9 +2140,9 @@ char *LoadFileText(const char *fileName)
+             // WARNING: When reading a file as 'text' file,
+             // text mode causes carriage return-linefeed translation...
+             // ...but using fseek() should return correct byte-offset
+-            fseek(file, 0, SEEK_END);
+-            unsigned int size = (unsigned int)ftell(file);
+-            fseek(file, 0, SEEK_SET);
++            long length = -1;
++            if (fseek(file, 0, SEEK_END) == 0) length = ftell(file);
++            unsigned int size = ((length > 0) && (length < INT_MAX) && (fseek(file, 0, SEEK_SET) == 0)) ? (unsigned int)length : 0;
+ 
+             if (size > 0)
+             {
+@@ -2127,12 +2154,22 @@ char *LoadFileText(const char *fileName)
+ 
+                     // WARNING: \r\n is converted to \n on reading, so,
+                     // read bytes count gets reduced by the number of lines
+-                    if (count < size) text = (char *)RL_REALLOC(text, count + 1);
+-
+-                    // Zero-terminate the string
+-                    text[count] = '\0';
+-
+-                    TRACELOG(LOG_INFO, "FILEIO: [%s] Text file loaded successfully", fileName);
++                    if (ferror(file))
++                    {
++                        RL_FREE(text);
++                        text = NULL;
++                        TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to read text file", fileName);
++                    }
++                    else
++                    {
++                        if (count < size)
++                        {
++                            char *smaller = (char *)RL_REALLOC(text, count + 1);
++                            if (smaller != NULL) text = smaller;
++                        }
++                        text[count] = '\0';
++                        TRACELOG(LOG_INFO, "FILEIO: [%s] Text file loaded successfully", fileName);
++                    }
+                 }
+                 else TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to allocated memory for file reading", fileName);
+             }
 diff --git a/src/rlgl.h b/src/rlgl.h
 index 8f96afd..fc1f7b9 100644
 --- a/src/rlgl.h

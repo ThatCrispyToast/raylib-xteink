@@ -13,7 +13,8 @@ output = Path(sys.argv[1] if len(sys.argv) > 1 else root / "artifacts/demo.png")
 page = int(sys.argv[2]) if len(sys.argv) > 2 else 0
 with tempfile.TemporaryDirectory(prefix="x4-capture-") as directory:
     temp = Path(directory)
-    script = "".join(f"{i*2} Right down\n{i*2+1} Right up\n" for i in range(page))
+    keys = {0: [], 1: ["Return"], 2: ["Right"]}[page]
+    script = "".join(f"{i*2} {key} down\n{i*2+1} {key} up\n" for i, key in enumerate(keys))
     (temp / "input").write_text(script + f"{page*2+2} quit down\n")
     env = dict(os.environ, SDL_VIDEODRIVER="offscreen", X4_EMULATOR_FAST="1",
                X4_INPUT_SCRIPT=str(temp / "input"), X4_SD_ROOT=str(temp / "sd"),

@@ -4,7 +4,9 @@ A native **480 × 800, 2D raylib target for the original ESP32-C3 Xteink X4**, w
 
 ![Paper running in microreader's X4 emulator](artifacts/demo.png)
 
-Includes **Paper**, a drawing showcase and playable Lights Out puzzle with SD-card persistence. Arrows change pages, Enter selects, Up/Down move the puzzle cursor, P requests a cleaning refresh, and Escape/Back closes the application. On hardware, closing enters deep sleep; Power wakes it. E-paper retains the last image while asleep. Waking performs a full refresh and returns to Paper’s opening page.
+Includes **Paper**, a drawing showcase and playable Lights Out puzzle with SD-card persistence. Enter opens the puzzle; arrows move around its grid and Enter flips a square and its orthogonal neighbors. Back opens a menu with undo, restart, new puzzle, help, device status, and sleep. Restart and new puzzle ask for confirmation. Power (`P` in the emulator) cleans the display and returns to the current screen. Sleep leaves a wake instruction on the panel; Power wakes the device and resumes a saved game.
+
+Paper saves the board, cursor, starting puzzle, move count, and last 64 undo moves in `raylib-x4/paper-a.sav` and `paper-b.sav` on the SD card. Alternating, versioned, checksummed records preserve the previous save if a write is incomplete. A valid old `paper.txt` is imported without changing it; unrelated files are preserved. Save failures and no-card play are shown directly below the puzzle. Without storage, progress lasts only until the application exits.
 
 ## Run the emulator
 
@@ -21,7 +23,7 @@ ctest --test-dir build --output-on-failure
 
 The explicit `path:.` also works in a directory without Git metadata. The flake locks the native tools, ESP-IDF 5.5.2, RISC-V toolchain, and Espressif QEMU. On other Linux systems, CMake ≥3.20, a C99/C++17 compiler, Python 3, and SDL2 ≥2.0.22 development files suffice for the native build.
 
-The emulator compiles microreader's real `DesktopEmulatorDisplay` and `DesktopRuntime`, including its panel crop, rotation, paper palette, and refresh delays. The adapter provides raylib input and filesystem access. It is a native firmware simulator, not a CPU emulator. `X4_SD_ROOT` selects the virtual SD directory (default `./sdcard`).
+The emulator compiles microreader's real `DesktopEmulatorDisplay` and `DesktopRuntime`, including its panel crop, rotation, paper palette, and refresh delays. The adapter provides raylib input and filesystem access. It is a native firmware simulator, not a CPU emulator. `X4_SD_ROOT` selects the virtual SD directory (default `./sdcard`). Set `X4_SD_ROOT=''` to emulate no card. An unavailable root also runs without storage; an existing read-only directory lets you test save-failure feedback.
 
 ```sh
 python3 scripts/capture.py artifacts/demo.png 0   # page 0, 1, or 2
@@ -35,7 +37,7 @@ idf.py -C firmware build
 idf.py -C firmware size
 ```
 
-The build produces `firmware/build/raylib_x4_firmware.bin` and the bootloader and partition table. A packaged image and checksums are in `dist/` after running `python3 scripts/package.py`.
+The build produces `firmware/build/raylib_x4_firmware.bin` and the bootloader and partition table. A packaged image and checksums are in `dist/` after running `python3 scripts/package.py`. The optional `--hardware-tested` flag requires a passing physical QA report whose application SHA-256 matches the current binary; older evidence cannot attest a new build.
 
 **This replaces the device firmware and partition table.** Use an original, unlocked ESP32-C3 X4; X3, X4 Pro, and newer locked variants are not this target. Back up the full flash before installing. With the appropriate serial port substituted:
 
@@ -55,17 +57,37 @@ Never flash the application-only `.bin` at address 0; its address is `0x10000`. 
 
 If Linux serial access is denied, an administrator can grant temporary access to this reader with `sudo bash scripts/grant-x4-access.sh SERIAL USER`, substituting its serial from `/dev/serial/by-id/` and your username. This targets one Espressif USB device and expires at reboot.
 
-The firmware is tested in the microreader emulator, ESP32-C3 QEMU, and on an original physical X4 with a FAT microSD card. See [validation](docs/validation.md) for the measured results and remaining physical checks. The hardware diagnostic application and USB acceptance runner are included so another board can be tested reproducibly.
+The firmware is tested in the microreader emulator, ESP32-C3 QEMU, and on an original physical X4 with a FAT microSD card. See [validation](docs/validation.md) for measured results and limits, and the [independent user QA report](docs/qa-user-report.md) for reproduced issues and retesting. The hardware diagnostic application and USB acceptance runner are included so another board can be tested reproducibly.
 
 ## Use it in an application
 
 Start with [examples/minimal.c](examples/minimal.c). Include `raylib.h` and optionally `raylib_x4.h`, and use `InitWindow(480, 800, title)`. Other window dimensions are rejected. The portrait framebuffer covers the controller's entire panel; keep content at least 14 pixels from the top and bottom to allow for the bezel.
 
-For native development, link `raylib::x4` and `x4_emulator`. To build a different C application for hardware:
+Build the same application for the emulator by selecting its entry point:
+
+```sh
+cmake -S . -B build-my-app -G Ninja \
+  -DX4_APP_SOURCE="$PWD/examples/minimal.c"
+cmake --build build-my-app -j
+./build-my-app/x4_demo
+```
+
+For multiple source files, pass `-DX4_APP_EXTRA_SOURCES="/path/helpers.c;/path/model.c"` to either build. Only the entry point's `main` is renamed for firmware. An external CMake project can instead use:
+
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(my_x4_app C CXX)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+add_subdirectory(/absolute/path/to/raylib-x4 x4)
+add_executable(my_x4_app application.c)
+target_link_libraries(my_x4_app PRIVATE raylib::x4 x4_emulator)
+```
+
+To build a different C application for hardware:
 
 ```sh
 nix develop path:.#firmware
-idf.py -C firmware -B ../build-my-app \
+idf.py -C firmware -B "$PWD/build-my-app-firmware" \
   -DX4_APP_SOURCE=/absolute/path/to/application.c build
 ```
 

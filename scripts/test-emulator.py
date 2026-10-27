@@ -27,29 +27,72 @@ with tempfile.TemporaryDirectory(prefix="raylib-x4-") as directory:
     assert pixel(25, 35) == (24, 26, 28)
     assert pixel(15, 35) == (232, 220, 200)
     assert pixel(410, 710) == (24, 26, 28)
-    # Navigate to the puzzle, move the cursor, toggle a cell, clean, and quit.
+    # User journeys use the same SDL event path as physical-key emulation.
+    import struct
     script = temp / "demo.input"
-    script.write_text("0 Right down\n1 Right up\n2 Down down\n3 Down up\n"
-                      "4 Return down\n5 Return up\n6 P down\n7 P up\n8 quit down\n")
     env["X4_INPUT_SCRIPT"] = str(script)
-    result = subprocess.run([build / "x4_demo"], env=env, text=True, capture_output=True, check=True)
-    assert "errors=0" in result.stdout, result.stdout
-    save = temp / "sd/paper.txt"
-    board, turns = map(int, save.read_text().split())
-    assert turns == 1 and board != 0
-    before = save.read_bytes()
-    script.write_text("0 Right down\n1 Right up\n2 quit down\n")
-    subprocess.run([build / "x4_demo"], env=env, check=True, stdout=subprocess.DEVNULL)
-    assert save.read_bytes() == before
-    # Solve the initial board through real key events, using its generating moves.
-    actions = ["Right"]
-    cursor = 0
-    for target in [0, 3, 6, 12, 21]:
-        actions += ["Down"] * (target - cursor) + ["Return"]
-        cursor = target
-    events = "".join(f"{i*2} {key} down\n{i*2+1} {key} up\n" for i,key in enumerate(actions))
-    script.write_text(events + f"{len(actions)*2} quit down\n")
-    env["X4_SD_ROOT"] = str(temp / "solve-sd")
-    subprocess.run([build / "x4_demo"], env=env, check=True, stdout=subprocess.DEVNULL)
-    assert (temp / "solve-sd/paper.txt").read_text().split() == ["0", "5"]
-print("PASS: SDL pixel orientation/polarity/crop, navigation, SD save/reload, complete puzzle solution")
+    def run(keys, sd=None):
+        if sd is not None:
+            env["X4_SD_ROOT"] = str(sd)
+        script.write_text("".join(f"{i*2} {key} down\n{i*2+1} {key} up\n" for i,key in enumerate(keys)) +
+                          f"{len(keys)*2+2} quit down\n")
+        result = subprocess.run([build / "x4_demo"], env=env, text=True, capture_output=True, timeout=30)
+        assert result.returncode == 0 and "errors=0" in result.stdout, result.stdout + result.stderr
+        return result
+    def saved(sd):
+        records = [p.read_bytes() for p in (Path(sd)/"raylib-x4").glob("paper-*.sav")]
+        data = max(records, key=lambda r: struct.unpack_from("<I", r, 8)[0])
+        assert len(data) == 112 and data[:8] == b"X4PAPER2"
+        return (*struct.unpack_from("<III", data, 12), data[24], data[25])
+    sd = temp / "game"
+    run(["Return", "Down", "Right", "Return", "P"], sd)
+    board, initial, turns, cursor, undo = saved(sd)
+    assert turns == 1 and cursor == 6 and undo == 1 and board != initial
+    # Relaunch resumes directly into the puzzle; undo survives the restart.
+    run(["Escape", "Down", "Return"])
+    assert saved(sd) == (initial, initial, 0, 6, 0)
+    # Reset cancellation preserves the existing state, then confirmation resets it.
+    run(["Return", "Escape", "Down", "Down", "Return", "Escape", "Escape"])
+    assert saved(sd)[2] == 1
+    run(["Escape", "Down", "Down", "Return", "Return"])
+    assert saved(sd) == (initial, initial, 0, 0, 0)
+    # A new board is distinct, persists, and can be restarted from its own start.
+    run(["Escape", "Down", "Down", "Down", "Return", "Return"])
+    fresh = saved(sd)
+    assert fresh[0] == fresh[1] and fresh[0] != initial and fresh[2:] == (0,0,0)
+    run(["Return", "Escape", "Down", "Down", "Return", "Return"])
+    assert saved(sd) == fresh
+    # Solve the initial board with two-dimensional grid navigation.
+    keys=["Return"]
+    x=y=0
+    for cell in [0,3,6,12,21]:
+        tx,ty=cell%5,cell//5
+        keys += ["Right"]*((tx-x)%5) + ["Down"]*((ty-y)%5) + ["Return"]
+        x,y=tx,ty
+    solve_sd=temp/"solve"
+    run(keys, solve_sd)
+    assert saved(solve_sd) == (0,initial,5,21,5)
+    # Menu help and sleep work after solving; sleep saves the selected cell.
+    run(["Escape"]+["Down"]*6+["Return","Return","Left","Escape","Up","Return"])
+    assert saved(solve_sd)[3] == 20
+    run(["Return","Return"], "")  # explicit no-card mode
+    unavailable=temp/"not-a-directory"
+    unavailable.write_text("untouched")
+    run(["Return","Return"], unavailable)
+    assert unavailable.read_text() == "untouched"
+    collision=temp/"collision"
+    collision.mkdir()
+    (collision/"paper.txt").mkdir()
+    run(["Return","Return"], collision)
+    assert (collision/"paper.txt").is_dir() and saved(collision)[2] == 1
+    foreign=temp/"foreign"
+    foreign.mkdir()
+    (foreign/"paper.txt").write_text("Personal notes.\n")
+    run(["Return","Return"], foreign)
+    assert (foreign/"paper.txt").read_text() == "Personal notes.\n"
+    blocked=temp/"blocked"
+    blocked.mkdir()
+    (blocked/"raylib-x4").write_text("conflict")
+    run(["Return","Return"], blocked)
+    assert (blocked/"raylib-x4").read_text() == "conflict"
+print("PASS: SDL pixels, grid controls, solve, durable resume/undo, restart/cancel/new game, help/sleep, unavailable/conflicting storage")

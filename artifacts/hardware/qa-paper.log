@@ -1,0 +1,122 @@
+I (130) esp_image: segment 4: paddr=00080d30 vaddr=40383924 size=05f2ch ( 24364) load
+I (136) esp_image: segment 5: paddr=00086c64 vaddr=50000000 size=00034h (    52) load
+I (139) boot: Loaded app from partition at offset 0x10000
+I (139) boot: Disabling RNG early entropy source...
+I (141) cpu_start: Unicore app
+I (149) cpu_start: Pro cpu start user code
+I (149) cpu_start: cpu freq: 160000000 Hz
+I (149) app_init: Application information:
+I (149) app_init: Project name:     raylib_x4_firmware
+I (149) app_init: App version:      1.1.0
+I (150) app_init: Compile time:     Jan  1 1980 00:00:00
+I (150) app_init: ELF file SHA256:  65d8e53db...
+I (150) app_init: ESP-IDF:          v5.5.2
+I (150) efuse_init: Min chip rev:     v0.3
+I (150) efuse_init: Max chip rev:     v1.99 
+I (150) efuse_init: Chip rev:         v0.4
+I (150) heap_init: Initializing. RAM available for dynamic allocation:
+I (150) heap_init: At 3FCA54E0 len 0001AB20 (106 KiB): RAM
+I (151) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (151) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (151) heap_init: At 50000034 len 00001FB4 (7 KiB): RTCRAM
+I (153) spi_flash: detected chip: generic
+I (153) spi_flash: flash io: dio
+I (154) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (154) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (155) main_task: Started on CPU0
+I (156) main_task: Calling app_main()
+X4: reset=11 wake=0
+X4: boot heap=216024 largest=114688
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+I (207) sdspi_transaction: cmd=52, R1 response: command not supported
+I (250) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+WARNING: FILEIO: [/sd/paper-qa-0662993d] Failed to open text file
+WARNING: FILEIO: [/sd/paper-qa-0662993d] Failed to open file
+Paper: saved board=7549310 turns=1 cursor=0 slot=0
+Paper: saved board=7549241 turns=2 cursor=1 slot=1
+Paper: saved board=7549367 turns=3 cursor=2 slot=0
+Paper: saved board=7549099 turns=4 cursor=3 slot=1
+Paper: saved board=7549619 turns=5 cursor=4 slot=0
+Paper: saved board=7550674 turns=6 cursor=5 slot=1
+Paper: saved board=7552560 turns=7 cursor=6 slot=0
+Paper: saved board=7548916 turns=8 cursor=7 slot=1
+Paper: saved board=7539836 turns=9 cursor=8 slot=0
+Paper: saved board=7556972 turns=10 cursor=9 slot=1
+Paper: saved board=7586636 turns=11 cursor=10 slot=0
+Paper: saved board=7528204 turns=12 cursor=11 slot=1
+Paper: saved board=7399308 turns=13 cursor=12 slot=0
+Paper: saved board=7640716 turns=14 cursor=13 slot=1
+Paper: saved board=8189068 turns=15 cursor=14 slot=0
+Paper: saved board=7172236 turns=16 cursor=15 slot=1
+Paper: saved board=5175436 turns=17 cursor=16 slot=0
+Paper: saved board=649356 turns=18 cursor=17 slot=1
+Paper: saved board=8898700 turns=19 cursor=18 slot=0
+Paper: saved board=25921676 turns=20 cursor=19 slot=1
+Paper: saved board=29034636 turns=21 cursor=20 slot=0
+Paper: saved board=30017676 turns=22 cursor=21 slot=1
+Paper: saved board=19400844 turns=23 cursor=22 slot=0
+Paper: saved board=15468684 turns=24 cursor=23 slot=1
+Paper: saved board=23333004 turns=25 cursor=24 slot=0
+Paper: saved board=23333039 turns=26 cursor=0 slot=1
+Paper: saved board=23333096 turns=27 cursor=1 slot=0
+Paper: saved board=23332966 turns=28 cursor=2 slot=1
+Paper: saved board=23333242 turns=29 cursor=3 slot=0
+Paper: saved board=23333730 turns=30 cursor=4 slot=1
+Paper: saved board=23334659 turns=31 cursor=5 slot=0
+Paper: saved board=23332833 turns=32 cursor=6 slot=1
+Paper: saved board=23336485 turns=33 cursor=7 slot=0
+Paper: saved board=23344557 turns=34 cursor=8 slot=1
+Paper: saved board=23361213 turns=35 cursor=9 slot=0
+Paper: saved board=23394973 turns=36 cursor=10 slot=1
+Paper: saved board=23455453 turns=37 cursor=11 slot=0
+Paper: saved board=23584349 turns=38 cursor=12 slot=1
+Paper: saved board=23310173 turns=39 cursor=13 slot=0
+Paper: saved board=23842141 turns=40 cursor=14 slot=1
+Paper: saved board=24791389 turns=41 cursor=15 slot=0
+Paper: saved board=22659421 turns=42 cursor=16 slot=1
+Paper: saved board=18796893 turns=43 cursor=17 slot=0
+Paper: saved board=26276189 turns=44 cursor=18 slot=1
+Paper: saved board=10269021 turns=45 cursor=19 slot=0
+Paper: saved board=11284829 turns=46 cursor=20 slot=1
+Paper: saved board=14496093 turns=47 cursor=21 slot=0
+Paper: saved board=4141405 turns=48 cursor=22 slot=1
+Paper: saved board=33239389 turns=49 cursor=23 slot=0
+Paper: saved board=7549277 turns=50 cursor=24 slot=1
+Paper: saved board=7549310 turns=51 cursor=0 slot=0
+Paper: saved board=7549241 turns=52 cursor=1 slot=1
+Paper: saved board=7549367 turns=53 cursor=2 slot=0
+Paper: saved board=7549099 turns=54 cursor=3 slot=1
+Paper: saved board=7549619 turns=55 cursor=4 slot=0
+Paper: saved board=7550674 turns=56 cursor=5 slot=1
+Paper: saved board=7552560 turns=57 cursor=6 slot=0
+Paper: saved board=7548916 turns=58 cursor=7 slot=1
+Paper: saved board=7539836 turns=59 cursor=8 slot=0
+Paper: saved board=7556972 turns=60 cursor=9 slot=1
+Paper: saved board=7586636 turns=61 cursor=10 slot=0
+Paper: saved board=7528204 turns=62 cursor=11 slot=1
+Paper: saved board=7399308 turns=63 cursor=12 slot=0
+Paper: saved board=7640716 turns=64 cursor=13 slot=1
+Paper: saved board=8189068 turns=65 cursor=14 slot=0
+Paper: saved board=7172236 turns=66 cursor=15 slot=1
+Paper: saved board=5175436 turns=67 cursor=16 slot=0
+Paper: saved board=649356 turns=68 cursor=17 slot=1
+Paper: saved board=8898700 turns=69 cursor=18 slot=0
+Paper: saved board=25921676 turns=70 cursor=19 slot=1
+Paper: saved board=8898700 turns=69 cursor=19 slot=0
+Paper: saved board=8899220 turns=70 cursor=4 slot=1
+INFO: FILEIO: [/sd/paper-qa-0662993d/raylib-x4/paper-b.sav] Text file saved successfully
+Paper: saved board=25921676 turns=70 cursor=19 slot=1
+Paper: saved board=7549277 turns=0 cursor=0 slot=0
+PAPER QA PASS checks=228 heap=74408 minimum=57592 stack=10868

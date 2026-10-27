@@ -78,3 +78,10 @@ The raylib backend maintains current/previous key state and repeat timing. Defau
 The hardware target is zlib-licensed and uses ESP-IDF directly. microreader's GPL display/runtime headers are isolated in the desktop emulator adapter, which is GPL-2.0-only. Other researched firmware projects were used to understand hardware behavior and compare architecture, not bundled into the firmware.
 
 Upstream raylib changes are preserved as a reviewable patch: platform include and scheduler sleep, packed framebuffer allocation/access and scissored clear, unavailable depth/render targets, GL object-name pointer portability on RISC-V, and respect for an explicitly disabled partial busy wait. The tested upstream revision is fixed because rlsw is actively evolving.
+
+
+## Paper save recovery
+
+Paper 1.1.0 keeps two 112-byte records under the SD card's `raylib-x4` directory. Each has an eight-byte version marker, explicitly little-endian sequence/board/initial-board/move-count fields, cursor, bounded undo history, and an FNV-1a checksum. Loading checks the exact file size, checksum, field ranges, and history entries before selecting the newest valid sequence. Save writes the alternate slot, flushes, syncs, and closes it before advancing the in-memory sequence. A partial replacement leaves the previously valid slot available. Recovery is reported on screen; this does not guarantee survival of card-controller or filesystem-wide damage.
+
+The old generic `paper.txt` is read only through a bounded, strict legacy parser and is never overwritten. Saves happen after a move, undo, confirmed restart/new puzzle, and choosing Sleep. Cursor movement alone does not write the card. The UI always exposes save failure or no-card status while permitting in-memory play. Random puzzles are constructed by applying legal toggles to the solved board, guaranteeing solvability; restart remembers each puzzle's initial board. The last 64 moves remain undoable across sleep and relaunch.

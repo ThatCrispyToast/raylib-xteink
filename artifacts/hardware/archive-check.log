@@ -1,25 +1,45 @@
--- Configuring done (0.0s)
+-- The C compiler identification is GNU 14.3.0
+-- The CXX compiler identification is GNU 14.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /nix/store/vr15iyyykg9zai6fpgvhcgyw7gckl78w-gcc-wrapper-14.3.0/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /nix/store/vr15iyyykg9zai6fpgvhcgyw7gckl78w-gcc-wrapper-14.3.0/bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found Python3: /nix/store/jj6jldlw37r8yy9kc1smrax9dhnjm2x4-python3-3.13.9/bin/python3.13 (found version "3.13.9") found components: Interpreter
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
--- Build files have been written to: /tmp/raylib-x4-release-check/build
-[1/13] Building C object CMakeFiles/x4_tests.dir/tests/hal_test.c.o
-[2/13] Building C object CMakeFiles/raylib_x4.dir/src/x4_font.c.o
-[3/13] Building C object CMakeFiles/raylib_x4.dir/src/x4_display.c.o
-[4/13] Building C object CMakeFiles/x4_epd_tests.dir/tests/test_epd.c.o
-[5/13] Building C object CMakeFiles/x4_epd_tests.dir/src/x4_epd.c.o
-[6/13] Building C object CMakeFiles/x4_tests.dir/tests/test_x4.c.o
-[7/13] Linking C executable x4_epd_tests
-[8/13] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtext.c.o
-[9/13] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rshapes.c.o
-[10/13] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rcore.c.o
-[11/13] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtextures.c.o
-[12/13] Linking C static library libraylib_x4.a
-[13/13] Linking C executable x4_tests
-Test project /tmp/raylib-x4-release-check/build
-    Start 1: x4_core
-1/2 Test #1: x4_core ..........................   Passed    0.00 sec
-    Start 2: x4_epd
-2/2 Test #2: x4_epd ...........................   Passed    0.00 sec
+-- Build files have been written to: /tmp/x4-qa-archive.95Omdk/build
+[1/16] Building C object CMakeFiles/x4_tests.dir/tests/hal_test.c.o
+[2/16] Building C object CMakeFiles/raylib_x4.dir/src/x4_font.c.o
+[3/16] Building C object CMakeFiles/raylib_x4.dir/src/x4_display.c.o
+[4/16] Building C object CMakeFiles/x4_epd_tests.dir/tests/test_epd.c.o
+[5/16] Building C object CMakeFiles/x4_epd_tests.dir/src/x4_epd.c.o
+[6/16] Building C object CMakeFiles/paper_tests.dir/tests/test_paper.c.o
+[7/16] Linking C executable x4_epd_tests
+[8/16] Building C object CMakeFiles/paper_tests.dir/examples/paper_state.c.o
+[9/16] Building C object CMakeFiles/x4_tests.dir/tests/test_x4.c.o
+[10/16] Linking C executable paper_tests
+[11/16] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtext.c.o
+[12/16] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rshapes.c.o
+[13/16] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rcore.c.o
+[14/16] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtextures.c.o
+[15/16] Linking C static library libraylib_x4.a
+[16/16] Linking C executable x4_tests
+Test project /tmp/x4-qa-archive.95Omdk/build
+    Start 1: x4_package
+1/4 Test #1: x4_package .......................   Passed    0.08 sec
+    Start 2: paper_state
+2/4 Test #2: paper_state ......................   Passed    0.04 sec
+    Start 3: x4_core
+3/4 Test #3: x4_core ..........................   Passed    0.00 sec
+    Start 4: x4_epd
+4/4 Test #4: x4_epd ...........................   Passed    0.00 sec
 
-100% tests passed, 0 tests failed out of 2
+100% tests passed, 0 tests failed out of 4
 
-Total Test time (real) =   0.01 sec
+Total Test time (real) =   0.12 sec

@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <limits.h>
 
 #define CHECK(x) do { if (!(x)) { fprintf(stderr, "%s:%d: %s\n", __FILE__, __LINE__, #x); exit(1); } } while (0)
 extern void *swGetColorBuffer(int *width, int *height);
@@ -28,6 +31,19 @@ static void frame(int x)
 int main(void)
 {
     SetTraceLogLevel(LOG_WARNING);
+    char directory[]="/tmp/x4-file-test-XXXXXX";
+    CHECK(mkdtemp(directory));
+    int bytes=1;
+    CHECK(LoadFileText(directory) == NULL);
+    CHECK(LoadFileData(directory, &bytes) == NULL && bytes == 0);
+    char filename[128]; snprintf(filename,sizeof(filename),"%s/large",directory);
+    FILE *file=fopen(filename,"wb"); CHECK(file);
+    CHECK(ftruncate(fileno(file),(off_t)INT_MAX+1) == 0); CHECK(fclose(file) == 0);
+    CHECK(LoadFileText(filename) == NULL);
+    CHECK(LoadFileData(filename,&bytes) == NULL && bytes == 0);
+    CHECK(SaveFileText(filename,"small\n"));
+    char *text=LoadFileText(filename); CHECK(text && !strcmp(text,"small\n")); UnloadFileText(text);
+    CHECK(unlink(filename) == 0 && rmdir(directory) == 0);
     CHECK(x4_decode_buttons(4095, 4095, false) == 0);
     const int front[] = {3470,2655,1470,3};
     for (int i = 0; i < 4; i++) CHECK(x4_decode_buttons(front[i], 4095, false) == (1u << i));

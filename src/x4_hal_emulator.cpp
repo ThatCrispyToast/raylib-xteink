@@ -47,7 +47,14 @@ extern "C" bool x4_hal_init(const char *title)
         display->set_rotation(microreader::Rotation::Deg90);
         SDL_SetWindowTitle(SDL_RenderGetWindow(runtime->renderer()), title ? title : "raylib X4");
         storage = std::getenv("X4_SD_ROOT") ? std::getenv("X4_SD_ROOT") : "sdcard";
-        std::filesystem::create_directories(storage);
+        std::error_code error;
+        if (!storage.empty()) {
+            std::filesystem::create_directories(storage, error);
+            if (error || !std::filesystem::is_directory(storage, error)) {
+                std::fprintf(stderr, "X4 emulator: storage unavailable: %s\n", storage.c_str());
+                storage.clear();
+            }
+        }
         down = 0;
         poll_count = 0;
         script.clear();
@@ -62,12 +69,12 @@ extern "C" bool x4_hal_init(const char *title)
         return true;
     } catch (const std::exception& e) {
         std::fprintf(stderr, "X4 emulator: %s\n", e.what());
-        display.reset(); runtime.reset();
+        display.reset(); runtime.reset(); storage.clear();
         return false;
     }
 }
 
-extern "C" void x4_hal_close(void) { display.reset(); runtime.reset(); }
+extern "C" void x4_hal_close(void) { display.reset(); runtime.reset(); storage.clear(); }
 extern "C" bool x4_hal_present(const uint8_t *frame, const uint8_t *previous, bool full)
 {
     if (full) display->full_refresh(frame, microreader::RefreshMode::Full, false);
@@ -120,12 +127,12 @@ extern "C" X4Input x4_hal_poll(void)
 extern "C" double x4_hal_time(void)
 { return static_cast<double>(SDL_GetPerformanceCounter())/SDL_GetPerformanceFrequency(); }
 extern "C" void x4_hal_sleep(double seconds) { SDL_Delay(static_cast<Uint32>(seconds*1000)); }
-extern "C" const char *x4_hal_storage(void) { return storage.c_str(); }
+extern "C" const char *x4_hal_storage(void) { return storage.empty() ? nullptr : storage.c_str(); }
 extern "C" X4Status x4_hal_status(void)
 {
     X4Status status = {};
     status.front_adc = status.side_adc = status.battery_mv = -1;
     status.buttons = down;
-    status.storage_mounted = runtime != nullptr;
+    status.storage_mounted = runtime != nullptr && !storage.empty();
     return status;
 }

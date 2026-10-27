@@ -7,8 +7,8 @@ Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flak
 | Check | Result | Evidence |
 |---|---|---|
 | Native Release build | Pass | `build/x4_demo`, `build/libraylib_x4.a` |
-| Native CTest suite | 3/3 pass | `artifacts/native-tests.txt` |
-| ASan + UBSan | 2/2 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
+| Native CTest suite | 5/5 pass | `artifacts/native-tests.txt` |
+| ASan + UBSan | 4/4 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
 | Hardware ESP32-C3 compile/link | Pass | `firmware/build/raylib_x4_firmware.bin`, `artifacts/firmware-build.log` |
 | Alternative application build | Pass | `build-minimal/raylib_x4_firmware.bin`, `artifacts/minimal-build.log` |
 | ESP32-C3 QEMU boot and renderer | Pass | `artifacts/qemu-test.log` |
@@ -17,10 +17,34 @@ Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flak
 | Seven physical buttons and visual panel check | Pass | `artifacts/hardware/buttons-report.json` |
 | Deep sleep and timer wake | 3/3 cycles pass | `artifacts/hardware/sleep-console.log` |
 | Physical Back/Power sleep and wake | Pass: owner confirmation and USB disconnect/reconnect | `artifacts/hardware/release-report.json` |
-| Packaged production image on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/release-report.json` |
-| Clean build from release source archive | 2/2 tests pass | `artifacts/hardware/archive-check.log` |
+| Paper 1.1.0 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
+| Physical Paper storage regression | 228 checks pass | `artifacts/hardware/qa-paper.log` |
+| Independent user acceptance | Seven baseline findings fixed and retested | `docs/qa-user-report.md` |
+| Clean build from release source archive | 4/4 tests pass | `artifacts/hardware/archive-check.log` |
 
 The tests deliberately trigger a rejected window size and display failure. Their expected error messages do not indicate a failing test.
+
+## Paper 1.1.0 QA
+
+The independent user pass reproduced a directory-read crash in the public file loader, accidental overwriting of unrelated `paper.txt` files, invisible save failures, absent replay/undo workflows, invalid-save and integer-overflow handling, and unavailable-storage emulation. All seven reported findings were fixed and independently retested. The full [user report](qa-user-report.md) preserves baseline reproductions and distinguishes emulator evidence from hardware evidence.
+
+The expanded native suite tests bounded file reads (directories and files larger than `INT_MAX`), strict legacy import, unsigned move-count limits, 64-move undo retention, alternating checksummed saves, truncated-record recovery, no storage, conflicting storage paths, and missing/stale hardware attestations. Emulator journeys exercise solving, direct grid navigation, persistent undo, restart cancellation/confirmation, fresh puzzles, help, and sleep. An independent solver also completed a newly generated puzzle, and a second native app exercised the new multi-source build options.
+
+On the physical X4, `tests/paper_device.c` ran 228 checks against the actual FAT SD card and raylib renderer. These include 70 save/reload cycles, persisted undo, deliberate truncation of the newest journal slot and recovery from the older slot, subsequent save repair, restart, safe directory rejection by both file-loading APIs, and heap integrity. It used a unique temporary directory, removed its test files, and preserved existing game data. The test reported 74,408 bytes free heap, a 57,592-byte minimum, and 10,868 bytes of main-task stack headroom. This tests interrupted-record handling, not arbitrary electrical failure or whole-filesystem corruption.
+
+Production Paper 1.1.0 was then restored with flash digest verification and booted with SD mounted: 70,192 bytes free heap, a 66,092-byte minimum, and a largest free block of 30,720 bytes. Its exact binary hash is recorded in `artifacts/hardware/qa-release-report.json`. Packaging with `--hardware-tested` rejects a different binary. The new menu and sleep-screen flows were tested in the emulator; physical button and Power-wake observations below are historical 1.0.0 evidence, not a repeated owner check of the new UI.
+
+To reproduce the isolated physical save regression, build and flash it as an alternate application, then restore the default Paper firmware:
+
+```sh
+idf.py -C firmware -B "$PWD/build-paper-qa" \
+  -DX4_APP_SOURCE="$PWD/tests/paper_device.c" \
+  -DX4_APP_EXTRA_SOURCES="$PWD/examples/paper_state.c" \
+  -DSDKCONFIG="$PWD/build-paper-qa/sdkconfig" build flash
+python scripts/device.py --raw --listen 90
+```
+
+The success marker is `PAPER QA PASS`; the test remains awake for reflashing. A full-flash backup and correct serial port are required as described in the README.
 
 ## Native and emulator coverage
 
@@ -50,7 +74,7 @@ The 192,000-byte buffer figure includes two static 48,000-byte panel frames and 
 
 The smoke test is **not** evidence of electrical panel behavior or exact 160 MHz drawing speed. It is evidence that the RISC-V build executes its rendering and allocation paths successfully. The desktop emulator similarly models pixels and some display timing, not analog waveforms, temperature response, or every board revision.
 
-## Physical device acceptance
+## Original 1.0.0 physical device acceptance
 
 An original ESP32-C3 revision 0.4 X4 with 16 MB flash and an inserted FAT microSD card was tested over USB. Before changing firmware, its entire 16 MB flash was read and verified against the device using esptool's digest comparison. The backup and checksum manifest remain local under `artifacts/hardware/backups/` and are excluded from releases.
 
@@ -78,7 +102,7 @@ The owner confirmed readable upright text and distinct black/dark-gray/light-gra
 
 Three timed deep-sleep cycles also passed: the USB device disappeared during sleep, then returned with reset reason 8 (deep sleep) and wake reason 4 (timer). Every wake remounted SD, rendered the same orientation frame, and retained healthy heap state.
 
-The exact packaged production image was then flashed with verification. Paper booted with SD mounted, 70,176 bytes free heap, a 66,076-byte minimum, and a largest free block of 30,720 bytes. The owner subsequently completed the Back → wait three seconds → Power test and confirmed that the display refreshed and returned to Paper. The host kernel recorded the X4 disconnecting at 20:41:04 and reconnecting at 20:41:07 on 2026-10-26 (local test time). The serial monitor had already timed out, so this final check is supported by the owner report and USB events rather than a captured MCU wake-reason code.
+The exact 1.0.0 packaged production image was then flashed with verification. Paper booted with SD mounted, 70,176 bytes free heap, a 66,076-byte minimum, and a largest free block of 30,720 bytes. The owner subsequently completed the Back → wait three seconds → Power test and confirmed that the display refreshed and returned to Paper. The host kernel recorded the X4 disconnecting at 20:41:04 and reconnecting at 20:41:07 on 2026-10-26 (local test time). The serial monitor had already timed out, so this final check is supported by the owner report and USB events rather than a captured MCU wake-reason code.
 
 Hardware testing uncovered and fixed the SD chip-select assignment (GPIO12), default-font allocation failures caused by fragmentation, and USB-client reset pulses on reconnect. Font pixels now stay in flash, texture uploads report failure, and an unsuccessful application exit leaves USB available for recovery. The diagnostic transport uses buffered USB writes with bounded waits and validates complete framebuffer transfers.
 
