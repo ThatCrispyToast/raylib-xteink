@@ -26,13 +26,24 @@ The tests deliberately trigger a rejected window size and display failure. Their
 
 ## Tetris example (2026-10-27)
 
-The added `x4_tetris` emulator target and alternate ESP-IDF application use the same renderer and driver as Paper. Gameplay tests cover all seven pieces and rotations, seven-piece bags, collisions, wall/floor adjustments, one through four cleared rows, nonadjacent clears, scoring, level limits, drop points, gravity, bounded lock resets, top-out, and deterministic stress games. All 279,159 assertions pass, including under ASan/UBSan. Another 247 comparisons show retained board updates matching complete redraws byte-for-byte, including rotations, edge movement, landing outlines, locks, score-width changes, and line clears.
+The owner's pace complaint exposed a poor timing choice in the original example: its 1.6-second gravity interval excluded every display refresh, so actual rows took about 2.27 seconds. Held controls were also limited to one step per refresh. Normal mode now includes ordinary refresh time in gravity, starts at 0.8 seconds per row, and accelerates to a 0.12-second minimum. Landing grace still uses visible time so a piece cannot lock while the player is waiting for its image. Pause, full cleaning, and first presentation of a new piece freeze both clocks. Held controls catch up after blocked frames, with bounded batches and no replay after release.
 
-Twenty SDL journeys exercise title/sleep/cancellation, relaxed and practice modes, soft/hard drop, pause/resume, mode changes, restart confirmation, help, and explicit cleaning. Independent wall-clock input injects presses while the emulator blocks: a two-second Power refresh freezes game time; movement during it is preserved; an Enter buffered while the next piece appears cannot immediately drop that unseen piece; and an Enter during restart presentation cannot auto-confirm.
+On the physical X4, the same scripted benchmark measured:
 
-On the physical X4, `tests/tetris_device.c` ran 29 scripted actions through the actual app: 28 presentations, two explicit full cleans (initial and Power), 26 partial updates, and zero display errors. Minimum heap was 73,764 bytes, with 13,428 bytes of main-task stack headroom. Ordinary horizontal moves drew in about 6–10 ms; partial presentation took about 653–657 ms for those moves. These are MCU/controller measurements, not optical or button-to-photon measurements. The original diagnostic run preceded a text-only correction to the title's Back/Sleep label; gameplay and driver code were unchanged.
+| Scenario | Original | Corrected |
+|---|---:|---:|
+| Six automatic rows from a settled spawn | 13.640 s | 5.478 s |
+| Steady level-one row interval | 2.271 s | 0.809 s |
+| Hold Down from spawn to the floor | 12.738 s | 2.105 s |
+| Hold Right from spawn to the right edge | 2.740 s | 1.390 s |
 
-The final interactive image was separately flash-verified and booted with SD mounted. Exact hashes and scope are in `artifacts/hardware/tetris-report.json`; the scripted serial log is `tetris-test.log` beside it. The app does not write game files, and the Paper firmware and saves remain available. Native screenshots of the title, play, and help screens were inspected. Physical ghosting and human button interaction were not visually observed during this pass.
+The benchmark uses the actual application and physical display. Its synthetic held-key source implements the old backend's 450/150 ms, one-repeat-per-poll behavior for the baseline and supplies held state to the new application repeat logic. Timings end after controller BUSY clears; these are not human button-to-photon or optical measurements. The stock waveform is unchanged, and a first-tap screen update still takes roughly 0.65–0.7 seconds. Raw logs and exact scope are in `artifacts/hardware/tetris-pace-report.json` and its before/after logs.
+
+Gameplay tests cover pieces, bags, rotations, collisions, wall/floor adjustments, row clearing, scoring, levels, lock resets, top-out, independent falling/locking clocks, extreme elapsed intervals, and deterministic stress games. All 279,167 assertions pass. Another 257 retained/full redraw comparisons cover board movement, outlines, rotations, locks, line clears, score changes, and all pause-menu selections. Score changes now leave the unchanged next-piece previews alone, and menu moves redraw only selection outlines.
+
+Twenty-three SDL journeys cover the application flows plus wall-clock gravity, held movement and release, held soft drop, and input during a two-second cleaning pause. Buffered Enter cannot drop an unseen next piece or confirm an unseen restart dialog. The complete 11-test native suite passes; after hardening the grounded-only clock path, all three Tetris tests and all seven sanitizer tests were rerun successfully. The targeted log is `artifacts/tetris-pace-tests.txt`.
+
+`tests/tetris_device.c` separately exercises the actual application with 29 scripted actions, including pause, mode changes, help, restart, cleaning, and sleep. The final interactive image is flash-verified and booted with SD mounted. Its current hashes and measurements are in `artifacts/hardware/tetris-report.json`; the original example attestation is preserved in `tetris-before-pace-report.json`. No game files are written. Native screenshots were visually inspected; physical ghosting and human button interaction were not visually observed during this pass.
 
 ## Paper 1.1.2 refresh and region-update follow-up
 

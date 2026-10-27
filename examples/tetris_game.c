@@ -66,8 +66,8 @@ void TetrisNew(TetrisGame *g, uint32_t seed, bool practice)
 unsigned int TetrisLevel(const TetrisGame *g) { return g->lines>=190 ? 20 : g->lines/10+1; }
 double TetrisFallSeconds(const TetrisGame *g)
 {
-    double seconds=1.6-0.1*(TetrisLevel(g)-1);
-    return seconds<0.5 ? 0.5 : seconds;
+    double seconds=0.8-0.04*(TetrisLevel(g)-1);
+    return seconds<0.12 ? 0.12 : seconds;
 }
 static void add_score(TetrisGame *g, unsigned int amount)
 { g->score=UINT32_MAX-g->score<amount ? UINT32_MAX : g->score+amount; }
@@ -140,23 +140,31 @@ void TetrisHardDrop(TetrisGame *g)
     lock_piece(g);
 }
 bool TetrisAdvance(TetrisGame *g, double seconds)
+{ return TetrisAdvanceClocks(g,seconds,seconds); }
+bool TetrisAdvanceClocks(TetrisGame *g, double falling_seconds, double locking_seconds)
 {
-    if (g->over || g->practice || !(seconds>0) || !isfinite(seconds)) return false;
+    if (g->over || g->practice || falling_seconds<0 || locking_seconds<0 ||
+        !isfinite(falling_seconds) || !isfinite(locking_seconds)) return false;
+    double seconds=falling_seconds>locking_seconds ? falling_seconds : locking_seconds;
+    if (!(seconds>0)) return false;
+    double fall_rate=falling_seconds/seconds, lock_rate=locking_seconds/seconds;
     bool changed=false;
     double interval=TetrisFallSeconds(g);
     while (seconds>0) {
-        bool grounded=on_ground(g);
-        double step=interval-g->falling;
-        if (grounded && 0.55-g->grounded<step) step=0.55-g->grounded;
+        if (on_ground(g)) {
+            g->grounded+=seconds*lock_rate; g->falling=0;
+            if (g->grounded>=0.55-1e-9) { lock_piece(g); return true; }
+            return changed;
+        }
+        double step=fall_rate>0 ? (interval-g->falling)/fall_rate : seconds;
         if (step>seconds) step=seconds;
         if (step<0) step=0;
-        g->falling+=step;
-        g->grounded=grounded ? g->grounded+step : 0;
+        g->falling+=step*fall_rate;
+        g->grounded=0;
         seconds-=step;
-        if (grounded && g->grounded>=0.55-1e-9) { lock_piece(g); return true; }
         if (g->falling>=interval-1e-9) {
             g->falling=0;
-            if (!grounded) { g->y++; changed=true; }
+            g->y++; changed=true;
         }
     }
     return changed;

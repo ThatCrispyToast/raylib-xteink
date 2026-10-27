@@ -41,11 +41,11 @@ static void board_image(const TetrisGame *g, uint8_t image[TETRIS_ROWS][TETRIS_C
         if (by>=0 && by<TETRIS_ROWS && bx>=0 && bx<TETRIS_COLS) image[by][bx]=pass ? 1 : 2;
     }
 }
-static void sidebar(const TetrisGame *g)
+static void sidebar(const TetrisGame *g, bool preview)
 {
-    DrawRectangle(310,112,146,548,WHITE);
-    text("NEXT",318,120,20);
-    for (int i=0; i<TETRIS_PREVIEW; i++) {
+    DrawRectangle(310,preview ? 112 : 432,146,preview ? 548 : 228,WHITE);
+    if (preview) text("NEXT",318,120,20);
+    if (preview) for (int i=0; i<TETRIS_PREVIEW; i++) {
         DrawRectangleLines(314,146+i*88,140,76,BLACK);
         uint16_t shape=TetrisShape(g->next[i],0);
         for (int y=0; y<4; y++) for (int x=0; x<4; x++)
@@ -62,7 +62,7 @@ static void draw_game(const TetrisGame *g, bool full)
     static unsigned int clear;
     uint8_t image[TETRIS_ROWS][TETRIS_COLS]; board_image(g,image);
     if (full) {
-        ClearBackground(WHITE); heading(g->practice ? "PRACTICE / NO AUTOMATIC FALL" : "RELAXED / TIME TO THINK");
+        ClearBackground(WHITE); heading(g->practice ? "PRACTICE / NO AUTOMATIC FALL" : "NORMAL / KEEP THE STACK LOW");
         DrawRectangleLinesEx((Rectangle){BOARD_X-2,BOARD_Y-2,CELL*TETRIS_COLS+4,CELL*TETRIS_ROWS+4},2,BLACK);
         controls(708,false);
     }
@@ -70,7 +70,8 @@ static void draw_game(const TetrisGame *g, bool full)
         int px=BOARD_X+x*CELL, py=BOARD_Y+y*CELL;
         DrawRectangle(px,py,CELL,CELL,WHITE); tile(px,py,image[y][x],CELL);
     }
-    if (full || score != g->score || lines != g->lines || memcmp(next,g->next,sizeof(next))) sidebar(g);
+    bool preview=full || memcmp(next,g->next,sizeof(next));
+    if (preview || score != g->score || lines != g->lines) sidebar(g,preview);
     if (full || clear != g->last_clear) {
         static const char *messages[]={"OUTLINE = LANDING POSITION","SINGLE!","DOUBLE!","TRIPLE!","FOUR LINES!"};
         DrawRectangle(24,672,432,22,WHITE); text(messages[g->last_clear<=4 ? g->last_clear : 4],24,674,18);
@@ -78,9 +79,16 @@ static void draw_game(const TetrisGame *g, bool full)
     memcpy(previous,image,sizeof(previous)); memcpy(next,g->next,sizeof(next));
     score=g->score; lines=g->lines; clear=g->last_clear;
 }
+static void option_outline(int y, Color color)
+{ DrawRectangleLinesEx((Rectangle){22,y-10,436,54},3,color); }
+static void menu_cursor(int previous, int next)
+{
+    if (previous == next) return;
+    option_outline(164+previous*80,WHITE); option_outline(164+next*80,BLACK);
+}
 static void option(const char *name, int y, bool selected)
 {
-    if (selected) DrawRectangleLinesEx((Rectangle){22,y-10,436,54},3,BLACK);
+    if (selected) option_outline(y,BLACK);
     text(name,38,y,26);
 }
 static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practice, bool sleep_confirmation)
@@ -89,15 +97,15 @@ static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practic
     if (screen == TITLE) {
         heading("STACK. CLEAR. REPEAT.");
         text("Choose your pace",24,154,28);
-        option("Relaxed",232,!practice); option("Practice",312,practice);
-        text(practice ? "Place pieces at your own pace." : "Gentle falling speed for e-paper.",24,408,22);
+        option("Normal",232,!practice); option("Practice",312,practice);
+        text(practice ? "Place pieces at your own pace." : "Keep moving. Keep clearing.",24,408,22);
         text("UP / DOWN: CHOOSE",24,468,20); text("ENTER: START",24,506,28);
         text("Complete rows to clear them.",24,582,22);
         controls(654,true);
         text("Games are not saved between sessions.",24,760,18);
     } else if (screen == PAUSE) {
         heading("PAUSED");
-        const char *items[]={"Resume", "Restart", practice ? "Mode: Practice" : "Mode: Relaxed", "How to play", "Sleep"};
+        const char *items[]={"Resume", "Restart", practice ? "Mode: Practice" : "Mode: Normal", "How to play", "Sleep"};
         for (int i=0; i<5; i++) option(items[i],164+i*80,i == menu);
         text("UP / DOWN: CHOOSE   ENTER: OPEN",24,624,18);
         text("BACK: RESUME",24,672,22);
@@ -111,7 +119,7 @@ static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practic
         text("small shifts to make a rotation fit.",24,332,20);
         text("Enter drops and locks the piece.",24,386,22);
         text("Practice: pieces wait for your input.",24,438,20);
-        text("Relaxed: pieces fall, then briefly",24,478,20);
+        text("Normal: pieces fall, then briefly",24,478,20);
         text("wait on landing so you can adjust.",24,510,20);
         text("Clear 10 lines to gain a level.",24,566,22);
         text("Power cleans the display at any time.",24,618,20);
@@ -138,6 +146,16 @@ static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practic
 }
 static void new_game(TetrisGame *g, bool practice)
 { TetrisNew(g,(uint32_t)GetRandomValue(1,INT_MAX),practice); }
+static int repeat_steps(bool down, bool pressed, double now, double *next, double interval, int limit)
+{
+    if (!down) { *next=0; return 0; }
+    if (pressed || *next == 0) { *next=now+0.18; return 0; }
+    if (now<*next) return 0;
+    double due=1+(now-*next)/interval;
+    int count=due>=limit ? limit : (int)due;
+    *next=due>=limit ? now+interval : *next+count*interval;
+    return count;
+}
 int main(void)
 {
     InitWindow(X4_WIDTH,X4_HEIGHT,"Tetris / raylib for Xteink X4");
@@ -145,18 +163,25 @@ int main(void)
     SetExitKey(KEY_NULL); SetTargetFPS(0); X4SetRefreshInterval(UINT_MAX);
     TetrisGame game={0};
     Screen screen=TITLE, drawn=SLEEP, confirmation_return=PAUSE;
-    int menu=0;
+    int menu=0, drawn_menu=0;
+    bool drawn_practice=false;
     bool practice=false, dirty=true, sleep_confirmation=false, confirmation_shown=false, discard_enter=false;
-    double last_tick=GetTime();
+    double last_tick=GetTime(), last_visible=last_tick, repeat_at[3]={0};
     while (!WindowShouldClose() && screen != SLEEP) {
-        double now=GetTime(), elapsed=now-last_tick; last_tick=now;
+        double now=GetTime(), elapsed=now-last_tick, visible_elapsed=now-last_visible;
+        last_tick=last_visible=now;
         int keys[64], count=0, key;
         while (count<64 && (key=GetKeyPressed()) != 0)
             if (!(discard_enter && key == KEY_ENTER)) keys[count++]=key;
         discard_enter=false;
-        if (!count && screen == PLAY) {
+        if (screen == PLAY) {
             const int repeat[]={KEY_LEFT,KEY_RIGHT,KEY_DOWN};
-            for (int i=0; i<3; i++) if (IsKeyPressedRepeat(repeat[i])) keys[count++]=repeat[i];
+            for (int i=0; i<3; i++) {
+                bool pressed=false;
+                for (int j=0; j<count; j++) if (keys[j] == repeat[i]) pressed=true;
+                int steps=repeat_steps(IsKeyDown(repeat[i]),pressed,now,&repeat_at[i],i == 2 ? 0.06 : 0.12,i == 2 ? 12 : 4);
+                while (steps-- && count<64) keys[count++]=repeat[i];
+            }
         }
         uint32_t pieces=game.pieces;
         bool new_piece=false, block_play=false;
@@ -200,19 +225,25 @@ int main(void)
                 new_game(&game,practice); screen=PLAY; dirty=new_piece=block_play=true;
             }
         }
-        if (screen == PLAY && before == PLAY && !new_piece) dirty |= TetrisAdvance(&game,elapsed);
+        if (screen == PLAY && before == PLAY && !new_piece) dirty |= TetrisAdvanceClocks(&game,elapsed,visible_elapsed);
         if (game.pieces != pieces) new_piece=true;
         if (screen == PLAY && game.over) { screen=GAME_OVER; dirty=true; }
         if (!dirty) { WaitTime(0.02); PollInputEvents(); continue; }
         BeginDrawing();
         if (screen == PLAY) draw_game(&game,drawn != PLAY);
+        else if (screen == PAUSE && drawn == PAUSE && practice == drawn_practice) menu_cursor(drawn_menu,menu);
         else draw_page(screen,&game,menu,practice,sleep_confirmation);
+        unsigned int full_before=X4GetStats().full_refreshes;
         EndDrawing();
-        // Only time when a settled board is visible advances gravity and lock delay.
-        last_tick=GetTime(); dirty=false;
+        last_visible=GetTime(); dirty=false;
+        // Ordinary refreshes count toward falling; cleans and unseen new pieces do not.
+        if (new_piece || before != PLAY || screen != PLAY || X4GetStats().full_refreshes != full_before) {
+            last_tick=last_visible;
+            memset(repeat_at,0,sizeof(repeat_at));
+        }
         if (new_piece || (screen == GAME_OVER && drawn != GAME_OVER)) discard_enter=true;
         if (screen == CONFIRM && !confirmation_shown) { confirmation_shown=true; discard_enter=true; }
-        drawn=screen;
+        drawn=screen; drawn_menu=menu; drawn_practice=practice;
         if (X4GetStats().frames == 1) {
             X4Status s=X4GetStatus();
             printf("TETRIS: ready heap=%zu minimum=%zu largest=%zu sd=%d\n",s.free_heap,s.minimum_heap,s.largest_block,s.storage_mounted);

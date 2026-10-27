@@ -40,6 +40,7 @@ static void qa_end(void)
 #define WindowShouldClose qa_closed
 #define GetKeyPressed qa_key
 #define IsKeyPressedRepeat qa_repeat
+#define IsKeyDown qa_repeat
 #define GetRandomValue qa_random
 #define BeginDrawing qa_begin
 #define EndDrawing qa_end

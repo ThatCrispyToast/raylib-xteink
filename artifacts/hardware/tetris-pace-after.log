@@ -1,0 +1,104 @@
+I (132) esp_image: segment 4: paddr=00083208 vaddr=4038382c size=06024h ( 24612) load
+I (138) esp_image: segment 5: paddr=00089234 vaddr=50000000 size=00034h (    52) load
+I (141) boot: Loaded app from partition at offset 0x10000
+I (141) boot: Disabling RNG early entropy source...
+I (143) cpu_start: Unicore app
+I (151) cpu_start: Pro cpu start user code
+I (151) cpu_start: cpu freq: 160000000 Hz
+I (151) app_init: Application information:
+I (151) app_init: Project name:     raylib_x4_firmware
+I (152) app_init: App version:      1.1.2
+I (152) app_init: Compile time:     Jan  1 1980 00:00:00
+I (152) app_init: ELF file SHA256:  848a78abd...
+I (152) app_init: ESP-IDF:          v5.5.2
+I (152) efuse_init: Min chip rev:     v0.3
+I (152) efuse_init: Max chip rev:     v1.99
+I (152) efuse_init: Chip rev:         v0.4
+I (152) heap_init: Initializing. RAM available for dynamic allocation:
+I (153) heap_init: At 3FCA56F0 len 0001A910 (106 KiB): RAM
+I (153) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (153) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (153) heap_init: At 50000034 len 00001FB4 (7 KiB): RTCRAM
+I (155) spi_flash: detected chip: generic
+I (155) spi_flash: flash io: dio
+I (156) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (156) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (157) main_task: Started on CPU0
+I (158) main_task: Calling app_main()
+X4: reset=11 wake=0
+X4: boot heap=215496 largest=114688
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+I (209) sdspi_transaction: cmd=52, R1 response: command not supported
+I (252) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+TETRIS: ready heap=73948 minimum=73948 largest=36864 sd=1
+TETRIS_PACE mode=0 seconds=0.000 x=3 y=0 pieces=0 full=1 partial=1 errors=0
+TETRIS_PACE mode=0 seconds=1.471 x=3 y=1 pieces=0 full=1 partial=2 errors=0
+TETRIS_PACE mode=0 seconds=2.281 x=3 y=2 pieces=0 full=1 partial=3 errors=0
+TETRIS_PACE mode=0 seconds=3.070 x=3 y=3 pieces=0 full=1 partial=4 errors=0
+TETRIS_PACE mode=0 seconds=3.880 x=3 y=4 pieces=0 full=1 partial=5 errors=0
+TETRIS_PACE mode=0 seconds=4.689 x=3 y=5 pieces=0 full=1 partial=6 errors=0
+TETRIS_PACE mode=0 seconds=5.478 x=3 y=6 pieces=0 full=1 partial=7 errors=0
+TETRIS: screen=1 score=0 lines=0 pieces=0 x=3 y=6 rotation=0 practice=0 frames=8 full=1 partial=7 errors=0
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+I (10793) sdspi_transaction: cmd=52, R1 response: command not supported
+I (10836) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+TETRIS: ready heap=73492 minimum=73492 largest=36864 sd=1
+TETRIS_PACE mode=1 seconds=0.000 x=3 y=0 pieces=0 full=1 partial=2 errors=0
+TETRIS_PACE mode=1 seconds=0.714 x=3 y=1 pieces=0 full=1 partial=3 errors=0
+TETRIS_PACE mode=1 seconds=1.410 x=3 y=10 pieces=0 full=1 partial=4 errors=0
+TETRIS_PACE mode=1 seconds=2.105 x=3 y=18 pieces=0 full=1 partial=5 errors=0
+TETRIS: screen=1 score=18 lines=0 pieces=0 x=3 y=18 rotation=0 practice=1 frames=6 full=1 partial=5 errors=0
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+I (18844) sdspi_transaction: cmd=52, R1 response: command not supported
+I (18887) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+TETRIS: ready heap=73492 minimum=73492 largest=36864 sd=1
+TETRIS_PACE mode=2 seconds=0.000 x=3 y=0 pieces=0 full=1 partial=2 errors=0
+TETRIS_PACE mode=2 seconds=0.699 x=4 y=0 pieces=0 full=1 partial=3 errors=0
+TETRIS_PACE mode=2 seconds=1.390 x=7 y=0 pieces=0 full=1 partial=4 errors=0
+TETRIS: screen=1 score=0 lines=0 pieces=0 x=7 y=0 rotation=0 practice=1 frames=5 full=1 partial=4 errors=0
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+TETRIS_PACE_PASS

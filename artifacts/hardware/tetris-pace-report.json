@@ -1,0 +1,24 @@
+{
+  "result": "PASS",
+  "baseline_commit": "722c3a4",
+  "measurements": {
+    "before": {
+      "six_rows_seconds": 13.64,
+      "steady_row_seconds": 2.271,
+      "held_drop_seconds": 12.738,
+      "held_move_to_edge_seconds": 2.74
+    },
+    "after": {
+      "six_rows_seconds": 5.478,
+      "steady_row_seconds": 0.809,
+      "held_drop_seconds": 2.105,
+      "held_move_to_edge_seconds": 1.39
+    }
+  },
+  "scope": "Actual application on physical X4 with synthetic inputs; times end after controller BUSY completion. Six rows from first settled spawn; held soft drop to floor and movement from spawn to right edge use Practice mode. Baseline repeat injector follows the previous backend contract (450 ms then 150 ms, at most one repeat per poll). This does not measure optical response or human button latency.",
+  "waveform": "Unchanged stock waveform and 20 MHz SPI; first-tap refresh latency remains roughly 0.65-0.7 seconds.",
+  "benchmark_sha256": {
+    "before": "8424a50fc32d7144f2b7ae4a17f8a59a0dd97865361145b25721895aab3bcf82",
+    "after": "8f34c5fabf5fd5bf95e193e0d4aca2a2dd568f82f7bd5d3cbc08d508548c24a3"
+  }
+}

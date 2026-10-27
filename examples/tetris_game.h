@@ -26,6 +26,8 @@ bool TetrisSoftDrop(TetrisGame *game);
 void TetrisHardDrop(TetrisGame *game);
 int TetrisLanding(const TetrisGame *game);
 bool TetrisAdvance(TetrisGame *game, double seconds);
+// Gravity may include refresh time while the landing grace period uses visible time.
+bool TetrisAdvanceClocks(TetrisGame *game, double falling_seconds, double locking_seconds);
 unsigned int TetrisLevel(const TetrisGame *game);
 double TetrisFallSeconds(const TetrisGame *game);
 #endif

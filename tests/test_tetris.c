@@ -71,7 +71,7 @@ static void clears_and_scoring(void)
     CHECK(TetrisSoftDrop(&g) && g.score == 1 && g.y == 1);
     TetrisHardDrop(&g); CHECK(g.score == 35);
     g=empty(TETRIS_I); g.lines=UINT32_MAX; g.score=UINT32_MAX-1;
-    CHECK(TetrisLevel(&g) == 20 && TetrisFallSeconds(&g) == 0.5);
+    CHECK(TetrisLevel(&g) == 20 && TetrisFallSeconds(&g) == 0.12);
     TetrisHardDrop(&g); CHECK(g.score == UINT32_MAX);
     // Nonadjacent full rows collapse independently and preserve the row between them.
     g=empty(TETRIS_I); g.rotation=1; g.x=2;
@@ -82,7 +82,7 @@ static void clears_and_scoring(void)
 static void timing_and_end(void)
 {
     TetrisGame g=empty(TETRIS_O);
-    CHECK(!TetrisAdvance(&g,1.59) && g.y == 0);
+    CHECK(!TetrisAdvance(&g,0.79) && g.y == 0);
     CHECK(TetrisAdvance(&g,0.02) && g.y == 1);
     CHECK(!TetrisAdvance(&g,-1) && !TetrisAdvance(&g,INFINITY) && !TetrisAdvance(&g,NAN));
     g.practice=true; TetrisGame before=g;
@@ -109,6 +109,17 @@ static void timing_and_end(void)
     CHECK(TetrisFits(&g,g.x,g.y,0) && TetrisLanding(&g) == -1);
     before=g; TetrisHardDrop(&g);
     CHECK(g.over && !memcmp(g.board,before.board,sizeof(g.board)));
+    g=empty(TETRIS_O);
+    CHECK(TetrisAdvanceClocks(&g,0.8,0) && g.y == 1);
+    CHECK(TetrisAdvanceClocks(&g,2.4,0.02) && g.y == 4);
+    g.y=18; g.falling=g.grounded=0;
+    CHECK(!TetrisAdvanceClocks(&g,4,0) && g.pieces == 0 && g.grounded == 0);
+    CHECK(!TetrisAdvanceClocks(&g,0,0.5) && g.pieces == 0);
+    CHECK(TetrisAdvanceClocks(&g,0,0.06) && g.pieces == 1);
+    CHECK(!TetrisAdvanceClocks(&g,NAN,0) && !TetrisAdvanceClocks(&g,0,-1));
+    g=empty(TETRIS_O);
+    CHECK(TetrisAdvanceClocks(&g,1e300,0) && g.y == 18 && g.pieces == 0);
+    CHECK(!TetrisAdvanceClocks(&g,1e300,0.02) && g.pieces == 0);
 }
 static void bags_and_stress(void)
 {

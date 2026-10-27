@@ -1,0 +1,23 @@
+{
+  "result": "PASS",
+  "application": "Tetris example",
+  "target_version": "1.1.2",
+  "application_sha256": "6bb42f9656df6b6822f8fd7caecd853c487ddfbcb005ba5734c6f9d0694f4a08",
+  "flash_verified": true,
+  "free_heap": 73980,
+  "minimum_heap": 73980,
+  "largest_block": 36864,
+  "storage_mounted": true,
+  "scripted_hardware_actions": 29,
+  "scripted_full_refreshes": 2,
+  "scripted_partial_refreshes": 26,
+  "scripted_errors": 0,
+  "qa_application_sha256": "0135f621af30280fbb213e601a077bed2fdc0d0d7a3fd1aede47c663f40f7265",
+  "model_checks": 279159,
+  "retained_full_render_comparisons": 247,
+  "emulator_journeys": 20,
+  "scope": "Actual application exercised on X4 with scripted keys, then interactive firmware flash-verified and booted to title. SD game files are never written. Physical pixels/ghosting and human button-to-photon latency were not observed.",
+  "native_suite_tests": 11,
+  "sanitizer_suite_tests": 7,
+  "qa_scope": "Scripted actual application, before text-only correction of the title Back/Sleep label; gameplay and driver unchanged. Final interactive image separately flash-verified and booted."
+}

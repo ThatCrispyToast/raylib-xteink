@@ -73,10 +73,12 @@ paths = ["CMakeLists.txt", "cmake", "src", "include", "examples", "tests", "scri
          ".gitignore", "firmware/CMakeLists.txt", "firmware/main", "firmware/partitions.csv",
          "firmware/sdkconfig.defaults", "firmware/sdkconfig.qemu", "vendor/raylib/src", "vendor/raylib/LICENSE",
          "artifacts/demo.png", "artifacts/puzzle.png", "artifacts/status.png", "artifacts/tetris.png",
-         "artifacts/native-tests.txt", "artifacts/sanitizer-tests.txt", "artifacts/qemu-test.log",
+         "artifacts/native-tests.txt", "artifacts/sanitizer-tests.txt", "artifacts/tetris-pace-tests.txt", "artifacts/qemu-test.log",
          "artifacts/firmware-build.log", "artifacts/minimal-build.log", "artifacts/image-info.txt"]
 if args.hardware_tested:
-    paths += ["artifacts/hardware/tetris-report.json", "artifacts/hardware/tetris-test.log", "artifacts/hardware/tetris-boot.log",
+    paths += ["artifacts/hardware/tetris-pace-before.log", "artifacts/hardware/tetris-pace-after.log",
+              "artifacts/hardware/tetris-pace-report.json", "artifacts/hardware/tetris-before-pace-report.json",
+              "artifacts/hardware/tetris-report.json", "artifacts/hardware/tetris-test.log", "artifacts/hardware/tetris-boot.log",
               "artifacts/hardware/qa-1.1.1-report.json", "artifacts/hardware/region-performance.log",
               "artifacts/hardware/region-performance-report.json", "artifacts/hardware/region-regression/report.json",
               "artifacts/hardware/region-regression/partial-soak.png", "artifacts/hardware/region-optical-report.json",

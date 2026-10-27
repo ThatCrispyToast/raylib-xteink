@@ -11,70 +11,70 @@
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
 -- Found Python3: /nix/store/jj6jldlw37r8yy9kc1smrax9dhnjm2x4-python3-3.13.9/bin/python3.13 (found version "3.13.9") found components: Interpreter
--- Configuring done (0.4s)
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
--- Build files have been written to: /tmp/raylib-x4-tetris-archive-bCgImi/build
-[  2%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rcore.c.o
-[  5%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtext.c.o
-[  8%] Building C object CMakeFiles/x4_epd_tests.dir/tests/test_epd.c.o
-[ 13%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtextures.c.o
+-- Build files have been written to: /tmp/raylib-x4-pace-archive-T0cep3/build
+[  2%] Building C object CMakeFiles/x4_epd_tests.dir/tests/test_epd.c.o
+[  5%] Building C object CMakeFiles/paper_tests.dir/examples/paper_state.c.o
+[  8%] Building C object CMakeFiles/x4_epd_tests.dir/src/x4_epd.c.o
 [ 13%] Building C object CMakeFiles/paper_tests.dir/tests/test_paper.c.o
-[ 19%] Building C object CMakeFiles/tetris_tests.dir/tests/test_tetris.c.o
+[ 13%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rshapes.c.o
+[ 16%] Building C object CMakeFiles/tetris_tests.dir/tests/test_tetris.c.o
+[ 19%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rcore.c.o
 [ 22%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rcore.c.o
-[ 22%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rshapes.c.o
-[ 25%] Building C object CMakeFiles/paper_tests.dir/examples/paper_state.c.o
-[ 27%] Building C object CMakeFiles/x4_epd_tests.dir/src/x4_epd.c.o
+[ 27%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtextures.c.o
+[ 27%] Building C object CMakeFiles/tetris_tests.dir/examples/tetris_game.c.o
 [ 30%] Linking C executable x4_epd_tests
-[ 33%] Building C object CMakeFiles/tetris_tests.dir/examples/tetris_game.c.o
-[ 36%] Linking C executable paper_tests
-[ 36%] Built target x4_epd_tests
+[ 33%] Linking C executable paper_tests
+[ 33%] Built target x4_epd_tests
+[ 36%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rshapes.c.o
 [ 36%] Built target paper_tests
-[ 41%] Building C object CMakeFiles/raylib_x4.dir/src/x4_display.c.o
-[ 41%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rshapes.c.o
-[ 44%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtextures.c.o
-[ 47%] Linking C executable tetris_tests
-[ 47%] Built target tetris_tests
-[ 50%] Building C object CMakeFiles/raylib_x4.dir/src/x4_font.c.o
-[ 52%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtext.c.o
-[ 55%] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_display.c.o
-[ 58%] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_font.c.o
-[ 61%] Linking C static library libraylib_x4.a
-[ 61%] Built target raylib_x4
-[ 63%] Building C object CMakeFiles/x4_raster_fast.dir/tests/test_raster_compare.c.o
-[ 77%] Building C object CMakeFiles/x4_raster_fast.dir/tests/hal_test.c.o
-[ 77%] Building C object CMakeFiles/tetris_render_tests.dir/tests/hal_test.c.o
+[ 38%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtextures.c.o
+[ 41%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtext.c.o
+[ 44%] Linking C executable tetris_tests
+[ 44%] Built target tetris_tests
+[ 47%] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_display.c.o
+[ 50%] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_font.c.o
+[ 52%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtext.c.o
+[ 55%] Building C object CMakeFiles/raylib_x4.dir/src/x4_display.c.o
+[ 58%] Building C object CMakeFiles/raylib_x4.dir/src/x4_font.c.o
+[ 61%] Linking C static library libraylib_x4_reference.a
+[ 61%] Built target raylib_x4_reference
+[ 63%] Building C object CMakeFiles/x4_raster_reference.dir/tests/test_raster_compare.c.o
+[ 66%] Building C object CMakeFiles/x4_raster_reference.dir/tests/hal_test.c.o
+[ 69%] Linking C static library libraylib_x4.a
+[ 72%] Linking C executable x4_raster_reference
+[ 72%] Built target raylib_x4
+[ 77%] Building C object CMakeFiles/x4_raster_fast.dir/tests/test_raster_compare.c.o
 [ 77%] Building C object CMakeFiles/tetris_render_tests.dir/examples/tetris_game.c.o
-[ 77%] Building C object CMakeFiles/tetris_render_tests.dir/tests/test_tetris_render.c.o
-[ 77%] Building C object CMakeFiles/x4_tests.dir/tests/test_x4.c.o
-[ 80%] Building C object CMakeFiles/x4_tests.dir/tests/hal_test.c.o
-[ 83%] Linking C executable x4_raster_fast
-[ 83%] Built target x4_raster_fast
-[ 86%] Linking C executable x4_tests
-[ 88%] Linking C static library libraylib_x4_reference.a
-[ 88%] Built target x4_tests
-[ 88%] Built target raylib_x4_reference
-[ 91%] Building C object CMakeFiles/x4_raster_reference.dir/tests/test_raster_compare.c.o
-[ 94%] Building C object CMakeFiles/x4_raster_reference.dir/tests/hal_test.c.o
-[ 97%] Linking C executable tetris_render_tests
-[100%] Linking C executable x4_raster_reference
+[ 80%] Building C object CMakeFiles/tetris_render_tests.dir/tests/test_tetris_render.c.o
+[ 83%] Building C object CMakeFiles/x4_raster_fast.dir/tests/hal_test.c.o
+[ 86%] Building C object CMakeFiles/tetris_render_tests.dir/tests/hal_test.c.o
+[ 88%] Building C object CMakeFiles/x4_tests.dir/tests/hal_test.c.o
+[ 91%] Building C object CMakeFiles/x4_tests.dir/tests/test_x4.c.o
+[ 91%] Built target x4_raster_reference
+[ 94%] Linking C executable x4_raster_fast
+[ 94%] Built target x4_raster_fast
+[ 97%] Linking C executable x4_tests
+[ 97%] Built target x4_tests
+[100%] Linking C executable tetris_render_tests
 [100%] Built target tetris_render_tests
-[100%] Built target x4_raster_reference
-Test project /tmp/raylib-x4-tetris-archive-bCgImi/build
+Test project /tmp/raylib-x4-pace-archive-T0cep3/build
     Start 1: x4_package
 1/7 Test #1: x4_package .......................   Passed    0.09 sec
     Start 2: x4_raster_equivalence
-2/7 Test #2: x4_raster_equivalence ............   Passed    0.19 sec
+2/7 Test #2: x4_raster_equivalence ............   Passed    0.20 sec
     Start 3: paper_state
-3/7 Test #3: paper_state ......................   Passed    0.05 sec
+3/7 Test #3: paper_state ......................   Passed    0.04 sec
     Start 4: tetris_game
 4/7 Test #4: tetris_game ......................   Passed    0.00 sec
     Start 5: tetris_render
-5/7 Test #5: tetris_render ....................   Passed    0.12 sec
+5/7 Test #5: tetris_render ....................   Passed    0.13 sec
     Start 6: x4_core
-6/7 Test #6: x4_core ..........................   Passed    0.02 sec
+6/7 Test #6: x4_core ..........................   Passed    0.01 sec
     Start 7: x4_epd
 7/7 Test #7: x4_epd ...........................   Passed    0.00 sec
 
 100% tests passed, 0 tests failed out of 7
 
-Total Test time (real) =   0.47 sec
+Total Test time (real) =   0.48 sec

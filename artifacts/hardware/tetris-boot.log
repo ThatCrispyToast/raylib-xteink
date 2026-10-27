@@ -1,5 +1,5 @@
-I (131) esp_image: segment 4: paddr=0008293c vaddr=403838bc size=05f94h ( 24468) load
-I (137) esp_image: segment 5: paddr=000888d8 vaddr=50000000 size=00034h (    52) load
+I (131) esp_image: segment 4: paddr=00082e7c vaddr=403838b4 size=05f9ch ( 24476) load
+I (138) esp_image: segment 5: paddr=00088e20 vaddr=50000000 size=00034h (    52) load
 I (141) boot: Loaded app from partition at offset 0x10000
 I (141) boot: Disabling RNG early entropy source...
 I (142) cpu_start: Unicore app
@@ -9,22 +9,22 @@ I (151) app_init: Application information:
 I (151) app_init: Project name:     raylib_x4_firmware
 I (151) app_init: App version:      1.1.2
 I (151) app_init: Compile time:     Jan  1 1980 00:00:00
-I (151) app_init: ELF file SHA256:  0a03e84a6...
-I (151) app_init: ESP-IDF:          v5.5.2
-I (151) efuse_init: Min chip rev:     v0.3
-I (151) efuse_init: Max chip rev:     v1.99 
+I (152) app_init: ELF file SHA256:  c1f5b378d...
+I (152) app_init: ESP-IDF:          v5.5.2
+I (152) efuse_init: Min chip rev:     v0.3
+I (152) efuse_init: Max chip rev:     v1.99
 I (152) efuse_init: Chip rev:         v0.4
 I (152) heap_init: Initializing. RAM available for dynamic allocation:
 I (152) heap_init: At 3FCA56D0 len 0001A930 (106 KiB): RAM
-I (152) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
-I (152) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (153) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (153) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
 I (153) heap_init: At 50000034 len 00001FB4 (7 KiB): RTCRAM
-I (154) spi_flash: detected chip: generic
-I (154) spi_flash: flash io: dio
+I (155) spi_flash: detected chip: generic
+I (155) spi_flash: flash io: dio
 I (155) sleep_gpio: Configure to isolate all GPIO pins in sleep state
-I (155) sleep_gpio: Enable automatic switching of GPIO sleep configuration
-I (156) main_task: Started on CPU0
-I (157) main_task: Calling app_main()
+I (156) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (157) main_task: Started on CPU0
+I (158) main_task: Calling app_main()
 X4: reset=11 wake=0
 X4: boot heap=215528 largest=114688
 INFO: Initializing raylib 6.5-dev
@@ -37,8 +37,8 @@ INFO:     > rtextures:. loaded (optional)
 INFO:     > rtext:..... loaded (optional)
 INFO:     > rmodels:... not loaded (optional)
 INFO:     > raudio:.... not loaded (optional)
-I (208) sdspi_transaction: cmd=52, R1 response: command not supported
-I (251) sdspi_transaction: cmd=5, R1 response: command not supported
+I (209) sdspi_transaction: cmd=52, R1 response: command not supported
+I (252) sdspi_transaction: cmd=5, R1 response: command not supported
 INFO: RLSW: Software renderer initialized successfully
 INFO: RLGL: Default OpenGL state initialized successfully
 INFO: SYSTEM: Working Directory: /

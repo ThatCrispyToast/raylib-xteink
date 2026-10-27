@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Play Tetris through SDL and verify input, pause, cleaning, and visible-time gravity."""
+"""Play Tetris through SDL and verify pace, held controls, pause, and cleaning."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
@@ -40,7 +40,7 @@ def main():
         case("title-sleep", ["Escape", "Return"], dict(screen=6, pieces=0, full=1))
         case("title-cancel-sleep", ["Escape", "Escape"], dict(screen=0, pieces=0, full=1))
         case("practice-waits", ["Down", "Return"], dict(screen=1, practice=1, y=0, pieces=0, full=1), idle=180)
-        case("relaxed-falls", ["Return"], dict(screen=1, practice=0, y=lambda y: y>=1, pieces=0), idle=180)
+        case("normal-falls", ["Return"], dict(screen=1, practice=0, y=lambda y: y>=1, pieces=0), idle=180)
         case("move-rotate-drop", ["Down", "Return", "Right", "Up", "Down", "Return"],
              dict(screen=1, pieces=1, score=lambda score: score>0, full=1))
         case("batched-double-drop", ["Down", "Return"], dict(screen=1, pieces=1), idle=24,
@@ -73,11 +73,18 @@ def main():
             timed("clean-freezes-clock", [(100,"Return"),(900,"P")], 3200,
                   dict(screen=1,y=0,pieces=0,full=2), pause=2000)
             timed("input-during-clean", [(100,"Return"),(900,"P"),(1200,"Right"),(1400,"Right"),(1600,"Down")],
-                  3700, dict(screen=1,x=5,y=1,pieces=0,score=1,full=2), pause=2000)
+                  3550, dict(screen=1,x=5,y=1,pieces=0,score=1,full=2), pause=2000)
             timed("unseen-piece-drop-guard", [(100,"Return"),(900,"Return"),(1100,"Return")],
                   1700, dict(screen=1,pieces=1))
             timed("buffered-confirmation-guard", [(100,"Return"),(900,"Escape"),(1400,"Down"),
                   (1900,"Return"),(2100,"Return")], 2700, dict(screen=4,pieces=0))
+            timed("real-time-gravity", [(100,"Return")], 6000,
+                  dict(screen=1,y=lambda y: y>=6,pieces=0,full=1))
+            for name,key,release,quit_ms,expected in [
+                    ("held-soft-drop", "Down", 2800, 3200, dict(screen=1,y=18,pieces=0,score=18,practice=1)),
+                    ("held-movement-release", "Right", 2050, 2250, dict(screen=1,x=lambda x: x>=6,pieces=0,practice=1))]:
+                timed(name,[(100,"Down"),(700,"Return")],quit_ms,expected)
+                cases[-1]["events"] += [(1300,key,"down"),(release,key,"up")]
 
         def run(item):
             path = work / item["name"]

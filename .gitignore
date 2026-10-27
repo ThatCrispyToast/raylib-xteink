@@ -59,3 +59,9 @@ __pycache__/
 !/artifacts/hardware/tetris-report.json
 !/artifacts/hardware/tetris-test.log
 !/artifacts/hardware/tetris-boot.log
+
+!/artifacts/tetris-pace-tests.txt
+!/artifacts/hardware/tetris-before-pace-report.json
+!/artifacts/hardware/tetris-pace-before.log
+!/artifacts/hardware/tetris-pace-after.log
+!/artifacts/hardware/tetris-pace-report.json
