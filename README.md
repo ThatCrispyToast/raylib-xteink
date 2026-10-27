@@ -18,6 +18,23 @@ Build 2D applications for the **original ESP32-C3 Xteink X4** with raylib. Draw 
 
 ## Quickstart
 
+Build Paper firmware with Docker:
+
+```sh
+docker build --output type=local,dest=build-docker/paper .
+```
+
+This exports flashable files and checksums using a pinned ESP-IDF toolchain. See [Docker builds](docs/docker.md) for Tetris, custom apps, and headless tests. No local SDK or Nix installation is required.
+
+Follow the [hardware guide](docs/hardware.md) to back up and flash from your host. **Installation replaces the device firmware and partition table.** This target supports the original, unlocked ESP32-C3 X4; X3, X4 Pro, and locked variants are unsupported.
+
+On the tested reader, ordinary cursor/menu updates complete in about **0.44 seconds**, and full cleans take about **3.8 seconds**. Paper and Tetris process ordinary controls during refreshes and clean on startup/wake or Power. See [performance measurements](docs/performance.md) for scope and limits.
+
+## Desktop emulator
+
+<details>
+<summary>Quickstart with CMake (Linux)</summary>
+
 On Linux, install the [build dependencies](docs/emulator.md#build) (CMake, a C/C++ compiler, Python, Git, and SDL2), then run from the project root:
 
 ```sh
@@ -26,6 +43,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ./build/x4_demo
 ```
+
+</details>
 
 <details>
 <summary>Quickstart with Nix (x86_64 Linux)</summary>
@@ -45,20 +64,6 @@ cmake --build build --parallel
 Run `./build/x4_tetris` for Tetris. Use the arrow keys, Enter to confirm, Escape to go back, and `P` to clean the display. See [example controls](docs/examples.md) for each game.
 
 The [emulator guide](docs/emulator.md) covers dependency installation, optional Nix setup, virtual SD storage, and screenshots.
-
-## Use it on an X4
-
-Build Paper firmware with Docker:
-
-```sh
-docker build --output type=local,dest=build-docker/paper .
-```
-
-This exports flashable files and checksums using a pinned ESP-IDF toolchain. See [Docker builds](docs/docker.md) for Tetris, custom apps, and headless tests. No local SDK or Nix installation is required.
-
-Follow the [hardware guide](docs/hardware.md) to back up and flash from your host. **Installation replaces the device firmware and partition table.** This target supports the original, unlocked ESP32-C3 X4; X3, X4 Pro, and locked variants are unsupported.
-
-On the tested reader, ordinary cursor/menu updates complete in about **0.44 seconds**, and full cleans take about **3.8 seconds**. Paper and Tetris process ordinary controls during refreshes and clean on startup/wake or Power. See [performance measurements](docs/performance.md) for scope and limits.
 
 ## Write an application
 
