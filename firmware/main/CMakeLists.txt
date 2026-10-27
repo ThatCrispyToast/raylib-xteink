@@ -12,6 +12,9 @@ endif()
 if(X4_APP_SOURCE STREQUAL "${X4_ROOT}/examples/paper.c")
     list(APPEND X4_APP_EXTRA_SOURCES "${X4_ROOT}/examples/paper_state.c")
 endif()
+if(X4_APP_SOURCE STREQUAL "${X4_ROOT}/examples/tetris.c")
+    list(APPEND X4_APP_EXTRA_SOURCES "${X4_ROOT}/examples/tetris_game.c")
+endif()
 idf_component_register(SRCS ${X4_RAYLIB_SOURCES} ../../src/x4_epd.c
     ../../src/x4_hal_espidf.c ${X4_APP_SOURCE} ${X4_APP_EXTRA_SOURCES} app_main.c
     INCLUDE_DIRS ../../src ../../include ../../vendor/raylib/src

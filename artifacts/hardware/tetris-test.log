@@ -1,0 +1,78 @@
+I (131) esp_image: segment 4: paddr=00082cfc vaddr=403837bc size=06094h ( 24724) load
+I (138) esp_image: segment 5: paddr=00088d98 vaddr=50000000 size=00034h (    52) load
+I (141) boot: Loaded app from partition at offset 0x10000
+I (141) boot: Disabling RNG early entropy source...
+I (142) cpu_start: Unicore app
+I (151) cpu_start: Pro cpu start user code
+I (151) cpu_start: cpu freq: 160000000 Hz
+I (151) app_init: Application information:
+I (151) app_init: Project name:     raylib_x4_firmware
+I (151) app_init: App version:      1.1.2
+I (151) app_init: Compile time:     Jan  1 1980 00:00:00
+I (152) app_init: ELF file SHA256:  c3b901fa9...
+I (152) app_init: ESP-IDF:          v5.5.2
+I (152) efuse_init: Min chip rev:     v0.3
+I (152) efuse_init: Max chip rev:     v1.99 
+I (152) efuse_init: Chip rev:         v0.4
+I (152) heap_init: Initializing. RAM available for dynamic allocation:
+I (152) heap_init: At 3FCA56E0 len 0001A920 (106 KiB): RAM
+I (153) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (153) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (153) heap_init: At 50000034 len 00001FB4 (7 KiB): RTCRAM
+I (155) spi_flash: detected chip: generic
+I (155) spi_flash: flash io: dio
+I (156) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (156) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (157) main_task: Started on CPU0
+I (158) main_task: Calling app_main()
+X4: reset=11 wake=0
+X4: boot heap=215512 largest=114688
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+I (209) sdspi_transaction: cmd=52, R1 response: command not supported
+I (252) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 0.000 milliseconds
+TETRIS_HW action=0 draw_ms=142.554 present_ms=3770.206 full=1 partial=0 errors=0
+TETRIS: ready heap=73764 minimum=73764 largest=36864 sd=1
+TETRIS_HW action=1 draw_ms=140.630 present_ms=665.584 full=1 partial=1 errors=0
+TETRIS_HW action=2 draw_ms=165.731 present_ms=703.779 full=1 partial=2 errors=0
+TETRIS_HW action=3 draw_ms=6.428 present_ms=653.336 full=1 partial=3 errors=0
+TETRIS_HW action=5 draw_ms=34.351 present_ms=656.675 full=1 partial=4 errors=0
+TETRIS_HW action=6 draw_ms=43.813 present_ms=675.732 full=1 partial=5 errors=0
+TETRIS_HW action=7 draw_ms=9.605 present_ms=657.068 full=1 partial=6 errors=0
+TETRIS_HW action=8 draw_ms=41.425 present_ms=676.853 full=1 partial=7 errors=0
+TETRIS_HW action=9 draw_ms=76.119 present_ms=705.405 full=1 partial=8 errors=0
+TETRIS_HW action=10 draw_ms=76.385 present_ms=660.038 full=1 partial=9 errors=0
+TETRIS_HW action=11 draw_ms=76.220 present_ms=658.940 full=1 partial=10 errors=0
+TETRIS_HW action=12 draw_ms=75.529 present_ms=645.456 full=1 partial=11 errors=0
+TETRIS_HW action=13 draw_ms=168.116 present_ms=704.508 full=1 partial=12 errors=0
+TETRIS_HW action=14 draw_ms=0.455 present_ms=3769.787 full=2 partial=12 errors=0
+TETRIS_HW action=15 draw_ms=75.431 present_ms=704.236 full=2 partial=13 errors=0
+TETRIS_HW action=16 draw_ms=75.594 present_ms=658.563 full=2 partial=14 errors=0
+TETRIS_HW action=17 draw_ms=75.557 present_ms=658.520 full=2 partial=15 errors=0
+TETRIS_HW action=18 draw_ms=75.653 present_ms=658.554 full=2 partial=16 errors=0
+TETRIS_HW action=19 draw_ms=216.987 present_ms=702.381 full=2 partial=17 errors=0
+TETRIS_HW action=20 draw_ms=75.627 present_ms=700.733 full=2 partial=18 errors=0
+TETRIS_HW action=21 draw_ms=75.447 present_ms=658.571 full=2 partial=19 errors=0
+TETRIS_HW action=22 draw_ms=75.564 present_ms=658.593 full=2 partial=20 errors=0
+TETRIS_HW action=23 draw_ms=55.526 present_ms=700.663 full=2 partial=21 errors=0
+TETRIS_HW action=24 draw_ms=163.509 present_ms=704.639 full=2 partial=22 errors=0
+TETRIS_HW action=25 draw_ms=75.152 present_ms=705.374 full=2 partial=23 errors=0
+TETRIS_HW action=26 draw_ms=75.060 present_ms=677.667 full=2 partial=24 errors=0
+TETRIS_HW action=27 draw_ms=55.951 present_ms=702.453 full=2 partial=25 errors=0
+TETRIS_HW action=28 draw_ms=34.764 present_ms=673.881 full=2 partial=26 errors=0
+TETRIS: screen=6 score=0 lines=0 pieces=0 x=3 y=0 rotation=0 practice=0 frames=28 full=2 partial=26 errors=0
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+TETRIS_HW_PASS actions=29 heap=214744 minimum=73764 stack=13428

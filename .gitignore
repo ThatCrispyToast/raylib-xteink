@@ -55,3 +55,7 @@ __pycache__/
 !/artifacts/hardware/region-regression/report.json
 !/artifacts/hardware/region-regression/partial-soak.png
 !/artifacts/hardware/region-optical-report.json
+!/artifacts/tetris.png
+!/artifacts/hardware/tetris-report.json
+!/artifacts/hardware/tetris-test.log
+!/artifacts/hardware/tetris-boot.log

@@ -22,8 +22,14 @@ if args.hardware_tested:
         raise SystemExit('Physical QA report does not match the application being packaged')
 dist.mkdir(exist_ok=True)
 cache = (build / "CMakeCache.txt").read_text()
-if any(line.startswith("X4_QEMU_SMOKE:") and line.endswith(("=ON", "=1", "=TRUE")) for line in cache.splitlines()):
+def qemu_build(cache):
+    return any(line.startswith("X4_QEMU_SMOKE:") and line.endswith(("=ON", "=1", "=TRUE")) for line in cache.splitlines())
+if qemu_build(cache):
     raise SystemExit("Refusing to package a test-only QEMU image as hardware firmware")
+tetris = root/'build-tetris/raylib_x4_firmware.bin'
+tetris_cache = (tetris.parent/'CMakeCache.txt').read_text() if tetris.exists() else ''
+if 'examples/tetris.c' in tetris_cache and qemu_build(tetris_cache):
+    raise SystemExit("Refusing to package a Tetris QEMU test image as hardware firmware")
 parts = [(0, "bootloader/bootloader.bin", "bootloader.bin"),
          (0x8000, "partition_table/partition-table.bin", "partition-table.bin"),
          (0x10000, "raylib_x4_firmware.bin", "application.bin")]
@@ -40,6 +46,15 @@ diagnostic = root/'build-hardware/raylib_x4_firmware.bin'
 (dist/'diagnostics.bin').unlink(missing_ok=True)
 if diagnostic.exists() and 'examples/diagnostics.c' in (diagnostic.parent/'CMakeCache.txt').read_text():
     shutil.copy2(diagnostic,dist/'diagnostics.bin')
+tetris_info = None
+(dist/'tetris.bin').unlink(missing_ok=True)
+if tetris.exists() and 'examples/tetris.c' in tetris_cache:
+    shutil.copy2(tetris,dist/'tetris.bin')
+    digest = hashlib.sha256(tetris.read_bytes()).hexdigest()
+    evidence = root/'artifacts/hardware/tetris-report.json'
+    report = json.loads(evidence.read_text()) if evidence.exists() else {}
+    verified = args.hardware_tested and report.get('result') == 'PASS' and report.get('application_sha256') == digest
+    tetris_info = dict(file='tetris.bin',offset=65536,application_sha256=digest,hardware_tested=verified)
 for name in ["LICENSE", "THIRD_PARTY.md"]:
     shutil.copy2(root / name, dist / name)
 (dist / "manifest.json").write_text(json.dumps({
@@ -49,6 +64,7 @@ for name in ["LICENSE", "THIRD_PARTY.md"]:
     "parts": [{"file": name, "offset": offset} for offset, _, name in parts],
     "hardware_tested": args.hardware_tested,
     "diagnostics_image": {"file":"diagnostics.bin","offset":65536} if (dist/'diagnostics.bin').exists() else None,
+    "tetris_example": tetris_info,
     "validation": "microreader desktop emulator, native ASan/UBSan, ESP32-C3 QEMU renderer smoke" +
         (", original X4 production boot and physical storage regression; historical platform acceptance in docs/validation.md" if args.hardware_tested else "")
 }, indent=2) + "\n")
@@ -56,11 +72,12 @@ paths = ["CMakeLists.txt", "cmake", "src", "include", "examples", "tests", "scri
          "docs", "patches", "README.md", "LICENSE", "THIRD_PARTY.md", "flake.nix", "flake.lock",
          ".gitignore", "firmware/CMakeLists.txt", "firmware/main", "firmware/partitions.csv",
          "firmware/sdkconfig.defaults", "firmware/sdkconfig.qemu", "vendor/raylib/src", "vendor/raylib/LICENSE",
-         "artifacts/demo.png", "artifacts/puzzle.png", "artifacts/status.png",
+         "artifacts/demo.png", "artifacts/puzzle.png", "artifacts/status.png", "artifacts/tetris.png",
          "artifacts/native-tests.txt", "artifacts/sanitizer-tests.txt", "artifacts/qemu-test.log",
          "artifacts/firmware-build.log", "artifacts/minimal-build.log", "artifacts/image-info.txt"]
 if args.hardware_tested:
-    paths += ["artifacts/hardware/qa-1.1.1-report.json", "artifacts/hardware/region-performance.log",
+    paths += ["artifacts/hardware/tetris-report.json", "artifacts/hardware/tetris-test.log", "artifacts/hardware/tetris-boot.log",
+              "artifacts/hardware/qa-1.1.1-report.json", "artifacts/hardware/region-performance.log",
               "artifacts/hardware/region-performance-report.json", "artifacts/hardware/region-regression/report.json",
               "artifacts/hardware/region-regression/partial-soak.png", "artifacts/hardware/region-optical-report.json",
               "artifacts/hardware/performance-before.log", "artifacts/hardware/performance-after.log",

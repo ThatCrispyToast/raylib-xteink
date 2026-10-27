@@ -7,8 +7,8 @@ Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flak
 | Check | Result | Evidence |
 |---|---|---|
 | Native Release build | Pass | `build/x4_demo`, `build/libraylib_x4.a` |
-| Native CTest suite | 8/8 pass | `artifacts/native-tests.txt` |
-| ASan + UBSan | 5/5 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
+| Native CTest suite | 11/11 pass | `artifacts/native-tests.txt` |
+| ASan + UBSan | 7/7 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
 | Hardware ESP32-C3 compile/link | Pass | `firmware/build/raylib_x4_firmware.bin`, `artifacts/firmware-build.log` |
 | Alternative application build | Pass | `build-minimal/raylib_x4_firmware.bin`, `artifacts/minimal-build.log` |
 | ESP32-C3 QEMU boot and renderer | Pass | `artifacts/qemu-test.log` |
@@ -20,9 +20,19 @@ Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flak
 | Paper 1.1.2 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
 | Physical Paper 1.1.0 storage regression | 228 checks pass | `artifacts/hardware/qa-paper.log` |
 | Independent user acceptance | Functional and wall-clock timing failures fixed and retested | `docs/qa-user-report.md` |
-| Clean build from release source archive | 5/5 tests pass | `artifacts/hardware/archive-check.log` |
+| Clean build from release source archive | 7/7 tests pass | `artifacts/hardware/archive-check.log` |
 
 The tests deliberately trigger a rejected window size and display failure. Their expected error messages do not indicate a failing test.
+
+## Tetris example (2026-10-27)
+
+The added `x4_tetris` emulator target and alternate ESP-IDF application use the same renderer and driver as Paper. Gameplay tests cover all seven pieces and rotations, seven-piece bags, collisions, wall/floor adjustments, one through four cleared rows, nonadjacent clears, scoring, level limits, drop points, gravity, bounded lock resets, top-out, and deterministic stress games. All 279,159 assertions pass, including under ASan/UBSan. Another 247 comparisons show retained board updates matching complete redraws byte-for-byte, including rotations, edge movement, landing outlines, locks, score-width changes, and line clears.
+
+Twenty SDL journeys exercise title/sleep/cancellation, relaxed and practice modes, soft/hard drop, pause/resume, mode changes, restart confirmation, help, and explicit cleaning. Independent wall-clock input injects presses while the emulator blocks: a two-second Power refresh freezes game time; movement during it is preserved; an Enter buffered while the next piece appears cannot immediately drop that unseen piece; and an Enter during restart presentation cannot auto-confirm.
+
+On the physical X4, `tests/tetris_device.c` ran 29 scripted actions through the actual app: 28 presentations, two explicit full cleans (initial and Power), 26 partial updates, and zero display errors. Minimum heap was 73,764 bytes, with 13,428 bytes of main-task stack headroom. Ordinary horizontal moves drew in about 6–10 ms; partial presentation took about 653–657 ms for those moves. These are MCU/controller measurements, not optical or button-to-photon measurements. The original diagnostic run preceded a text-only correction to the title's Back/Sleep label; gameplay and driver code were unchanged.
+
+The final interactive image was separately flash-verified and booted with SD mounted. Exact hashes and scope are in `artifacts/hardware/tetris-report.json`; the scripted serial log is `tetris-test.log` beside it. The app does not write game files, and the Paper firmware and saves remain available. Native screenshots of the title, play, and help screens were inspected. Physical ghosting and human button interaction were not visually observed during this pass.
 
 ## Paper 1.1.2 refresh and region-update follow-up
 

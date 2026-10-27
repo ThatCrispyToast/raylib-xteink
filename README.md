@@ -10,6 +10,35 @@ Paper saves the board, cursor, starting puzzle, move count, and last 64 undo mov
 
 Paper 1.1.2 measures about 0.68 seconds for cursor/menu updates on the physical X4, down from 0.73 seconds in 1.1.1 and 2.45/2.08 seconds originally. Puzzle flips with SD saves measure about 0.77 seconds. Rapid taps keep their order. Paper cleans on startup/wake and when you press Power; navigation, idle time, and entering Sleep no longer schedule a full-screen flash. Press Power if ghosting becomes distracting. The stock panel waveform accounts for about 0.64 seconds of a partial update; full cleans take about 3.8 seconds. See [physical performance measurements](docs/performance.md).
 
+## Tetris example
+
+[Tetris](examples/tetris.c) provides a 10 × 20 board, all seven pieces in shuffled seven-piece bags, three upcoming pieces, a landing outline, clockwise rotation with wall/floor adjustments, soft/hard drops, line scoring, levels, pause, restart, and sleep. **Relaxed** mode uses gentle automatic falling; **Practice** mode waits for your input. Choose the mode with Up/Down on the title screen, then press Enter.
+
+After the native build below, run `./build/x4_tetris`. Left/Right moves, Up rotates, Down soft-drops, Enter hard-drops, Back pauses, and Power (`P`) cleans the screen. Holding Left, Right, or Down repeats. The pause menu offers restart, mode switching, help, and sleep. Restart and sleep require confirmation. Games are kept in memory only; this example does not write to the SD card.
+
+![Tetris running in the X4 emulator](artifacts/tetris.png)
+
+The game clock stops while drawing or waiting for the panel, and while paused. In Relaxed mode, the initial fall interval is 1.6 seconds of visible play time, decreasing to a 0.5-second minimum as levels rise. A landed piece waits 0.55 seconds before locking, with at most 15 movement/rotation resets. Practice disables both automatic fall and automatic locking; Enter places the piece. Only changed cells are redrawn during play. Full cleans happen initially and on Power, with no periodic flashing.
+
+Scoring is 100/300/500/800 points for clearing one/two/three/four rows, multiplied by the level before the clear; soft/hard drops add one/two points per row. Every ten cleared rows increases the level, capped at 20. Rotation uses simple position adjustments, not the full competitive SRS rule set; hold pieces and T-spin/combo bonuses are outside this example.
+
+Build the hardware example separately, preserving the default Paper build:
+
+```sh
+nix develop path:.#firmware
+idf.py -C firmware -B "$PWD/build-tetris" \
+  -DX4_APP_SOURCE="$PWD/examples/tetris.c" \
+  -DSDKCONFIG="$PWD/build-tetris/sdkconfig" build
+# Use the correct USB serial port for your X4:
+idf.py -C firmware -B "$PWD/build-tetris" -p /dev/ttyACM0 flash
+```
+
+The application image is `build-tetris/raylib_x4_firmware.bin` (flash offset `0x10000`). On a reader already running this target, flashing only that application leaves the existing bootloader and partition table intact. To return to Paper, flash `firmware/build/raylib_x4_firmware.bin` at `0x10000`. Both examples leave Paper's saved games intact.
+
+After building Tetris, `python3 scripts/package.py --hardware-tested` also includes `dist/tetris.bin` at offset `0x10000`. Its manifest entry has a separate hash and hardware-test attestation; the main merged image remains Paper.
+
+The portable gameplay model is in [tetris_game.c](examples/tetris_game.c). `ctest --test-dir build -R tetris --output-on-failure` checks gameplay, retained/full redraw equivalence, and scripted SDL journeys, including input during blocked refreshes. `tests/tetris_device.c` exercises the actual application on hardware with deterministic input and no save-file writes.
+
 ## Run the emulator
 
 On NixOS, from this directory:

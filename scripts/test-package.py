@@ -21,4 +21,12 @@ with tempfile.TemporaryDirectory(prefix="x4-package-test-") as temporary:
         result=subprocess.run([sys.executable,test/"scripts/package.py","--hardware-tested"],capture_output=True,text=True)
         assert result.returncode != 0 and message in result.stderr, result
         assert not (test/"dist").exists()
+    (test/"firmware/build/CMakeCache.txt").write_text("X4_QEMU_SMOKE:BOOL=OFF\n")
+    (test/"build-tetris").mkdir()
+    (test/"build-tetris/raylib_x4_firmware.bin").write_bytes(b"test-only firmware")
+    (test/"build-tetris/CMakeCache.txt").write_text("X4_APP_SOURCE:FILEPATH=/example/examples/tetris.c\nX4_QEMU_SMOKE:BOOL=ON\n")
+    result=subprocess.run([sys.executable,test/"scripts/package.py"],capture_output=True,text=True)
+    assert result.returncode != 0 and "Tetris QEMU" in result.stderr, result
+    assert not (test/"dist/tetris.bin").exists()
 print("PASS: missing and stale hardware attestations rejected before packaging")
+print("PASS: Tetris QEMU image rejected before packaging firmware")

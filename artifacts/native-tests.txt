@@ -1,21 +1,27 @@
 Test project /workspace/raylib-x4/build
-    Start 1: x4_package
-1/8 Test #1: x4_package .......................   Passed    0.07 sec
-    Start 2: x4_raster_equivalence
-2/8 Test #2: x4_raster_equivalence ............   Passed    0.19 sec
-    Start 3: paper_state
-3/8 Test #3: paper_state ......................   Passed    0.04 sec
-    Start 4: x4_core
-4/8 Test #4: x4_core ..........................   Passed    0.01 sec
-    Start 5: x4_epd
-5/8 Test #5: x4_epd ...........................   Passed    0.00 sec
-    Start 6: x4_input_timing
-6/8 Test #6: x4_input_timing ..................   Passed   30.07 sec
-    Start 7: x4_emulator
-7/8 Test #7: x4_emulator ......................   Passed   36.63 sec
-    Start 8: x4_paper_rendering
-8/8 Test #8: x4_paper_rendering ...............   Passed   10.93 sec
+      Start  1: x4_package
+ 1/11 Test  #1: x4_package .......................   Passed    0.07 sec
+      Start  2: x4_raster_equivalence
+ 2/11 Test  #2: x4_raster_equivalence ............   Passed    0.18 sec
+      Start  3: paper_state
+ 3/11 Test  #3: paper_state ......................   Passed    0.04 sec
+      Start  4: tetris_game
+ 4/11 Test  #4: tetris_game ......................   Passed    0.00 sec
+      Start  5: tetris_render
+ 5/11 Test  #5: tetris_render ....................   Passed    0.11 sec
+      Start  6: tetris_emulator
+ 6/11 Test  #6: tetris_emulator ..................   Passed   13.95 sec
+      Start  7: x4_core
+ 7/11 Test  #7: x4_core ..........................   Passed    0.01 sec
+      Start  8: x4_epd
+ 8/11 Test  #8: x4_epd ...........................   Passed    0.00 sec
+      Start  9: x4_input_timing
+ 9/11 Test  #9: x4_input_timing ..................   Passed   30.06 sec
+      Start 10: x4_emulator
+10/11 Test #10: x4_emulator ......................   Passed   36.75 sec
+      Start 11: x4_paper_rendering
+11/11 Test #11: x4_paper_rendering ...............   Passed   11.04 sec
 
-100% tests passed, 0 tests failed out of 8
+100% tests passed, 0 tests failed out of 11
 
-Total Test time (real) =  77.94 sec
+Total Test time (real) =  92.22 sec
