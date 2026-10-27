@@ -99,7 +99,7 @@ idf.py -C firmware -B "$PWD/build-paper-qa" \
 python scripts/device.py --raw --listen 90
 ```
 
-The success marker is `PAPER QA PASS`; the test remains awake for reflashing. A full-flash backup and correct serial port are required as described in the README.
+The success marker is `PAPER QA PASS`; the test remains awake for reflashing. A full-flash backup and correct serial port are required as described in the [hardware guide](hardware.md).
 
 ## Native and emulator coverage
 

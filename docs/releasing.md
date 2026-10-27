@@ -1,8 +1,8 @@
 # Preparing a release
 
-Start with a clean checkout and the pinned environments in the README. Build Paper in `firmware/build` and, optionally, Tetris in `build-tetris`. `build-hardware` may contain the diagnostic app. Do not distribute QEMU smoke images as hardware firmware.
+Start with a clean checkout and the pinned [native](emulator.md) and [firmware](hardware.md) environments. Build Paper in `firmware/build` and, optionally, Tetris in `build-tetris`. `build-hardware` may contain the diagnostic app. Do not distribute QEMU smoke images as hardware firmware.
 
-Run the native suite, sanitizer suite, and QEMU smoke test. Hardware behavior requires a physical device; keep its backup outside the project. The generic diagnostic runner writes temporary test files on the SD card, so use a test card or back it up first. Record the exact tested application hash and distinguish boot verification from full interactive or optical testing.
+Run the native suite, sanitizer suite, and QEMU smoke test using the [testing guide](testing.md). Hardware behavior requires a physical device; keep its backup outside the project. The generic diagnostic runner writes temporary test files on the SD card, so use a test card or back it up first. Record the exact tested application hash and distinguish boot verification from full interactive or optical testing.
 
 ```sh
 python3 scripts/public_audit.py --history

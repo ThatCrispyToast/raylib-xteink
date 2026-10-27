@@ -1,198 +1,62 @@
 # raylib for Xteink X4
 
-A native **480 × 800, 2D raylib target for the original ESP32-C3 Xteink X4**, with ESP-IDF firmware and the existing microreader desktop emulator. It uses upstream raylib 6.5-dev drawing, text, texture, camera, file, and input APIs. The packed software framebuffer fits in internal SRAM; no GPU or PSRAM is required.
+Build 2D applications for the **original ESP32-C3 Xteink X4** with raylib. Draw at the panel's native 480 × 800 resolution, run the same application in a desktop emulator, and deploy it with ESP-IDF.
 
-![Paper running in microreader's X4 emulator](artifacts/demo.png)
+[Documentation](docs/README.md) · [Hardware setup](docs/hardware.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
-[Emulator](#run-the-emulator) · [Hardware installation](#build-and-flash-the-device) · [Application API](#use-it-in-an-application) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
+<p>
+  <img src="artifacts/puzzle.png" width="240" alt="Paper's Lights Out puzzle in the desktop emulator">
+  <img src="artifacts/tetris.png" width="240" alt="Tetris in the desktop emulator">
+</p>
 
-Includes **Paper**, a drawing showcase and playable Lights Out puzzle with SD-card persistence. Enter opens the puzzle; arrows move around its grid and Enter flips a square and its orthogonal neighbors. Back opens a menu with undo, restart, new puzzle, help, device status, and sleep. Restart and new puzzle ask for confirmation. Power (`P` in the emulator) cleans the display and returns to the current screen. Sleep leaves a wake instruction on the panel; Power wakes the device and resumes a saved game.
+*Paper and Tetris running in the microreader desktop emulator.*
 
-Paper saves the board, cursor, starting puzzle, move count, and last 64 undo moves in `raylib-x4/paper-a.sav` and `paper-b.sav` on the SD card. Alternating, versioned, checksummed records preserve the previous save if a write is incomplete. A valid old `paper.txt` is imported without changing it; unrelated files are preserved. Save failures and no-card play are shown directly below the puzzle. Without storage, progress lasts only until the application exits.
+- **Familiar raylib APIs:** shapes, text, textures, alpha blending, 2D cameras, input, and files.
+- **Fits the X4:** four grayscale levels, dithered to monochrome, with 192 KB of pixel buffers and no PSRAM requirement.
+- **Built for e-paper:** changed-region updates, optional asynchronous presentation, and factory waveforms.
+- **Two playable examples:** Paper, a Lights Out puzzle with persistent saves and undo; and Tetris, with Normal and Practice modes.
 
-Version 1.2.0 brings ordinary cursor/menu actions down to about **0.44 seconds** on the physical X4, from 0.68 seconds in 1.1.2. The presenter keeps factory waveforms, caches their setup, and powers down after two seconds of inactivity. Paper and Tetris process ordinary input while the panel refreshes and retain the latest pending frame. They clean on startup/wake and Power; navigation and idle time do not schedule flashes. Full cleans still take about 3.8 seconds. See [measurements and limits](docs/performance.md).
+## Quickstart
 
-## Tetris example
-
-[Tetris](examples/tetris.c) provides a 10 × 20 board, all seven pieces in shuffled seven-piece bags, three upcoming pieces, a landing outline, clockwise rotation with wall/floor adjustments, soft/hard drops, line scoring, levels, pause, restart, and sleep. **Normal** mode uses automatic falling; **Practice** mode waits for your input. Choose the mode with Up/Down on the title screen, then press Enter.
-
-After the native build below, run `./build/x4_tetris`. Left/Right moves, Up rotates, Down soft-drops, Enter hard-drops, Back pauses, and Power (`P`) cleans the screen. Holding Left/Right repeats after 180 ms at 120 ms intervals; Down repeats at 60 ms intervals. Repeats catch up across refreshes, with a per-update limit of four sideways steps or twelve downward steps. Releasing stops the repeats. The pause menu offers restart, mode switching, help, and sleep. Restart and sleep require confirmation. Games are kept in memory only; this example does not write to the SD card.
-
-![Tetris running in the X4 emulator](artifacts/tetris.png)
-
-Normal mode counts ordinary refresh time toward gravity: the initial fall interval is 0.8 seconds of real time, decreasing to a 0.12-second minimum as levels rise. At higher levels, several rows may advance in one display update. Pausing, full cleaning, and showing a new piece freeze the clock. A landed piece waits 0.55 seconds of visible time before locking, with at most 15 movement/rotation resets. Practice disables both automatic fall and automatic locking; Enter places the piece. Only changed cells are redrawn during play. Full cleans happen initially and on Power, with no periodic flashing.
-
-Ordinary movement no longer blocks the game loop for the whole display refresh. The physical stress test processed frame submissions in 7 ms on average; Tetris movement processing took about 40–50 ms including its drawing and conversion. These are software response times: a factory-waveform update still needs about 0.42 seconds, and an input arriving during one may wait for the next update. New pieces, grounded pieces, confirmation dialogs, and page changes wait for presentation before continuing. See [physical performance](docs/performance.md) for complete-frame timings.
-
-Scoring is 100/300/500/800 points for clearing one/two/three/four rows, multiplied by the level before the clear; soft/hard drops add one/two points per row. Every ten cleared rows increases the level, capped at 20. Rotation uses simple position adjustments, not the full competitive SRS rule set; hold pieces and T-spin/combo bonuses are outside this example.
-
-Build the hardware example separately, preserving the default Paper build:
+On x86_64 Linux with Nix, run from the project root:
 
 ```sh
-nix develop path:.#firmware
-idf.py -C firmware -B "$PWD/build-tetris" \
-  -DX4_APP_SOURCE="$PWD/examples/tetris.c" \
-  -DSDKCONFIG="$PWD/build-tetris/sdkconfig" build
-# Use the correct USB serial port for your X4:
-idf.py -C firmware -B "$PWD/build-tetris" -p /dev/ttyACM0 flash
-```
-
-The application image is `build-tetris/raylib_x4_firmware.bin` (flash offset `0x10000`). On a reader already running this target, flashing only that application leaves the existing bootloader and partition table intact. To return to Paper, flash `firmware/build/raylib_x4_firmware.bin` at `0x10000`. Both examples leave Paper's saved games intact.
-
-After building Tetris, `python3 scripts/package.py --hardware-tested` also includes `dist/tetris.bin` at offset `0x10000`. Its manifest entry has a separate hash and hardware-test attestation; the main merged image remains Paper.
-
-The portable gameplay model is in [tetris_game.c](examples/tetris_game.c). `ctest --test-dir build -R tetris --output-on-failure` checks gameplay, retained/full redraw equivalence, and scripted SDL journeys, including input during blocked refreshes. `tests/tetris_device.c` exercises the actual application on hardware with deterministic input and no save-file writes.
-
-## Run the emulator
-
-On NixOS, from the project root:
-
-```sh
-python3 scripts/fetch-emulator.py
 nix develop path:.
+python3 scripts/fetch-emulator.py
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ./build/x4_demo
-ctest --test-dir build --output-on-failure
 ```
 
-The explicit `path:.` also works in a directory without Git metadata. The flake locks the native tools, ESP-IDF 5.5.2, RISC-V toolchain, and Espressif QEMU. On other Linux systems, CMake ≥3.20, a C99/C++17 compiler, Python ≥3.9, and SDL2 ≥2.0.22 development files suffice for the native build.
+Run `./build/x4_tetris` for Tetris. Use the arrow keys, Enter to confirm, Escape to go back, and `P` to clean the display. See [example controls](docs/examples.md) for each game.
 
-The emulator compiles microreader's real `DesktopEmulatorDisplay` and `DesktopRuntime`, including its panel crop, rotation, paper palette, and refresh delays. The adapter provides raylib input and filesystem access. It is a native firmware simulator, not a CPU emulator. `X4_SD_ROOT` selects the virtual SD directory (default `./sdcard`). Set `X4_SD_ROOT=''` to emulate no card. An unavailable root also runs without storage; an existing read-only directory lets you test save-failure feedback.
+The [emulator guide](docs/emulator.md) covers building without Nix, virtual SD storage, and screenshots.
 
-```sh
-python3 scripts/capture.py artifacts/demo.png 0   # page 0, 1, or 2
-```
+## Use it on an X4
 
-## Build and flash the device
+Follow the [hardware guide](docs/hardware.md) to build firmware, back up the reader, and install Paper or Tetris. **Installation replaces the device firmware and partition table.** This target supports the original, unlocked ESP32-C3 X4; X3, X4 Pro, and locked variants are unsupported.
 
-```sh
-nix develop path:.#firmware
-idf.py -C firmware build
-idf.py -C firmware size
-```
+On the tested reader, ordinary cursor/menu updates complete in about **0.44 seconds**, and full cleans take about **3.8 seconds**. Paper and Tetris process ordinary controls during refreshes and clean on startup/wake or Power. See [performance measurements](docs/performance.md) for scope and limits.
 
-The build produces `firmware/build/raylib_x4_firmware.bin` and the bootloader and partition table. A packaged image and checksums are in `dist/` after running `python3 scripts/package.py`. Packaging rejects common private-data leaks and unexpected release files. See [release preparation](docs/releasing.md) for source-archive verification and publishing. The optional `--hardware-tested` flag requires a passing physical QA report whose application SHA-256 matches the current binary; older evidence cannot attest a new build.
+## Write an application
 
-**This replaces the device firmware and partition table.** Use an original, unlocked ESP32-C3 X4; X3, X4 Pro, and newer locked variants are not this target. Back up the full flash before installing. With the appropriate serial port and a backup path outside the project substituted:
+Start with [examples/minimal.c](examples/minimal.c): include `raylib.h`, open a 480 × 800 window, and use the usual drawing loop. The [application guide](docs/application.md) covers custom builds, input, storage, memory limits, and the X4 refresh API.
 
-```sh
-python -m esptool --chip esp32c3 --port /dev/ttyACM0 read_flash 0 0x1000000 /path/outside/project/x4-backup.bin
-python -m esptool --chip esp32c3 --port /dev/ttyACM0 verify_flash 0 /path/outside/project/x4-backup.bin
-idf.py -C firmware -p /dev/ttyACM0 flash monitor
-```
+This is a 2D target for e-paper interfaces and games. Audio, 3D, shaders, and render textures are outside its scope.
 
-Alternatively, the packaged merged image is flashed at address **0**:
+## Documentation
 
-```sh
-python -m esptool --chip esp32c3 --port /dev/ttyACM0 write_flash 0 dist/raylib-x4.bin
-```
-
-Never flash the application-only `.bin` at address 0; its address is `0x10000`. To restore a full backup, use `python -m esptool --chip esp32c3 --port /dev/ttyACM0 write_flash 0 /path/outside/project/x4-backup.bin`. The firmware mounts an existing FAT SD card at `/sd` and never formats it. Without a card, the example runs without persistence.
-
-If Linux serial access is denied, an administrator can grant temporary access to this reader with `sudo bash scripts/grant-x4-access.sh SERIAL USER`, substituting its serial from `/dev/serial/by-id/` and your username. This targets one Espressif USB device and expires at reboot.
-
-The firmware is tested in the microreader emulator, ESP32-C3 QEMU, and on an original physical X4 with a FAT microSD card. See [validation](docs/validation.md) for measured results and limits, and the [independent user QA report](docs/qa-user-report.md) for reproduced issues and retesting. The hardware diagnostic application and USB acceptance runner are included so another board can be tested reproducibly.
-
-## Use it in an application
-
-Start with [examples/minimal.c](examples/minimal.c). Include `raylib.h` and optionally `raylib_x4.h`, and use `InitWindow(480, 800, title)`. Other window dimensions are rejected. The portrait framebuffer covers the controller's entire panel; keep content at least 14 pixels from the top and bottom to allow for the bezel.
-
-Build the same application for the emulator by selecting its entry point:
-
-```sh
-cmake -S . -B build-my-app -G Ninja \
-  -DX4_APP_SOURCE="$PWD/examples/minimal.c"
-cmake --build build-my-app -j
-./build-my-app/x4_demo
-```
-
-For multiple source files, pass `-DX4_APP_EXTRA_SOURCES="/path/helpers.c;/path/model.c"` to either build. Only the entry point's `main` is renamed for firmware. An external CMake project can instead use:
-
-```cmake
-cmake_minimum_required(VERSION 3.20)
-project(my_x4_app C CXX)
-set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-add_subdirectory(/absolute/path/to/raylib-x4 x4)
-add_executable(my_x4_app application.c)
-target_link_libraries(my_x4_app PRIVATE raylib::x4 x4_emulator)
-```
-
-To build a different C application for hardware:
-
-```sh
-nix develop path:.#firmware
-idf.py -C firmware -B "$PWD/build-my-app-firmware" \
-  -DX4_APP_SOURCE=/absolute/path/to/application.c build
-```
-
-The application supplies `int main(void)`. The firmware wrapper invokes it on the FreeRTOS main task and sleeps when it returns zero; a nonzero exit keeps USB available for recovery. Keep raylib calls on that task. Use a low target frame rate, or redraw only when state changes and call `PollInputEvents()` and `WaitTime()` while idle. `EndDrawing()` compares the output frame and skips unchanged display updates. Presentation is synchronous by default. Set `X4SetAsyncRefresh(true)` to submit ordinary updates without waiting for the waveform. Input polling services completion and starts the newest queued snapshot; older queued snapshots are replaced. The in-flight snapshot stays immutable, using the same 192 KB pixel-buffer budget. Call `X4WaitDisplay()` to drain output, or set async mode false before `EndDrawing()` when a confirmation or new game state must be visible before the next input poll. Startup, full cleans, and closing always wait. Call `PollInputEvents()` during idle loops so completion and automatic power-down can run.
-
-| Physical input | raylib key | Emulator key |
-|---|---|---|
-| Back | `KEY_ESCAPE` | Escape / Backspace |
-| Confirm | `KEY_ENTER` | Enter |
-| Left / Right | `KEY_LEFT` / `KEY_RIGHT` | Left / Right |
-| Side Up / Down | `KEY_UP` / `KEY_DOWN` | Up / Down |
-| Power | `KEY_P` | P |
-
-Buttons are debounced and sampled every 5 ms on hardware. Presses are latched across blocking display refreshes. Use `GetKeyPressed()` in a loop when input order or repeated taps matter: up to 64 press edges survive a blocking refresh. `IsKeyPressed()` remains a per-frame boolean. `X4GetStatus().dropped_input_presses` reports queue overflow. Keys held longer than 450 ms become eligible for `IsKeyPressedRepeat()` every 150 ms; at most one repeat is delivered per poll, so blocking refreshes reduce the observed rate. A resistor ladder cannot distinguish every simultaneous button combination.
-
-| X4 extension | Purpose |
+| Guide | Contents |
 |---|---|
-| `X4RefreshFull()` | Force the next frame to clean the panel |
-| `X4SetRefreshInterval(n)` | Clean after `n` partial updates; default 12, zero always cleans |
-| `X4SetAsyncRefresh(bool)` | Select blocking or nonblocking presentation for subsequent frames |
-| `X4WaitDisplay()` | Finish in-flight and queued frames; returns success |
-| `X4IsDisplayBusy()` | Query pending/in-flight output without advancing it |
-| `X4GetStats()` | Completed refreshes, coalesced frames, errors, memory, and timings |
-| `X4GetStatus()` | Calibrated battery voltage, raw button ADCs, button mask, heap, and SD status |
-| `X4GetPanelFrame()` | Read-only completed 48 KB frame; NULL while async output is in flight; 1 means white |
-| `X4GetStoragePath()` | `/sd`, the emulator SD directory, or `NULL` |
+| [Emulator](docs/emulator.md) | Build, run, virtual SD, screenshots |
+| [Hardware](docs/hardware.md) | Back up, flash, switch applications, restore |
+| [Application development](docs/application.md) | Build integration, API, input, memory |
+| [Examples](docs/examples.md) | Paper and Tetris controls, saves, game rules |
+| [Testing](docs/testing.md) | Native, sanitizer, QEMU, and device checks |
+| [Design](docs/design.md) | Renderer, memory layout, display driver |
 
-Use `X4GetStoragePath()` when forming asset/save paths. Working-directory-relative paths are not automatically mapped to SD. Limit textures and decoded images to fit the remaining heap. Loading a full-screen RGBA image requires 1.5 MB and is unsuitable for this MCU.
+The target has been exercised in microreader, ESP32-C3 QEMU, and on a physical X4. [Validation results](docs/validation.md) distinguish automated checks from physical and optical observations.
 
-The default font's atlas and glyph images live in flash. The software renderer samples the atlas directly, and `ImageText()` remains supported. Treat the glyph images returned by `GetFontDefault()` as read-only; use `ImageCopy()` before modifying them. Updating the default font texture makes a RAM copy. Texture uploads return an invalid texture when memory or texture handles run out; check `IsTextureValid()`. `X4GetStatus().largest_block` helps size allocations, which must be contiguous.
+## License
 
-Supported: 2D shapes, default bitmap text, bitmap fonts, small textures, alpha blending, camera transforms, scissor clipping, raymath, keyboard edges/repeat, timing, and SD files. Colors are quantized to four luminance levels during rendering and spatially dithered to monochrome during presentation. Image support includes PNG, BMP, TGA, and QOI; TTF, JPEG, and animated GIF are disabled in this profile.
-
-Out of scope for this constrained target: 3D/depth, audio, render textures, programmable shaders, multitouch, mouse/gamepads, window management, wireless services, and OTA. This is an e-paper target for interfaces and turn-based games; its refresh latency is not suitable for conventional real-time action games. Presentation waits for completion by default; optional async presentation keeps input processing active during partial updates. Both modes enforce a single 15-second BUSY deadline from activation.
-
-## Verification
-
-```sh
-# Native suite, including actual emulator pixel readback and save/reload
-ctest --test-dir build --output-on-failure
-
-# AddressSanitizer + UndefinedBehaviorSanitizer for the target and SSD1677 protocol
-cmake -S . -B build-test -G Ninja -DX4_SANITIZE=ON \
-  -DX4_BUILD_EMULATOR=OFF -DCMAKE_BUILD_TYPE=Debug
-cmake --build build-test -j
-ctest --test-dir build-test --output-on-failure
-
-# Real RISC-V / ESP-IDF execution with physical I/O replaced by a test HAL
-nix develop path:.#firmware -c idf.py -C firmware -B "$PWD/build-qemu" \
-  -DX4_QEMU_SMOKE=ON -DSDKCONFIG="$PWD/build-qemu/sdkconfig" build
-nix develop path:.#qemu -c python3 scripts/test-qemu.py
-```
-
-QEMU smoke images are test-only and must not be installed on the device. [Design and research](docs/design.md) describe the memory budget, upstream changes, controller protocol, and alternatives considered.
-
-To run the USB hardware acceptance app after backing up the device:
-
-```sh
-nix develop path:.#firmware
-idf.py -C firmware -B "$PWD/build-hardware" \
-  -DX4_APP_SOURCE="$PWD/examples/diagnostics.c" \
-  -DSDKCONFIG="$PWD/build-hardware/sdkconfig" build flash
-python scripts/test-device.py --port /dev/ttyACM0
-python scripts/device.py status --capture artifacts/device-frame.png
-```
-
-The runner checks pixel checksums, SD writes and PNG asset loading, texture allocation failure, unchanged frames, cleaning policy, repeated refreshes, and close/reopen. Its PNG captures are framebuffer readbacks, not photographs. The diagnostic app also accepts `scene 0` through `scene 5`, `step`, `redraw`, `full`, `interval N`, `sdtest`, `assets`, `texturetest`, `oom`, `reopen`, `reboot`, `sleep`, and `sleep3` (three-second timer wake). `--listen 60` records physical button events; `python scripts/test-sleep.py` checks three timed sleep cycles. `--raw --listen 60` monitors ordinary firmware without sending diagnostic commands. Rebuild and flash the default app to return to Paper.
-
-## Source and licensing
-
-The target and firmware integration use the zlib license; raylib retains its upstream zlib license. The emulator executable links GPL-2.0 microreader code, so that executable and its adapter are GPL-2.0. It is not linked into the hardware firmware. See [THIRD_PARTY.md](THIRD_PARTY.md).
-
-Upstream raylib is vendored at a fixed revision with a small [patch](patches/raylib-x4.patch). The emulator is fetched at a fixed revision. No upstream checkout is silently updated during a build.
+The target and firmware integration use the [zlib license](LICENSE). The desktop emulator adapter is **GPL-2.0-only**; it is not linked into the device firmware. Vendored code retains its upstream licenses. See [third-party notices](THIRD_PARTY.md).
