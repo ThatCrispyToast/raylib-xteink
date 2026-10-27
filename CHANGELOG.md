@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add an Ubuntu/Debian quickstart and fix GCC 12 builds with source-path sanitization enabled.
 - Add Docker firmware exports and headless emulator, sanitizer, and QEMU testing with pinned base images.
 - Document native CMake setup and host-side flashing without Nix.
 - Capture emulator screenshots before SDL invalidates the presented backbuffer, fixing pixel checks on Ubuntu.

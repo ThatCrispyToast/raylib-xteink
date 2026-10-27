@@ -4,11 +4,11 @@ Run these commands from the project root. The emulator uses microreader's actual
 
 ## Build
 
-On Linux, provide Git, CMake ≥3.20, a C99/C++17 compiler, Python ≥3.9, pkg-config, SDL2 ≥2.0.22 development files, and Make or Ninja. On Ubuntu 24.04/Debian 12 or newer:
+On Linux, provide Git, CMake ≥3.20, a C99/C++17 compiler, Python ≥3.9, pkg-config, SDL2 ≥2.0.22 development files, and Make or Ninja. On Ubuntu 24.04/26.04 or Debian 12/13:
 
 ```sh
 sudo apt update
-sudo apt install build-essential cmake git libsdl2-dev pkg-config python3
+sudo apt install build-essential ca-certificates cmake git libsdl2-dev pkg-config python3
 ```
 
 Then build from the project root:
@@ -18,6 +18,8 @@ python3 scripts/fetch-emulator.py
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
+
+These commands pass the full native suite in clean Ubuntu and Debian containers; see [tested versions](validation.md#ubuntu-and-debian-quickstarts).
 
 The fetch script pins microreader to the revision in [THIRD_PARTY.md](../THIRD_PARTY.md) and refuses to replace a checkout at a different revision. CMake uses your default build tool; add `-G Ninja` when creating a new build directory if preferred.
 

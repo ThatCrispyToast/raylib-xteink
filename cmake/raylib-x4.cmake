@@ -8,8 +8,9 @@ set(X4_RAYLIB_SOURCES
     ${X4_ROOT}/src/x4_display.c
     ${X4_ROOT}/src/x4_font.c)
 function(x4_configure target)
+    # Resolve rlsw's self-include after __FILE__ path remapping.
     target_include_directories(${target} PUBLIC ${X4_ROOT}/include ${X4_ROOT}/vendor/raylib/src
-        PRIVATE ${X4_ROOT}/src)
+        PRIVATE ${X4_ROOT}/src ${X4_ROOT})
     target_compile_options(${target} PRIVATE -include ${X4_ROOT}/src/x4_config.h
         -ffunction-sections -fdata-sections
         "-fmacro-prefix-map=${X4_ROOT}/=")

@@ -33,6 +33,22 @@ On the tested reader, ordinary cursor/menu updates complete in about **0.44 seco
 ## Desktop emulator
 
 <details>
+<summary>Quickstart on Ubuntu / Debian</summary>
+
+Tested on Ubuntu 24.04/26.04 and Debian 12/13. Install the distribution packages, then build and run from the project root:
+
+```sh
+sudo apt update
+sudo apt install build-essential ca-certificates cmake git libsdl2-dev pkg-config python3
+python3 scripts/fetch-emulator.py
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+./build/x4_demo
+```
+
+</details>
+
+<details>
 <summary>Quickstart with CMake (Linux)</summary>
 
 On Linux, install the [build dependencies](docs/emulator.md#build) (CMake, a C/C++ compiler, Python, Git, and SDL2), then run from the project root:

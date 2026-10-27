@@ -2,6 +2,21 @@
 
 Latest validation on 2026-10-27 on NixOS x86_64. Exact tool versions are locked in `flake.lock`; the embedded SDK is ESP-IDF 5.5.2 and the emulator is Espressif QEMU 9.2.2. The native display emulator is microreader revision `a4adfdb9a37b83bcb724cac3dc8990f335b49e8a`.
 
+## Ubuntu and Debian quickstarts
+
+The native quickstart was tested on 2026-10-27 in clean official x86-64 containers with only the documented apt packages and their dependencies. Each used CMake's default Make generator, fetched the pinned microreader revision, ran the complete native suite, and captured Paper's showcase and puzzle screens.
+
+| Container | GCC | CMake | SDL2 | CTest |
+|---|---|---|---|---|
+| Ubuntu 24.04 | 13.3.0 | 3.28.3 | 2.30.0 | 12/12 pass |
+| Ubuntu 26.04 | 15.2.0 | 4.2.3 | 2.32.10 | 12/12 pass |
+| Debian 12 | 12.2.0 | 3.25.1 | 2.26.5 | 12/12 pass |
+| Debian 13 | 14.2.0 | 3.31.6 | 2.32.4 | 12/12 pass |
+
+Debian 12 initially failed because source-path sanitization made `rlsw.h`'s `#include __FILE__` relative. Adding the project root as a private include directory resolves that path while retaining the privacy mapping. The shared CMake change also passes a Paper firmware build, binary privacy checks, and the ESP32-C3 QEMU smoke test.
+
+Ubuntu tests used the official US package mirror after slow downloads from the default mirror. All container rendering was headless; these runs do not test desktop compositor integration or physical hardware.
+
 ## Docker workflow
 
 The [Docker workflow](docker.md) was exercised with rootless Docker 29.7.2 on x86-64 Linux, using the pinned Ubuntu 24.04 and official ESP-IDF 5.5.2 images. The Docker test target passes 12/12 native/emulator tests, 8/8 ASan/UBSan tests, and the ESP32-C3 QEMU smoke test. Forcing fresh test stages with `--no-cache-filter` also passes. The existing Nix environment passes its full 12-test suite and, after the final headless-renderer change, all four affected emulator suites.
