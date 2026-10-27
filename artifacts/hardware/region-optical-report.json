@@ -1,0 +1,9 @@
+{
+  "result": "NOT_OBSERVED",
+  "requested_via": "Visual inspection requested",
+  "screen": "PARTIAL REFRESH / UPDATE 240",
+  "partial_updates_without_clean": 200,
+  "framebuffer_capture": "artifacts/hardware/region-regression/partial-soak.png",
+  "note": "Software framebuffer capture is not an optical measurement. Awaiting owner observation. Production Paper restored after the inspection window.",
+  "production_restored_utc": "2026-10-27T03:59:40.837396+00:00"
+}

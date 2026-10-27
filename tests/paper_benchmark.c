@@ -1,6 +1,7 @@
 // Exercise the actual Paper drawing code on the MCU without touching saved games.
 #include "raylib.h"
 #include "raylib_x4.h"
+#include "../src/x4_epd.h"
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -42,9 +43,12 @@ static void benchmark_end(void)
     double draw=GetTime()-draw_start;
     EndDrawing();
     X4Stats s=X4GetStats();
+    X4EpdStats e=x4_epd_stats();
     printf("PAPER_PERF frame=%u key=%d draw_ms=%.3f convert_ms=%.3f present_ms=%.3f total_ms=%.3f action_ms=%.3f full=%u partial=%u errors=%u\n",
         frame,actions[frame],draw*1000,s.last_convert_seconds*1000,s.last_present_seconds*1000,
         (GetTime()-draw_start)*1000,(GetTime()-action_start)*1000,s.full_refreshes,s.partial_refreshes,s.errors);
+    printf("PANEL_PERF bytes=%u window=%ux%u transfer_ms=%.3f waveform_ms=%.3f\n",
+        e.ram_bytes,e.window_width,e.window_height,e.transfer_us/1000.0,e.waveform_us/1000.0);
     fflush(stdout); frame++; delivered=false;
 }
 #undef main

@@ -1,0 +1,46 @@
+{
+  "result": "PASS",
+  "version": "1.1.2",
+  "baseline_commit": "0d06fd6",
+  "scope": "Same scripted application actions on physical X4, through BUSY completion; excludes mechanical debounce, waiting in the input queue, and optical pixel settling. Isolated real SD saves. Room temperature, one reader/card, small sample counts.",
+  "samples": {
+    "cursor": {
+      "samples": 9,
+      "median_action_ms": 677.013,
+      "median_draw_ms": 8.551,
+      "median_convert_ms": 18.762,
+      "median_present_ms": 648.791,
+      "median_transfer_ms": 3.976,
+      "median_waveform_ms": 641.117,
+      "median_bytes": 4446.0,
+      "max_action_ms": 677.342
+    },
+    "menu": {
+      "samples": 7,
+      "median_action_ms": 679.188,
+      "median_draw_ms": 3.564,
+      "median_convert_ms": 18.697,
+      "median_present_ms": 656.388,
+      "median_transfer_ms": 10.914,
+      "median_waveform_ms": 639.701,
+      "median_bytes": 18312.0,
+      "max_action_ms": 679.668
+    },
+    "save": {
+      "samples": 2,
+      "median_action_ms": 772.665,
+      "median_draw_ms": 42.175,
+      "median_convert_ms": 18.84,
+      "median_present_ms": 668.919,
+      "median_transfer_ms": 24.465,
+      "median_waveform_ms": 639.616,
+      "median_bytes": 46003.5,
+      "max_action_ms": 784.152
+    }
+  },
+  "full_refreshes": 1.0,
+  "partial_refreshes": 22.0,
+  "errors": 0.0,
+  "benchmark_sha256": "02782ca0f968d0c1e993b318558aacb7f4af0c242527ed776dbbc5a27b0ecd62",
+  "diagnostic_sha256": "0931baf180e81b25b909b2f8ef2f9db09394e1f449449a787e74d5aef28d9ee9"
+}

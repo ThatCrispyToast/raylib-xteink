@@ -46,3 +46,12 @@ __pycache__/
 /artifacts/hardware/performance-regression/*
 !/artifacts/hardware/performance-regression/report.json
 !/artifacts/hardware/qa-1.1.0-report.json
+
+!/artifacts/hardware/qa-1.1.1-report.json
+!/artifacts/hardware/region-performance.log
+!/artifacts/hardware/region-performance-report.json
+!/artifacts/hardware/region-regression/
+/artifacts/hardware/region-regression/*
+!/artifacts/hardware/region-regression/report.json
+!/artifacts/hardware/region-regression/partial-soak.png
+!/artifacts/hardware/region-optical-report.json

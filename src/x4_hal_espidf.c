@@ -28,6 +28,7 @@ static int64_t changed_at, battery_sample_at;
 static int last_front = -1, last_side = -1, battery_mv = -1;
 
 static void sleep_ms(unsigned int ms) { vTaskDelay(pdMS_TO_TICKS(ms) ? pdMS_TO_TICKS(ms) : 1); }
+static uint64_t time_us(void) { return esp_timer_get_time(); }
 static bool busy(void) { return gpio_get_level(GPIO_NUM_6); }
 static void reset(bool high) { gpio_set_level(GPIO_NUM_5, high); }
 static bool write_spi(bool data, const uint8_t *bytes, size_t size)
@@ -96,7 +97,7 @@ bool x4_hal_init(const char *title)
     bus_initialized = true;
     spi_device_interface_config_t device = { .clock_speed_hz = 20000000, .mode = 0, .spics_io_num = -1, .queue_size = 1 };
     if (spi_bus_add_device(SPI2_HOST, &device, &spi) != ESP_OK) goto fail;
-    X4EpdIO io = { write_spi, busy, reset, sleep_ms };
+    X4EpdIO io = { write_spi, busy, reset, sleep_ms, time_us };
     if (!x4_epd_init(&io)) goto fail;
     panel_initialized = true;
     adc_oneshot_unit_init_cfg_t unit = { .unit_id = ADC_UNIT_1 };

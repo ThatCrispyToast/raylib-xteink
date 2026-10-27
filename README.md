@@ -8,7 +8,7 @@ Includes **Paper**, a drawing showcase and playable Lights Out puzzle with SD-ca
 
 Paper saves the board, cursor, starting puzzle, move count, and last 64 undo moves in `raylib-x4/paper-a.sav` and `paper-b.sav` on the SD card. Alternating, versioned, checksummed records preserve the previous save if a write is incomplete. A valid old `paper.txt` is imported without changing it; unrelated files are preserved. Save failures and no-card play are shown directly below the puzzle. Without storage, progress lasts only until the application exits.
 
-The 1.1.1 performance fix reduces measured physical cursor updates from 2.45 seconds to about 0.73 seconds, and menu selection updates from 2.08 seconds to about 0.73 seconds. Rapid taps keep their order. Paper redraws only changed selections and waits for three seconds of idle time before its periodic cleaning refresh (after at least 12 partial updates). Power still requests a clean immediately. The current panel waveform takes about 0.7 seconds for a partial update and 3.8 seconds for a full clean; this remains an e-paper interface. See [physical performance measurements](docs/performance.md).
+Paper 1.1.2 measures about 0.68 seconds for cursor/menu updates on the physical X4, down from 0.73 seconds in 1.1.1 and 2.45/2.08 seconds originally. Puzzle flips with SD saves measure about 0.77 seconds. Rapid taps keep their order. Paper cleans on startup/wake and when you press Power; navigation, idle time, and entering Sleep no longer schedule a full-screen flash. Press Power if ghosting becomes distracting. The stock panel waveform accounts for about 0.64 seconds of a partial update; full cleans take about 3.8 seconds. See [physical performance measurements](docs/performance.md).
 
 ## Run the emulator
 

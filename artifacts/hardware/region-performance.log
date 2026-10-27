@@ -1,0 +1,100 @@
+I (133) esp_image: segment 4: paddr=00084dc0 vaddr=4038329c size=065b4h ( 26036) load
+I (140) esp_image: segment 5: paddr=0008b37c vaddr=50000000 size=00034h (    52) load
+I (143) boot: Loaded app from partition at offset 0x10000
+I (143) boot: Disabling RNG early entropy source...
+I (145) cpu_start: Unicore app
+I (153) cpu_start: Pro cpu start user code
+I (153) cpu_start: cpu freq: 160000000 Hz
+I (153) app_init: Application information:
+I (153) app_init: Project name:     raylib_x4_firmware
+I (153) app_init: App version:      1.1.1
+I (153) app_init: Compile time:     Jan  1 1980 00:00:00
+I (154) app_init: ELF file SHA256:  e68723fb1...
+I (154) app_init: ESP-IDF:          v5.5.2
+I (154) efuse_init: Min chip rev:     v0.3
+I (154) efuse_init: Max chip rev:     v1.99 
+I (154) efuse_init: Chip rev:         v0.4
+I (154) heap_init: Initializing. RAM available for dynamic allocation:
+I (154) heap_init: At 3FCA5670 len 0001A990 (106 KiB): RAM
+I (155) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (155) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (155) heap_init: At 50000034 len 00001FB4 (7 KiB): RTCRAM
+I (157) spi_flash: detected chip: generic
+I (157) spi_flash: flash io: dio
+I (157) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (158) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (159) main_task: Started on CPU0
+I (160) main_task: Calling app_main()
+X4: reset=11 wake=0
+X4: boot heap=215624 largest=114688
+INFO: Initializing raylib 6.5-dev
+INFO: Platform backend: CUSTOM
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... not loaded (optional)
+INFO:     > raudio:.... not loaded (optional)
+I (211) sdspi_transaction: cmd=52, R1 response: command not supported
+I (254) sdspi_transaction: cmd=5, R1 response: command not supported
+INFO: RLSW: Software renderer initialized successfully
+INFO: RLGL: Default OpenGL state initialized successfully
+INFO: SYSTEM: Working Directory: /
+INFO: TIMER: Target time per frame: 100.000 milliseconds
+INFO: TEXTURE: [ID 2] Texture loaded successfully (32x32 | R8G8B8A8 | 1 mipmaps)
+PAPER_PERF frame=0 key=0 draw_ms=266.731 convert_ms=18.652 present_ms=3771.160 total_ms=4057.029 action_ms=4057.094 full=1 partial=0 errors=0
+PANEL_PERF bytes=144000 window=800x480 transfer_ms=60.765 waveform_ms=3709.113
+X4: Paper ready heap=69776 minimum=56972 largest=29696 sd=1
+PAPER_PERF frame=1 key=257 draw_ms=176.103 convert_ms=18.797 present_ms=699.117 total_ms=894.575 action_ms=894.637 full=1 partial=1 errors=0
+PANEL_PERF bytes=106080 window=680x416 transfer_ms=53.178 waveform_ms=639.454
+PAPER_PERF frame=2 key=262 draw_ms=8.294 convert_ms=18.769 present_ms=648.964 total_ms=676.977 action_ms=677.059 full=1 partial=2 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=3.979 waveform_ms=641.227
+PAPER_PERF frame=3 key=262 draw_ms=8.551 convert_ms=18.788 present_ms=648.885 total_ms=677.041 action_ms=677.111 full=1 partial=3 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=4.053 waveform_ms=641.117
+PAPER_PERF frame=4 key=264 draw_ms=8.764 convert_ms=18.747 present_ms=647.689 total_ms=676.018 action_ms=676.082 full=1 partial=4 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.974 waveform_ms=640.033
+PAPER_PERF frame=5 key=263 draw_ms=8.672 convert_ms=18.547 present_ms=648.904 total_ms=676.938 action_ms=677.013 full=1 partial=5 errors=0
+PANEL_PERF bytes=4830 window=80x161 transfer_ms=4.169 waveform_ms=641.071
+PAPER_PERF frame=6 key=265 draw_ms=8.341 convert_ms=18.807 present_ms=648.359 total_ms=676.461 action_ms=676.543 full=1 partial=6 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.976 waveform_ms=641.226
+PAPER_PERF frame=7 key=256 draw_ms=114.029 convert_ms=18.813 present_ms=701.100 total_ms=834.480 action_ms=834.531 full=1 partial=7 errors=0
+PANEL_PERF bytes=111180 window=680x436 transfer_ms=56.008 waveform_ms=639.569
+PAPER_PERF frame=8 key=264 draw_ms=3.105 convert_ms=18.969 present_ms=656.754 total_ms=679.358 action_ms=679.414 full=1 partial=8 errors=0
+PANEL_PERF bytes=19620 window=120x436 transfer_ms=11.852 waveform_ms=639.429
+PAPER_PERF frame=9 key=264 draw_ms=3.612 convert_ms=18.781 present_ms=656.688 total_ms=679.618 action_ms=679.668 full=1 partial=9 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=11.012 waveform_ms=639.754
+PAPER_PERF frame=10 key=264 draw_ms=3.564 convert_ms=18.697 present_ms=656.728 total_ms=679.519 action_ms=679.571 full=1 partial=10 errors=0
+PANEL_PERF bytes=19620 window=120x436 transfer_ms=11.903 waveform_ms=639.338
+PAPER_PERF frame=11 key=264 draw_ms=3.106 convert_ms=18.967 present_ms=656.388 total_ms=679.127 action_ms=679.188 full=1 partial=11 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=10.850 waveform_ms=639.701
+PAPER_PERF frame=12 key=264 draw_ms=3.583 convert_ms=18.550 present_ms=656.310 total_ms=678.978 action_ms=679.026 full=1 partial=12 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=10.676 waveform_ms=639.831
+PAPER_PERF frame=13 key=265 draw_ms=3.649 convert_ms=18.684 present_ms=656.262 total_ms=679.131 action_ms=679.183 full=1 partial=13 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=10.637 waveform_ms=639.807
+PAPER_PERF frame=14 key=265 draw_ms=3.557 convert_ms=18.694 present_ms=656.167 total_ms=678.951 action_ms=679.002 full=1 partial=14 errors=0
+PANEL_PERF bytes=18312 window=112x436 transfer_ms=10.914 waveform_ms=639.626
+PAPER_PERF frame=15 key=256 draw_ms=176.430 convert_ms=18.799 present_ms=702.038 total_ms=897.802 action_ms=897.862 full=1 partial=15 errors=0
+PANEL_PERF bytes=111180 window=680x436 transfer_ms=55.450 waveform_ms=641.157
+PAPER_PERF frame=16 key=263 draw_ms=8.355 convert_ms=18.772 present_ms=649.180 total_ms=677.263 action_ms=677.342 full=1 partial=16 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=3.973 waveform_ms=641.226
+PAPER_PERF frame=17 key=262 draw_ms=8.522 convert_ms=18.762 present_ms=648.791 total_ms=677.023 action_ms=677.097 full=1 partial=17 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=4.060 waveform_ms=641.111
+PAPER_PERF frame=18 key=264 draw_ms=8.640 convert_ms=18.736 present_ms=647.696 total_ms=676.017 action_ms=676.084 full=1 partial=18 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.970 waveform_ms=640.042
+PAPER_PERF frame=19 key=265 draw_ms=8.616 convert_ms=18.548 present_ms=648.550 total_ms=676.657 action_ms=676.739 full=1 partial=19 errors=0
+PANEL_PERF bytes=4446 window=152x78 transfer_ms=3.974 waveform_ms=641.135
+Paper: saved board=7549210 turns=1 cursor=1 slot=0
+PAPER_PERF frame=20 key=257 draw_ms=42.052 convert_ms=18.832 present_ms=667.320 total_ms=729.172 action_ms=784.152 full=1 partial=20 errors=0
+PANEL_PERF bytes=42282 window=464x243 transfer_ms=22.914 waveform_ms=639.606
+PAPER_PERF frame=21 key=262 draw_ms=8.773 convert_ms=18.560 present_ms=648.310 total_ms=676.462 action_ms=676.533 full=1 partial=21 errors=0
+PANEL_PERF bytes=4347 window=72x161 transfer_ms=4.233 waveform_ms=639.866
+Paper: saved board=7549332 turns=2 cursor=2 slot=1
+PAPER_PERF frame=22 key=257 draw_ms=42.299 convert_ms=18.849 present_ms=670.518 total_ms=732.369 action_ms=761.178 full=1 partial=22 errors=0
+PANEL_PERF bytes=49725 window=408x325 transfer_ms=26.016 waveform_ms=639.627
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+X4: frames=23 full=1 partial=22 unchanged=0 errors=0 buffers=192000
+INFO: TEXTURE: [ID 1] Unloaded texture data from VRAM (GPU)
+INFO: Window closed successfully
+PAPER_PERF_DONE result=0

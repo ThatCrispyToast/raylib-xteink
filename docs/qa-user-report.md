@@ -177,7 +177,7 @@ The final retained-redraw build, emulator SHA-256 `30382f9c61b36dcf3787b6b54214c
 | Release during a long clean pause | The original press survives; stale held-key repeats are not replayed after release. |
 | Ordinary held navigation | Repeats occur and movement settles within one normal refresh after release. |
 
-Separate timing runs verified the idle-clean policy. Thirteen cursor moves plus one flip produced 14 partial updates and only the initial full refresh while active. Continuing the same run without input produced exactly one additional full clean at 9.815 seconds, about three seconds after the last action at 6.800 seconds. The final game state was identical. This removes the earlier automatic full-clean interruption on the thirteenth navigation update.
+Separate timing runs verified the idle-clean policy. Thirteen cursor moves plus one flip produced 14 partial updates and only the initial full refresh while active. Continuing the same run without input produced exactly one additional full clean at 9.815 seconds, about three seconds after the last action at 6.800 seconds. The final game state was identical. This removed the earlier automatic full-clean interruption on the thirteenth navigation update. The owner later requested fewer flashes, and release 1.1.2 supersedes this idle-clean policy with the manual-clean policy tested below.
 
 ### Retained drawing correctness
 
@@ -193,3 +193,29 @@ A physical latency run should timestamp the debounced press, delivery to Paper, 
 
 
 The final 1.1.1 release rebuild (`76f4dff3cd0cc2ff53ab1da7803a4e56fe2e657f340e697a435b376e080e08de`) also passed the complete seven-test CTest suite, including all nine wall-clock scenarios. Physical measurements and their scope are now recorded separately in [the performance report](performance.md); ordinary selection updates measured about 0.73 seconds, with the unchanged panel waveform accounting for most of that time.
+
+
+## Manual-clean policy and retained puzzle updates (1.1.2)
+
+The owner requested fewer full-screen flashes and further speed improvements. Paper now leaves cleaning to its initial display setup and an explicit Power press. Cursor movement, menu navigation, idle time, and the Sleep screen do not request full cleans. The existing `POWER: CLEAN` footer makes recovery from visible ghosting discoverable. This policy applies to Paper; the generic target's `X4SetRefreshInterval()` contract and default remain unchanged.
+
+The checked-in `scripts/test-emulator.py` now enforces this behavior:
+
+| Scenario | Observed result |
+|---|---|
+| 64 grid moves, 64 menu moves, then long idle | 131 actual partial presentations, exactly one initial full refresh, and 6.2 seconds with no further presentation. |
+| The same puzzle with one Power press | Exactly one additional full refresh; final pixels identical to the run without Power. Another 6.2 seconds idle caused no extra presentation. |
+| Choose Sleep after a move | No full refresh beyond initialization; board, cursor, move count, and undo history saved successfully. |
+| Relaunch the saved game | Exactly one initial full refresh, no partial refreshes, and the saved state preserved. |
+
+The tests check the age of the last screenshot as well as refresh counters, so changing the application's idle-poll interval cannot silently turn the idle scenario into a short pause. The preserved prior build failed the long-navigation test with two full refreshes; the updated policy passed in the native CTest run. These are emulator assertions about refresh requests and application behavior, not photographs or electrical measurements.
+
+A separate new test, `scripts/test-paper-rendering.py`, checks the expanded retained drawing path for game moves. It compares each final retained puzzle image with the same seeded journey followed by Back → Back, which forces the complete puzzle page to redraw without altering the game. Each pair starts from independent identical storage, and save records must remain identical. The script copies the tested executable before starting, keeping all comparisons on the same binary.
+
+```sh
+python3 scripts/test-paper-rendering.py build --output /tmp/x4-paper-rendering
+```
+
+**All 47 comparisons passed with byte-identical screenshots and unchanged save records.** Coverage includes a flip at every one of the 25 cells, four transitions into the solved state, leaving and navigating a solved board, repeated and overlapping flips, undo and menu transitions, clearing notices, move-counter width changes, the uint32 move limit, save failure, recovery-status changes, and no-card play. The save-failure fixture blocks the alternate journal with a directory, making the failure deterministic without relying on user permissions. Representative solved, unsolved, move-limit, and failed-save screens were also visually inspected and remained clear.
+
+The tested retained-puzzle emulator SHA-256 was `b1e515e6e4fb53eb9003bc5656a067c599ad262e193738f931d5b64ff1689d90`. Local comparison evidence is `/tmp/x4-user-qa/flip-rendering/run-j1gg07c0/`; policy results are recorded in the native CTest log. The main agent separately performs the physical response-time measurements and extended partial-refresh soak described in [performance measurements](performance.md). This independent pass did not access the reader, evaluate panel ghosting, change voltage/LUT settings, or certify physical waveform behavior.

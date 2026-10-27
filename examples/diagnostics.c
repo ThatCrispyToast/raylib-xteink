@@ -160,7 +160,7 @@ static bool command(char *line)
     else if (!strcmp(line,"step")) { revision++; draw_scene(); }
     else if (!strcmp(line,"redraw")) draw_scene();
     else if (!strcmp(line,"full")) { X4RefreshFull(); draw_scene(); }
-    else if (sscanf(line,"interval %u",&value) == 1 && value <= 100) { X4SetRefreshInterval(value); status("status"); }
+    else if (sscanf(line,"interval %u",&value) == 1) { X4SetRefreshInterval(value); status("status"); }
     else if (!strcmp(line,"sdtest")) sd_test();
     else if (!strcmp(line,"assets")) asset_test();
     else if (!strcmp(line,"texturetest")) {

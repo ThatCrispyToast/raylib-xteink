@@ -24,6 +24,14 @@ static void cell(uint32_t board, int index, bool selected)
 }
 static void menu_selection(int menu, Color color)
 { DrawRectangleLinesEx((Rectangle){22,140+menu*61,436,48},3,color); }
+static void puzzle_heading(uint32_t board)
+{ label(board ? "Make every square white." : "Solved! Back for a new puzzle.",28,148,24); }
+static void puzzle_footer(const PaperState *state, const char *notice)
+{
+    label(TextFormat("%u moves",(unsigned)state->turns),28,640,20);
+    label(notice ? notice : "BACK: undo / new puzzle / help",28,666,18);
+    label(PaperSaveMessage(state),28,692,16);
+}
 static uint32_t new_board(uint32_t previous)
 {
     uint32_t board;
@@ -38,14 +46,12 @@ int main(void)
     InitWindow(X4_WIDTH, X4_HEIGHT, "Paper / raylib for Xteink X4");
     if (!IsWindowReady()) return 1;
     SetTargetFPS(10); SetExitKey(KEY_NULL);
-    X4SetRefreshInterval(UINT_MAX); // Paper schedules periodic cleans when navigation is idle.
+    X4SetRefreshInterval(UINT_MAX); // Clean on wake or Power; navigation does not schedule flashes.
     PaperState state; PaperLoad(&state, X4GetStoragePath());
     int page=state.loaded ? 1 : 0, menu=0, confirm=0;
     bool dirty=true, in_menu=false, help=false, sleep=false;
     const char *notice=NULL;
     bool confirmation_shown=false, discard_queued_enter=false;
-    double last_action=GetTime();
-    unsigned int last_full=0, partials_at_full=0;
     struct { int kind, cursor, menu; uint32_t board, turns; PaperSaveStatus status; const char *notice; } drawn={0};
     Image checker=GenImageChecked(32,32,4,4,WHITE,BLACK);
     Texture2D tile=LoadTextureFromImage(checker); UnloadImage(checker);
@@ -56,7 +62,6 @@ int main(void)
         discard_queued_enter=false;
         const int arrows[]={KEY_LEFT,KEY_RIGHT,KEY_UP,KEY_DOWN};
         if (!count) for (int i=0; i<4; i++) if (IsKeyPressedRepeat(arrows[i])) keys[count++]=arrows[i];
-        if (count) last_action=GetTime();
         for (int event=0; event<count; event++) {
             key=keys[event];
             if (key == KEY_P) { X4RefreshFull(); dirty=true; }
@@ -105,28 +110,26 @@ int main(void)
             }
             if (sleep) break;
         }
-        X4Stats refresh=X4GetStats();
-        if (refresh.full_refreshes != last_full) {
-            last_full=refresh.full_refreshes; partials_at_full=refresh.partial_refreshes;
-        }
-        if (!dirty && refresh.partial_refreshes-partials_at_full >= 12 &&
-            GetTime()-last_action >= 3 && !X4GetStatus().buttons) {
-            X4RefreshFull(); dirty=true;
-        }
         if (!dirty) { WaitTime(0.02); PollInputEvents(); continue; }
         int kind=(!sleep && !confirm && !help) ? (in_menu ? 2 : page == 1 ? 1 : 0) : 0;
-        bool cursor_only=kind == 1 && drawn.kind == 1 && drawn.board == state.board &&
-            drawn.turns == state.turns && drawn.status == state.status && drawn.notice == notice;
+        bool puzzle_only=kind == 1 && drawn.kind == 1;
         bool menu_only=kind == 2 && drawn.kind == 2 && drawn.status == state.status;
         BeginDrawing();
-        if (cursor_only) {
-            cell(state.board,drawn.cursor,false); cell(state.board,state.cursor,true);
+        if (puzzle_only) {
+            uint32_t changed=drawn.board^state.board;
+            for (int i=0; i<25; i++) if ((changed & (1u<<i)) || i == drawn.cursor || i == state.cursor)
+                cell(state.board,i,i == state.cursor);
+            if (!drawn.board != !state.board) {
+                DrawRectangle(28,148,424,24,WHITE); puzzle_heading(state.board);
+            }
+            if (drawn.turns != state.turns || drawn.status != state.status || drawn.notice != notice) {
+                DrawRectangle(28,640,424,70,WHITE); puzzle_footer(&state,notice);
+            }
         } else if (menu_only) {
             menu_selection(drawn.menu,WHITE); menu_selection(menu,BLACK);
         } else {
             ClearBackground(WHITE);
             if (sleep) {
-                X4RefreshFull();
                 label("PAPER IS ASLEEP", 28, 230, 34);
                 label("Press Power to wake.", 28, 308, 26);
                 label(PaperSaveMessage(&state), 28, 380, 20);
@@ -178,12 +181,10 @@ int main(void)
                 label(PaperSaveMessage(&state),28,666,18);
             } else if (page == 1) {
                 header("LIGHTS OUT", "ARROWS: MOVE    ENTER: FLIP");
-                label(state.board ? "Make every square white." : "Solved! Back for a new puzzle.",28,148,24);
+                puzzle_heading(state.board);
                 label("Enter flips a cross of neighbors.",28,196,20);
                 for (int i=0; i<25; i++) cell(state.board,i,i == state.cursor);
-                label(TextFormat("%u moves",(unsigned)state.turns),28,640,20);
-                label(notice ? notice : "BACK: undo / new puzzle / help",28,666,18);
-                label(PaperSaveMessage(&state),28,692,16);
+                puzzle_footer(&state,notice);
             } else {
                 header("DEVICE STATUS", "ENTER: PLAY    LEFT/RIGHT: SHOWCASE");
                 X4Stats stats=X4GetStats(); X4Status device=X4GetStatus();

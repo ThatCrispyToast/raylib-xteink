@@ -18,7 +18,11 @@ def main():
     parser.add_argument('--port', default='/dev/ttyACM0')
     parser.add_argument('--output', type=Path, default=Path('artifacts/hardware/acceptance'))
     parser.add_argument('--steps', type=int, default=40)
+    parser.add_argument('--partial-soak', type=int, default=0,
+                        help='Additional updates without automatic cleaning; leaves the result visible for inspection')
     args = parser.parse_args()
+    if args.steps < 1 or args.partial_soak < 0:
+        parser.error('--steps must be positive and --partial-soak nonnegative')
     args.output.mkdir(parents=True, exist_ok=True)
     records = []
     start = time.monotonic()
@@ -75,10 +79,28 @@ def main():
                 reopened = command('reopen','ready')
                 require(reopened['sd'], 'SD remount failed')
                 require(reopened['heap'] >= baseline-512, 'Resource leak after reopen')
+            if args.partial_soak:
+                command('interval 4294967295', 'status')
+                command('scene 1')
+                soak = command('full')
+                for index in range(args.partial_soak):
+                    after = command('step')
+                    require(after['full'] == soak['full'], 'Unexpected full clean during partial soak')
+                    require(after['partial'] == soak['partial']+index+1, 'Partial update missing')
+                    require(after['heap'] == soak['heap'], 'Heap changed during partial soak')
+                    if index % 50 == 49:
+                        require(command('sdtest', 'sd_test')['ok'], 'Shared SPI SD round trip failed')
+                        device.event('status')
+                device.frame(args.output/'partial-soak.png')
+                same = command('redraw')
+                require(same['hash'] == after['hash'] and same['skipped'] == after['skipped']+1,
+                        'Final soak frame was not stable')
             final = command('status', 'status')
         finally:
             device.close()
     report = dict(result='PASS',elapsed_seconds=round(time.monotonic()-start,2),
+                  partial_soak_updates=args.partial_soak,
+                  optical_scope='Framebuffer captures do not measure physical ghosting; visual inspection is separate.',
                   initial=initial,final=final,records=records)
     (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
     print(f'PASS: {len(records)} physical-device checks; logs and captures in {args.output}')

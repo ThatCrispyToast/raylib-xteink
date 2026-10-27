@@ -11,50 +11,57 @@
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
 -- Found Python3: /nix/store/jj6jldlw37r8yy9kc1smrax9dhnjm2x4-python3-3.13.9/bin/python3.13 (found version "3.13.9") found components: Interpreter
--- Configuring done (0.4s)
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
--- Build files have been written to: /tmp/x4-perf-archive.JBl5S7/build
-[1/29] Building C object CMakeFiles/raylib_x4.dir/src/x4_font.c.o
-[2/29] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_font.c.o
-[3/29] Building C object CMakeFiles/raylib_x4.dir/src/x4_display.c.o
-[4/29] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_display.c.o
-[5/29] Building C object CMakeFiles/x4_raster_fast.dir/tests/hal_test.c.o
-[6/29] Building C object CMakeFiles/x4_raster_reference.dir/tests/hal_test.c.o
-[7/29] Building C object CMakeFiles/x4_raster_fast.dir/tests/test_raster_compare.c.o
-[8/29] Building C object CMakeFiles/x4_raster_reference.dir/tests/test_raster_compare.c.o
-[9/29] Building C object CMakeFiles/x4_tests.dir/tests/hal_test.c.o
-[10/29] Building C object CMakeFiles/paper_tests.dir/tests/test_paper.c.o
-[11/29] Building C object CMakeFiles/x4_epd_tests.dir/tests/test_epd.c.o
-[12/29] Building C object CMakeFiles/paper_tests.dir/examples/paper_state.c.o
-[13/29] Building C object CMakeFiles/x4_epd_tests.dir/src/x4_epd.c.o
-[14/29] Linking C executable paper_tests
-[15/29] Linking C executable x4_epd_tests
-[16/29] Building C object CMakeFiles/x4_tests.dir/tests/test_x4.c.o
-[17/29] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtext.c.o
-[18/29] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtext.c.o
-[19/29] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rshapes.c.o
-[20/29] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rshapes.c.o
-[21/29] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rcore.c.o
-[22/29] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rcore.c.o
-[23/29] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtextures.c.o
-[24/29] Linking C static library libraylib_x4.a
-[25/29] Linking C executable x4_raster_fast
-[26/29] Linking C executable x4_tests
-[27/29] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtextures.c.o
-[28/29] Linking C static library libraylib_x4_reference.a
-[29/29] Linking C executable x4_raster_reference
-Test project /tmp/x4-perf-archive.JBl5S7/build
+-- Build files have been written to: /tmp/raylib-x4-1.1.2-archive-a0shpx/build
+[  3%] Building C object CMakeFiles/paper_tests.dir/examples/paper_state.c.o
+[  6%] Building C object CMakeFiles/paper_tests.dir/tests/test_paper.c.o
+[ 10%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rcore.c.o
+[ 13%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rshapes.c.o
+[ 20%] Building C object CMakeFiles/x4_epd_tests.dir/tests/test_epd.c.o
+[ 20%] Building C object CMakeFiles/x4_epd_tests.dir/src/x4_epd.c.o
+[ 24%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtextures.c.o
+[ 27%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rcore.c.o
+[ 31%] Building C object CMakeFiles/raylib_x4.dir/vendor/raylib/src/rtext.c.o
+[ 34%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rshapes.c.o
+[ 37%] Linking C executable x4_epd_tests
+[ 41%] Linking C executable paper_tests
+[ 41%] Built target x4_epd_tests
+[ 44%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtextures.c.o
+[ 44%] Built target paper_tests
+[ 48%] Building C object CMakeFiles/raylib_x4.dir/src/x4_display.c.o
+[ 51%] Building C object CMakeFiles/raylib_x4.dir/src/x4_font.c.o
+[ 55%] Building C object CMakeFiles/raylib_x4_reference.dir/vendor/raylib/src/rtext.c.o
+[ 58%] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_display.c.o
+[ 62%] Building C object CMakeFiles/raylib_x4_reference.dir/src/x4_font.c.o
+[ 65%] Linking C static library libraylib_x4.a
+[ 65%] Built target raylib_x4
+[ 72%] Building C object CMakeFiles/x4_raster_fast.dir/tests/test_raster_compare.c.o
+[ 72%] Building C object CMakeFiles/x4_raster_fast.dir/tests/hal_test.c.o
+[ 79%] Building C object CMakeFiles/x4_tests.dir/tests/test_x4.c.o
+[ 79%] Building C object CMakeFiles/x4_tests.dir/tests/hal_test.c.o
+[ 82%] Linking C executable x4_raster_fast
+[ 86%] Linking C static library libraylib_x4_reference.a
+[ 86%] Built target raylib_x4_reference
+[ 86%] Built target x4_raster_fast
+[ 89%] Building C object CMakeFiles/x4_raster_reference.dir/tests/test_raster_compare.c.o
+[ 93%] Building C object CMakeFiles/x4_raster_reference.dir/tests/hal_test.c.o
+[ 96%] Linking C executable x4_raster_reference
+[100%] Linking C executable x4_tests
+[100%] Built target x4_raster_reference
+[100%] Built target x4_tests
+Test project /tmp/raylib-x4-1.1.2-archive-a0shpx/build
     Start 1: x4_package
 1/5 Test #1: x4_package .......................   Passed    0.07 sec
     Start 2: x4_raster_equivalence
-2/5 Test #2: x4_raster_equivalence ............   Passed    0.19 sec
+2/5 Test #2: x4_raster_equivalence ............   Passed    0.20 sec
     Start 3: paper_state
 3/5 Test #3: paper_state ......................   Passed    0.04 sec
     Start 4: x4_core
-4/5 Test #4: x4_core ..........................   Passed    0.01 sec
+4/5 Test #4: x4_core ..........................   Passed    0.00 sec
     Start 5: x4_epd
 5/5 Test #5: x4_epd ...........................   Passed    0.00 sec
 
 100% tests passed, 0 tests failed out of 5
 
-Total Test time (real) =   0.31 sec
+Total Test time (real) =   0.32 sec

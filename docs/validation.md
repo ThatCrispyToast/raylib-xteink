@@ -7,28 +7,36 @@ Validated on 2026-10-26 on NixOS x86_64. Exact tool versions are locked in `flak
 | Check | Result | Evidence |
 |---|---|---|
 | Native Release build | Pass | `build/x4_demo`, `build/libraylib_x4.a` |
-| Native CTest suite | 7/7 pass | `artifacts/native-tests.txt` |
+| Native CTest suite | 8/8 pass | `artifacts/native-tests.txt` |
 | ASan + UBSan | 5/5 pass, no sanitizer findings | `artifacts/sanitizer-tests.txt` |
 | Hardware ESP32-C3 compile/link | Pass | `firmware/build/raylib_x4_firmware.bin`, `artifacts/firmware-build.log` |
 | Alternative application build | Pass | `build-minimal/raylib_x4_firmware.bin`, `artifacts/minimal-build.log` |
 | ESP32-C3 QEMU boot and renderer | Pass | `artifacts/qemu-test.log` |
 | SDL screenshot inspection | Pass | `artifacts/demo.png`, `artifacts/puzzle.png`, `artifacts/status.png` |
-| Physical X4 render/storage acceptance | 68 checks pass | `artifacts/hardware/final-acceptance/report.json` |
+| Physical X4 render/storage and no-clean soak | 276 checks pass, including 200 partial updates without a full clean | `artifacts/hardware/region-regression/report.json` |
 | Seven physical buttons and visual panel check | Pass | `artifacts/hardware/buttons-report.json` |
 | Deep sleep and timer wake | 3/3 cycles pass | `artifacts/hardware/sleep-console.log` |
 | Physical Back/Power sleep and wake | Pass: owner confirmation and USB disconnect/reconnect | `artifacts/hardware/release-report.json` |
-| Paper 1.1.1 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
+| Paper 1.1.2 on the X4 | Flash verified, Paper boots with SD mounted | `artifacts/hardware/qa-release-report.json` |
 | Physical Paper 1.1.0 storage regression | 228 checks pass | `artifacts/hardware/qa-paper.log` |
 | Independent user acceptance | Functional and wall-clock timing failures fixed and retested | `docs/qa-user-report.md` |
 | Clean build from release source archive | 5/5 tests pass | `artifacts/hardware/archive-check.log` |
 
 The tests deliberately trigger a rejected window size and display failure. Their expected error messages do not indicate a failing test.
 
+## Paper 1.1.2 refresh and region-update follow-up
+
+Physical measurements improved cursor/menu actions to about 0.68 seconds and flips with SD saves to about 0.77 seconds. Changed-byte window transfers remove most SPI traffic for navigation; retained puzzle drawing avoids full-page redraws on flips. Paper no longer schedules a cleaning flash after navigation, idle, or entering Sleep. Startup/wake and Power still clean. The 20 MHz SPI clock and temperature-selected stock waveform remain unchanged.
+
+The physical diagnostic run passed 276 checks, including 200 consecutive partial updates without a full clean, stable heap, no transfer errors, and scene hashes matching the earlier release. Its 9,876-byte minimum stack headroom includes the new transfer buffer. Framebuffer captures cannot measure physical ghosting.
+
+The independent user pass compared 47 retained puzzle states against full-page redraws and verified their save records. The emulator completed 131 partial updates and six seconds idle without an extra full clean; explicit Power, Sleep, and relaunch policies also passed. The new controller model validates edge regions, chunked writes, changing windows, and both fixed and swapped RAM banks. Physical measurements and optical limits are recorded in [the performance report](performance.md); the exact production binary is attested in `artifacts/hardware/qa-release-report.json`. Production 1.1.2 was flash-verified and booted with the real SD mounted. The owner optical check is still unobserved, as recorded in `artifacts/hardware/region-optical-report.json`.
+
 ## Paper 1.1.1 performance follow-up
 
-The owner's physical-latency report prompted direct MCU measurements. Cursor/menu navigation now takes about 0.73 seconds, versus 2.45/2.08 seconds previously; most remaining time is the unchanged panel waveform. Drawing, conversion, input ordering, retained selection updates, and idle cleaning were fixed. Nine wall-clock input checks, 32 reference-renderer scenes, 33 retained/full-redraw comparisons, and a fresh 68-check physical regression pass. See [performance measurements and limits](performance.md).
+The owner's physical-latency report prompted direct MCU measurements. In 1.1.1, cursor/menu navigation took about 0.73 seconds, versus 2.45/2.08 seconds previously; most remaining time is the unchanged panel waveform. Drawing, conversion, input ordering, retained selection updates, and idle cleaning were fixed. Nine wall-clock input checks, 32 reference-renderer scenes, 33 retained/full-redraw comparisons, and a fresh 68-check physical regression pass. See [performance measurements and limits](performance.md).
 
-Production 1.1.1 was flash-verified and booted with SD mounted: 69,920 bytes free heap, a 65,820-byte minimum, and a largest free block of 29,696 bytes. The current exact binary is recorded in `artifacts/hardware/qa-release-report.json`; historical 1.1.0 evidence is preserved separately in `qa-1.1.0-report.json`.
+Production 1.1.1 was flash-verified and booted with SD mounted: 69,920 bytes free heap, a 65,820-byte minimum, and a largest free block of 29,696 bytes. That binary is recorded in `artifacts/hardware/qa-1.1.1-report.json`; historical 1.1.0 evidence is preserved separately in `qa-1.1.0-report.json`.
 
 ## Paper 1.1.0 QA
 

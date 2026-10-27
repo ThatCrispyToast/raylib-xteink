@@ -2,9 +2,11 @@
 """Exercise the upstream emulator, read its actual SDL output, and test demo persistence."""
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
+import time
 
 root = Path(__file__).resolve().parents[1]
 build = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else root / "build"
@@ -31,14 +33,18 @@ with tempfile.TemporaryDirectory(prefix="raylib-x4-") as directory:
     import struct
     script = temp / "demo.input"
     env["X4_INPUT_SCRIPT"] = str(script)
-    def run(keys, sd=None):
+    def run(keys, sd=None, idle_polls=0):
         if sd is not None:
             env["X4_SD_ROOT"] = str(sd)
         script.write_text("".join(f"{i*2} {key} down\n{i*2+1} {key} up\n" for i,key in enumerate(keys)) +
-                          f"{len(keys)*2+2} quit down\n")
+                          f"{len(keys)*2+2+idle_polls} quit down\n")
         result = subprocess.run([build / "x4_demo"], env=env, text=True, capture_output=True, timeout=30)
         assert result.returncode == 0 and "errors=0" in result.stdout, result.stdout + result.stderr
         return result
+    def stats(result):
+        values = re.search(r"X4: frames=(\d+) full=(\d+) partial=(\d+) unchanged=(\d+) errors=(\d+) buffers=(\d+)", result.stdout)
+        assert values, result.stdout
+        return dict(zip(("frames", "full", "partial", "unchanged", "errors", "buffers"), map(int, values.groups())))
     def saved(sd):
         records = [p.read_bytes() for p in (Path(sd)/"raylib-x4").glob("paper-*.sav")]
         data = max(records, key=lambda r: struct.unpack_from("<I", r, 8)[0])
@@ -95,4 +101,32 @@ with tempfile.TemporaryDirectory(prefix="raylib-x4-") as directory:
     (blocked/"raylib-x4").write_text("conflict")
     run(["Return","Return"], blocked)
     assert (blocked/"raylib-x4").read_text() == "conflict"
+    # More than 100 real presentations and six seconds idle must not trigger a clean.
+    navigation = stats(run(["Return"]+["Right"]*64+["Escape"]+["Down"]*64+["Escape"],
+                           temp/"long-navigation", idle_polls=300))
+    assert navigation["partial"] > 100 and navigation["full"] == 1, navigation
+    navigation_idle = time.time() - (temp/"frame.ppm").stat().st_mtime
+    assert navigation_idle >= 5, f"Long-navigation idle interval too short: {navigation_idle:.3f}s"
+    # Power adds exactly one full update and preserves the visible game through idle.
+    manual_sd = temp/"manual-clean"
+    ordinary = stats(run(["Return"], manual_sd))
+    ordinary_pixels = (temp/"frame.ppm").read_bytes()
+    cleaned = stats(run(["Return","P"], manual_sd, idle_polls=300))
+    assert ordinary["full"] == 1 and cleaned["full"] == 2, (ordinary, cleaned)
+    assert cleaned["partial"] == ordinary["partial"], (ordinary, cleaned)
+    assert (temp/"frame.ppm").read_bytes() == ordinary_pixels
+    manual_idle = time.time() - (temp/"frame.ppm").stat().st_mtime
+    assert manual_idle >= 5, f"Post-clean idle interval too short: {manual_idle:.3f}s"
+    # Sleep uses a partial update; reopening initializes the panel with one full.
+    sleep_sd = temp/"partial-sleep"
+    slept = stats(run(["Return","Right","Return","Escape","Up","Return"], sleep_sd))
+    before_wake = saved(sleep_sd)
+    sleep_pixels = (temp/"frame.ppm").read_bytes()
+    assert slept["full"] == 1 and slept["partial"] >= 1, slept
+    assert before_wake[2:] == (1,1,1), before_wake
+    woke = stats(run([], sleep_sd))
+    assert woke["full"] == 1 and woke["partial"] == 0, woke
+    assert saved(sleep_sd) == before_wake
+    assert (temp/"frame.ppm").read_bytes() != sleep_pixels
+    print(f"PASS: Paper manual-clean policy ({navigation['partial']} partial updates, {navigation_idle:.1f}s idle, one Power clean, {manual_idle:.1f}s idle, partial sleep, full initialization)")
 print("PASS: SDL pixels, grid controls, solve, durable resume/undo, restart/cancel/new game, help/sleep, unavailable/conflicting storage")

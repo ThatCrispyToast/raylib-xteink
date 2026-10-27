@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "version": "1.1.1",
+  "application_sha256": "1032d7b9de01a92ac05cfc194cd746bed96d7490a3a3896b7cc4a746040f51d2",
+  "flash_verified": true,
+  "free_heap": 69920,
+  "minimum_heap": 65820,
+  "largest_block": 29696,
+  "storage_mounted": true,
+  "physical_regression_checks": 68,
+  "physical_regression_report": "artifacts/hardware/performance-regression/report.json",
+  "physical_performance_log": "artifacts/hardware/performance-after.log",
+  "current_application_hardware_scope": "Production flash verification and boot; same renderer/HAL passed 68 hardware regression checks; actual Paper code benchmarked on physical X4 with isolated SD saves.",
+  "input_scope": "Ordered rapid taps and confirmation guards tested through independent wall-clock SDL events; no new owner button-response measurement or camera latency measurement."
+}
