@@ -7,9 +7,11 @@ import subprocess
 import sys
 import tempfile
 import time
+from emulator_profile import PROFILES
 
 root = Path(__file__).resolve().parents[1]
 build = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else root / "build"
+expected_width, expected_height, crop_top = PROFILES[sys.argv[2] if len(sys.argv) > 2 else "x4"]
 with tempfile.TemporaryDirectory(prefix="raylib-x4-") as directory:
     temp = Path(directory)
     env = dict(os.environ, SDL_VIDEODRIVER="offscreen", X4_EMULATOR_FAST="1",
@@ -19,12 +21,12 @@ with tempfile.TemporaryDirectory(prefix="raylib-x4-") as directory:
     with (temp / "frame.ppm").open("rb") as f:
         assert f.readline() == b"P6\n"
         width, height = map(int, f.readline().split())
-        assert (width, height) == (480, 786), (width, height)
+        assert (width, height) == (expected_width, expected_height), (width, height)
         assert f.readline() == b"255\n"
         pixels = f.read()
     def pixel(x, y):
-        # microreader crops ten panel columns at the top in portrait.
-        i = ((y - 10) * width + x) * 3
+        # Map application coordinates into the visible SDL surface.
+        i = ((y - crop_top) * width + x) * 3
         return tuple(pixels[i:i + 3])
     assert pixel(25, 35) == (24, 26, 28)
     assert pixel(15, 35) == (232, 220, 200)

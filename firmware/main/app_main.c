@@ -2,6 +2,8 @@
 #include "esp_sleep.h"
 #include "esp_system.h"
 #include "driver/gpio.h"
+#include "driver/rtc_io.h"
+#include "xteink_board.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <stdio.h>
@@ -9,7 +11,10 @@ int x4_application_main(void);
 void app_main(void)
 {
     printf("X4: reset=%d wake=%d\n",esp_reset_reason(),esp_sleep_get_wakeup_cause());
-    if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_GPIO) {
+    if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_GPIO || esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0) {
+#if XTEINK_ESP32S3
+        rtc_gpio_deinit(GPIO_NUM_3);
+#endif
         gpio_config_t power = { .pin_bit_mask=1ULL<<3, .mode=GPIO_MODE_INPUT, .pull_up_en=GPIO_PULLUP_ENABLE };
         gpio_config(&power);
         while (!gpio_get_level(GPIO_NUM_3)) vTaskDelay(pdMS_TO_TICKS(20));
@@ -24,6 +29,12 @@ void app_main(void)
         for (;;) vTaskDelay(pdMS_TO_TICKS(1000));
     }
     while (!gpio_get_level(GPIO_NUM_3)) vTaskDelay(pdMS_TO_TICKS(20));
+#if XTEINK_ESP32S3
+    rtc_gpio_pullup_en(GPIO_NUM_3);
+    rtc_gpio_pulldown_dis(GPIO_NUM_3);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_3,0);
+#else
     esp_deep_sleep_enable_gpio_wakeup(1ULL << 3, ESP_GPIO_WAKEUP_GPIO_LOW);
+#endif
     esp_deep_sleep_start();
 }

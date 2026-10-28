@@ -1,0 +1,48 @@
+#ifndef XTEINK_BOARD_H
+#define XTEINK_BOARD_H
+#include "xteink_device.h"
+
+#define XTEINK_SSD1677 10
+#define XTEINK_PANEL_UC8253 11
+#define XTEINK_PANEL_UC8279 12
+#define XTEINK_PANEL_UC8179 13
+#ifndef XTEINK_PANEL
+#if XTEINK_DEVICE == XTEINK_X3
+#define XTEINK_PANEL XTEINK_PANEL_UC8253
+#else
+#define XTEINK_PANEL XTEINK_SSD1677
+#endif
+#endif
+
+#if XTEINK_DEVICE == XTEINK_X3
+#define EPD_CLK 8
+#define EPD_MOSI 10
+#define EPD_CS 21
+#define EPD_DC 4
+#define EPD_RST 5
+#define EPD_BUSY 6
+#define SD_ENABLE 13
+#define SD_ENABLE_LEVEL 1
+#define I2C_SDA 20
+#define I2C_SCL 0
+#elif XTEINK_DEVICE == XTEINK_X4_CLASSIC || XTEINK_DEVICE == XTEINK_X4_PRO
+#define EPD_CLK 12
+#define EPD_MOSI 11
+#define EPD_CS 13
+#define SD_ENABLE_LEVEL 0
+#define I2C_SDA 39
+#define I2C_SCL 38
+#if XTEINK_DEVICE == XTEINK_X4_CLASSIC
+#define EPD_DC 14
+#define EPD_RST 10
+#define EPD_BUSY 18
+#define SD_ENABLE 6
+#else
+#define EPD_DC 18
+#define EPD_RST 14
+#define EPD_BUSY 6
+#define SD_ENABLE 5
+#endif
+#endif
+#define XTEINK_ESP32S3 (XTEINK_DEVICE == XTEINK_X4_CLASSIC || XTEINK_DEVICE == XTEINK_X4_PRO)
+#endif

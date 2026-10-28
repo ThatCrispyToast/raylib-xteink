@@ -96,9 +96,9 @@ bool x4_epd_init(const X4EpdIO *io)
     bus.reset(true); bus.sleep_ms(20); bus.reset(false); bus.sleep_ms(2);
     bus.reset(true); bus.sleep_ms(20);
     if (!wait_ready() || !command(0x12,NULL,0) || !wait_ready()) return false;
-    const uint8_t booster[]={0xae,0xc7,0xc3,0xc0,0x40}, driver[]={0xdf,0x01,0x02};
+    const uint8_t booster[]={0xae,0xc7,0xc3,0xc0,XTEINK_DEVICE==XTEINK_X4 ? 0x40 : 0x80}, driver[]={0xdf,0x01,0x02};
     ready=byte(0x18,0x80) && command(0x0c,booster,sizeof(booster)) &&
-        command(0x01,driver,sizeof(driver)) && byte(0x3c,0x01);
+        command(0x01,driver,sizeof(driver)) && byte(0x3c,XTEINK_DEVICE==XTEINK_X4 ? 0x01 : 0x80);
     return ready;
 }
 bool x4_epd_begin(const uint8_t *frame, const uint8_t *previous, bool full)
@@ -114,10 +114,11 @@ bool x4_epd_begin(const uint8_t *frame, const uint8_t *previous, bool full)
     if ((full && !write_ram(0x26,frame,w)) || !write_ram(0x24,frame,w)) return false;
     stats.transfer_us=time_us()-start;
     // Reuse temperature-selected Mode 2 OTP during a burst; never override its voltages.
-    bool load_lut=!partial_lut || !bus.time_us || time_us()-lut_at >= 30000000;
+    bool load_lut=XTEINK_DEVICE!=XTEINK_X4 || !partial_lut || !bus.time_us || time_us()-lut_at >= 30000000;
     uint8_t control=full ? 0xf7 : (powered ? 0 : 0xc0) | (load_lut ? 0x3c : 0x0c);
+    if (XTEINK_DEVICE!=XTEINK_X4) control=full ? 0xf7 : 0xfc;
     if (!bus.time_us) control |= 0x03;
-    if (!byte(0x21,full ? 0x40 : 0x00) || !byte(0x22,control)) return false;
+    if (!byte(0x21,full && XTEINK_DEVICE==XTEINK_X4 ? 0x40 : 0x00) || !byte(0x22,control)) return false;
     if (!command(0x20,NULL,0)) return false;
     pending_frame=frame; pending_window=w; pending_full=full; pending_load=load_lut;
     started_at=time_us();

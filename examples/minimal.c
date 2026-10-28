@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    InitWindow(480, 800, "Hello X4");
+    InitWindow(X4_WIDTH, X4_HEIGHT, "Hello Xteink");
     if (!IsWindowReady()) return 1;
     SetTargetFPS(10);
     int count = 0;

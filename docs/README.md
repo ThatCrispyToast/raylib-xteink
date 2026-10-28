@@ -5,6 +5,7 @@
 - [Desktop emulator](emulator.md) — prerequisites, builds, controls, virtual SD, and screenshots.
 - [Docker builds](docker.md) — firmware exports, custom applications, compiler caching, and headless tests.
 - [Hardware installation](hardware.md) — compatible devices, backups, flashing, and restoration.
+- [Experimental hardware ports](experimental-hardware.md) — X3, Classic, and Pro builds, panel selection, peripherals, and untested features.
 - [Application development](application.md) — custom applications, CMake integration, and X4 APIs.
 - [Example applications](examples.md) — Paper and Tetris controls, persistence, and game rules.
 

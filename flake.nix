@@ -1,5 +1,5 @@
 {
-  description = "raylib for the Xteink X4: native emulator and ESP32-C3 firmware";
+  description = "raylib for XTEINK: native emulators and ESP32-C3/S3 firmware";
   inputs.esp-dev.url = "github:mirrexagon/nixpkgs-esp-dev";
   inputs.nixpkgs.follows = "esp-dev/nixpkgs";
   outputs = { self, nixpkgs, esp-dev }: let
@@ -13,10 +13,14 @@
       inputsFrom = [ esp-dev.devShells.${system}.esp32c3-idf ];
       packages = [ pkgs.python3 ];
     };
+    firmware-s3 = pkgs.mkShell {
+      inputsFrom = [ esp-dev.devShells.${system}.esp32s3-idf ];
+      packages = [ pkgs.python3 ];
+    };
     qemu = pkgs.mkShell {
-      packages = [ (pkgs.qemu-esp32.overrideAttrs (old: {
+      packages = [ pkgs.python3 (pkgs.qemu-esp32.overrideAttrs (old: {
         configureFlags = (builtins.filter (flag: !(pkgs.lib.hasPrefix "--target-list=" flag)) old.configureFlags)
-          ++ [ "--target-list=riscv32-softmmu" ];
+          ++ [ "--target-list=riscv32-softmmu,xtensa-softmmu" ];
         postInstall = "";
       })) ];
     }; };

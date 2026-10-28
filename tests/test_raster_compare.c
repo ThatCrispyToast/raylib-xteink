@@ -8,7 +8,7 @@ int main(int argc, char **argv)
     if (argc != 2) return 1;
     FILE *out=fopen(argv[1],"wb"); if (!out) return 1;
     SetTraceLogLevel(LOG_NONE);
-    InitWindow(480,800,"raster equivalence"); if (!IsWindowReady()) return 1;
+    InitWindow(X4_WIDTH,X4_HEIGHT,"raster equivalence"); if (!IsWindowReady()) return 1;
     SetTargetFPS(0);
     for (int scene=0; scene<32; scene++) {
         SetRandomSeed(731u+scene);

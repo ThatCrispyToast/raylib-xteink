@@ -15,13 +15,13 @@ extern void *swGetColorBuffer(int *width, int *height);
 
 static bool white(int x, int y)
 {
-    unsigned int p = (479 - x)*800 + y;
+    unsigned int p = (X4_WIDTH - 1 - x)*X4_HEIGHT + y;
     return (X4GetPanelFrame()[p/8] & (0x80u >> (p%8))) != 0;
 }
 static unsigned int gray(int x, int y)
 {
     uint8_t c[4];
-    x4_gray2_read8(c, swGetColorBuffer(NULL, NULL), (799 - y)*480 + x);
+    x4_gray2_read8(c, swGetColorBuffer(NULL, NULL), (X4_HEIGHT - 1 - y)*X4_WIDTH + x);
     return c[0];
 }
 static void frame(int x)
@@ -60,9 +60,9 @@ int main(void)
     unsigned int random=7;
     for (int i=0; i<X4_GRAY_BYTES; i++) { random=random*1664525u+1013904223u; input_gray[i]=random>>24; }
     const uint8_t bayer[4][4]={{0,8,2,10},{12,4,14,6},{3,11,1,9},{15,7,13,5}};
-    for (int y=0; y<800; y++) for (int x=0; x<480; x++) {
-        unsigned int i=(799-y)*480+x, shade=(input_gray[i/4]>>(6-2*(i%4))) & 3;
-        unsigned int bit=(479-x)*800+y;
+    for (int y=0; y<X4_HEIGHT; y++) for (int x=0; x<X4_WIDTH; x++) {
+        unsigned int i=(X4_HEIGHT-1-y)*X4_WIDTH+x, shade=(input_gray[i/4]>>(6-2*(i%4))) & 3;
+        unsigned int bit=(X4_WIDTH-1-x)*X4_HEIGHT+y;
         if (shade == 3 || (shade && shade*16 > bayer[y%4][x%4]*3+1)) reference[bit/8] |= 0x80u>>(bit%8);
     }
     x4_convert_frame(input_gray,converted); CHECK(!memcmp(reference,converted,sizeof(reference)));
@@ -70,19 +70,19 @@ int main(void)
     for (int i = 0; i < 4; i++) { float c[] = {i/3.0f,i/3.0f,i/3.0f,1}; x4_gray2_write(&packed,c,i); }
     CHECK(packed == 0x1b);
 
-    InitWindow(480,800,"test"); CHECK(IsWindowReady()); SetTargetFPS(0); SetExitKey(KEY_NULL);
-    CHECK(GetScreenWidth() == 480 && GetScreenHeight() == 800);
+    InitWindow(X4_WIDTH,X4_HEIGHT,"test"); CHECK(IsWindowReady()); SetTargetFPS(0); SetExitKey(KEY_NULL);
+    CHECK(GetScreenWidth() == X4_WIDTH && GetScreenHeight() == X4_HEIGHT);
     frame(20); CHECK(!white(25,35) && white(19,35) && white(40,35));
     CHECK(X4GetStats().full_refreshes == 1);
     frame(20); CHECK(X4GetStats().unchanged_frames == 1);
     X4SetRefreshInterval(2); frame(21); frame(22); frame(23);
     CHECK(X4GetStats().full_refreshes == 2 && X4GetStats().partial_refreshes == 2);
     X4RefreshFull(); frame(23); CHECK(X4GetStats().full_refreshes == 3);
-    CHECK(X4GetStats().framebuffer_bytes == 192000);
+    CHECK(X4GetStats().framebuffer_bytes == X4_GRAY_BYTES + 2*X4_FRAME_BYTES);
 
     BeginDrawing(); ClearBackground(WHITE);
-    DrawRectangle(0,0,1,1,BLACK); DrawRectangle(479,0,1,1,BLACK);
-    DrawRectangle(0,799,1,1,BLACK); DrawRectangle(479,799,1,1,BLACK);
+    DrawRectangle(0,0,1,1,BLACK); DrawRectangle(X4_WIDTH-1,0,1,1,BLACK);
+    DrawRectangle(0,X4_HEIGHT-1,1,1,BLACK); DrawRectangle(X4_WIDTH-1,X4_HEIGHT-1,1,1,BLACK);
     DrawRectangle(-20,-20,30,30,BLACK);
     BeginScissorMode(100,100,10,10); ClearBackground(BLACK); EndScissorMode();
     DrawRectangle(20,100,10,10,Fade(BLACK,0.5f));
@@ -93,7 +93,7 @@ int main(void)
     DrawLine(-10,400,490,400,BLACK);
     DrawLineEx((Vector2){-10,0},(Vector2){490,0},20,BLACK);
     EndDrawing();
-    CHECK(!white(0,0) && !white(479,0) && !white(0,799) && !white(479,799));
+    CHECK(!white(0,0) && !white(X4_WIDTH-1,0) && !white(0,X4_HEIGHT-1) && !white(X4_WIDTH-1,X4_HEIGHT-1));
     CHECK(!white(105,105) && white(99,105) && white(110,105) && white(105,110));
     CHECK(gray(25,105) == 85 || gray(25,105) == 170);
     CHECK(!white(210,140) && !white(300,200) && white(321,200));
@@ -175,8 +175,8 @@ int main(void)
     CloseWindow(); CHECK(!IsWindowReady());
     CHECK(!X4IsDisplayBusy() && test_present_buffer_stable && !white(42,35));
     test_present_delay=0;
-    InitWindow(800,480,"invalid"); CHECK(!IsWindowReady());
-    InitWindow(480,800,"reopen"); CHECK(IsWindowReady()); frame(20);
+    InitWindow(X4_HEIGHT,X4_WIDTH,"invalid"); CHECK(!IsWindowReady());
+    InitWindow(X4_WIDTH,X4_HEIGHT,"reopen"); CHECK(IsWindowReady()); frame(20);
     atlas = LoadImageFromTexture(GetFontDefault().texture);
     corner = GetImageColor(atlas,0,0); CHECK(corner.r == 255 && corner.a == 0);
     UnloadImage(atlas);

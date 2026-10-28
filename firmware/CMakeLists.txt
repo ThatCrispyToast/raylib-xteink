@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
-set(IDF_TARGET esp32c3)
-set(PROJECT_VER "1.2.0")
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/xteink-firmware.cmake)
+set(PROJECT_VER "1.0.0")
 set(COMPONENTS main)
 if(X4_QEMU_SMOKE)
     set(SDKCONFIG_DEFAULTS "${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults;${CMAKE_CURRENT_LIST_DIR}/sdkconfig.qemu")

@@ -70,7 +70,7 @@ static void draw_scene(void)
         DrawCircle(100,440,50,BLACK); DrawCircleLines(245,440,50,BLACK);
         DrawTriangle((Vector2){350,490},(Vector2){430,490},(Vector2){390,390},BLACK);
         DrawText("Press each of the 7 buttons.",30,570,20,BLACK);
-        DrawText("BOTTOM / 480 x 800",30,742,25,BLACK);
+        DrawText(TextFormat("BOTTOM / %d x %d", X4_WIDTH, X4_HEIGHT),30,742,25,BLACK);
     } else if (scene == 1) {
         DrawText("PARTIAL REFRESH",28,30,30,BLACK);
         DrawText("The border and text stay still.",28,84,20,BLACK);
@@ -199,7 +199,7 @@ static bool command(char *line)
     }
     else if (!strcmp(line,"reopen")) {
         CloseWindow(); status("closed");
-        InitWindow(480,800,"X4 Lab");
+        InitWindow(X4_WIDTH,X4_HEIGHT,"X4 Lab");
         if (!IsWindowReady()) return false;
         SetExitKey(KEY_NULL); SetTargetFPS(0); draw_scene(); status("ready");
     }
@@ -231,7 +231,7 @@ int main(void)
     usb_serial_jtag_vfs_use_driver();
     setvbuf(stdout,NULL,_IONBF,0);
     reply("X4 {\"event\":\"boot\",\"reset_reason\":%d,\"wake_reason\":%d}\n",esp_reset_reason(),esp_sleep_get_wakeup_cause());
-    InitWindow(480,800,"X4 Lab"); if (!IsWindowReady()) return 1;
+    InitWindow(X4_WIDTH,X4_HEIGHT,"X4 Lab"); if (!IsWindowReady()) return 1;
     SetExitKey(KEY_NULL); SetTargetFPS(0);
     draw_scene(); status("ready");
     char line[128]; size_t used=0;

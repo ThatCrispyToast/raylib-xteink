@@ -2,6 +2,8 @@
 
 Both examples build with the [desktop emulator](emulator.md) and run on the [physical X4](hardware.md). In the emulator, use Escape or Backspace for Back and `P` for Power.
 
+They also build for the [experimental X3, Classic, and Pro firmware ports](experimental-hardware.md). Those ports have no physical-device validation.
+
 | Input | Paper | Tetris |
 |---|---|---|
 | Left / Right | Move across the puzzle grid | Move the piece |
@@ -11,6 +13,13 @@ Both examples build with the [desktop emulator](emulator.md) and run on the [phy
 | Power | Clean the display | Clean the display |
 
 Full cleans happen on startup/wake and an explicit Power press. Navigation and idle time do not schedule extra flashes. A clean returns to the current screen.
+
+## Pro touch controls
+
+On the Pro profile, tap the display with a finger or the desktop's left mouse button. The bottom left cleans; bottom right opens the menu, goes back, or pauses. Physical Up/Down/Power and touch Home are also mapped.
+
+- **Paper:** tap a puzzle square to flip it, or a menu row to open it. The showcase/status footer switches pages or enters Play. Tap the confirmation page to confirm, or bottom right to cancel. Device Status has Off/Cool/Warm frontlight controls.
+- **Tetris:** tap Normal or Practice, then Start. During play, the five bottom controls are Left, Right, Turn, Soft drop, and Drop. Tap pause-menu rows to select them; confirmation pages have separate confirm/cancel areas. Movement uses one step per tap; held repeat remains available on physical Down or desktop movement keys.
 
 ## Paper
 

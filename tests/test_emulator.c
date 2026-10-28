@@ -5,7 +5,7 @@
 #define CHECK(x) do { if (!(x)) { fprintf(stderr,"emulator check failed: %s\n",#x); exit(1); } } while (0)
 int main(void)
 {
-    InitWindow(480,800,"X4 emulator integration"); CHECK(IsWindowReady());
+    InitWindow(X4_WIDTH,X4_HEIGHT,"X4 emulator integration"); CHECK(IsWindowReady());
     SetTargetFPS(0); SetExitKey(KEY_NULL);
     for (int i=0; i<6; i++) {
         BeginDrawing(); ClearBackground(WHITE);

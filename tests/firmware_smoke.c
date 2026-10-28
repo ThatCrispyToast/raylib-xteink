@@ -1,4 +1,4 @@
-// Real ESP32-C3 renderer/FreeRTOS memory smoke test; physical peripherals are stubbed.
+// Real C3/S3 renderer/FreeRTOS memory smoke test; physical peripherals are stubbed.
 #include "raylib.h"
 #include "x4_hal.h"
 #include "esp_heap_caps.h"
@@ -9,6 +9,13 @@
 #include <stdlib.h>
 #define CHECK(x) do { if (!(x)) { printf("X4_QEMU_FAIL: %s\n",#x); abort(); } } while (0)
 static size_t free_at_boot;
+static bool white_at(int x, int y)
+{
+    unsigned int bit=(X4_WIDTH-1-x)*X4_HEIGHT+y;
+    return (X4GetPanelFrame()[bit/8] & (0x80u>>(bit%8)))!=0;
+}
+bool xteink_hal_frontlight(unsigned int brightness, unsigned int warmth)
+{ (void)brightness; (void)warmth; return XTEINK_HAS_FRONTLIGHT; }
 bool x4_hal_init(const char *title) { (void)title; return true; }
 void x4_hal_close(void) {}
 bool x4_hal_begin_present(const uint8_t *frame, const uint8_t *previous, bool full)
@@ -24,20 +31,24 @@ X4Status x4_hal_status(void) { return (X4Status){ .front_adc=-1, .side_adc=-1, .
 void app_main(void)
 {
     free_at_boot = esp_get_free_heap_size();
-    printf("X4_QEMU: boot_heap=%zu\n",free_at_boot);
-    InitWindow(480,800,"smoke"); CHECK(IsWindowReady()); SetTargetFPS(0);
+    printf("X4_QEMU: device=%s size=%dx%d boot_heap=%zu\n",XTEINK_DEVICE_ID,X4_WIDTH,X4_HEIGHT,free_at_boot);
+    InitWindow(X4_WIDTH,X4_HEIGHT,"smoke"); CHECK(IsWindowReady()); SetTargetFPS(0);
     CHECK(IsFontValid(GetFontDefault()));
     Image image = GenImageChecked(32,32,4,4,WHITE,BLACK);
     Texture2D texture = LoadTextureFromImage(image); CHECK(IsTextureValid(texture)); UnloadImage(image);
     for (int i=0;i<3;i++) {
         BeginDrawing(); ClearBackground(WHITE);
-        DrawText("raylib on ESP32-C3",28,30,30,BLACK);
+        DrawText(XTEINK_DEVICE_NAME,28,30,30,BLACK);
         DrawRectangle(30+i,100,50,50,BLACK);
         DrawCircle(200,200,40,GRAY);
         DrawTexture(texture,30,300,WHITE);
+        DrawPixel(X4_WIDTH-1,X4_HEIGHT-1,BLACK);
         EndDrawing();
         CHECK(!WindowShouldClose());
         CHECK(X4GetPanelFrame() != NULL);
+        CHECK(!white_at(35,110) && white_at(10,110));
+        CHECK(white_at(30,300) != white_at(34,300));
+        CHECK(!white_at(X4_WIDTH-1,X4_HEIGHT-1));
         vTaskDelay(1);
     }
     X4Stats stats = X4GetStats();

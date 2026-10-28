@@ -3,16 +3,18 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "xteink_device.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define X4_WIDTH 480
-#define X4_HEIGHT 800
-#define X4_PANEL_WIDTH 800
-#define X4_PANEL_HEIGHT 480
-#define X4_FRAME_BYTES 48000
-#define X4_GRAY_BYTES 96000
+// Legacy names follow the selected device profile.
+#define X4_WIDTH XTEINK_WIDTH
+#define X4_HEIGHT XTEINK_HEIGHT
+#define X4_PANEL_WIDTH XTEINK_PANEL_WIDTH
+#define X4_PANEL_HEIGHT XTEINK_PANEL_HEIGHT
+#define X4_FRAME_BYTES XTEINK_FRAME_BYTES
+#define X4_GRAY_BYTES XTEINK_GRAY_BYTES
 
 typedef struct X4Stats {
     unsigned int frames, full_refreshes, partial_refreshes, unchanged_frames, errors;
@@ -22,7 +24,7 @@ typedef struct X4Stats {
 } X4Stats;
 
 typedef struct X4Status {
-    int front_adc, side_adc, battery_mv; // -1 means unavailable; voltage uses ADC calibration.
+    int front_adc, side_adc, battery_mv; // -1 means unavailable; voltage from calibrated ADC or fuel gauge.
     unsigned int buttons;              // Bits: Back, Confirm, Left, Right, Up, Down, Power.
     size_t free_heap, minimum_heap, largest_block;
     unsigned int dropped_input_presses; // Queue overflow; zero during normal use.
@@ -43,11 +45,13 @@ bool X4WaitDisplay(void);
 bool X4IsDisplayBusy(void);
 X4Stats X4GetStats(void);
 X4Status X4GetStatus(void);
-// Latest completed panel frame: 800x480, MSB first, 1 = white.
+// Latest completed panel frame: X4_PANEL_WIDTH x X4_PANEL_HEIGHT, MSB first, 1 = white.
 // NULL while an async frame is in flight; wait before capturing.
 const uint8_t *X4GetPanelFrame(void);
 // Emulator: current virtual SD directory. Hardware: /sd. NULL if not mounted.
 const char *X4GetStoragePath(void);
+// Pro frontlight: brightness and warmth 0..100. False when unavailable/out of range.
+bool XteinkSetFrontlight(unsigned int brightness, unsigned int warmth);
 
 #ifdef __cplusplus
 }

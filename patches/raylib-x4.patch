@@ -69,7 +69,17 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      void *pixels;                       // Texture pixels
      sw_pixel_read_color8_f readColor8;  // Texel read RGBA8
      sw_pixel_read_color_f readColor;    // Texel read RGBA32F
-@@ -2295,6 +2305,12 @@
+@@ -1272,7 +1282,8 @@
+ 
+ static SW_INLINE float sw_rcp(float x)
+ {
+-#if defined(__XTENSA__)
++    // Use toolchain division for XTEINK, including the S3 QEMU target.
++#if defined(__XTENSA__) && !defined(PLATFORM_XTEINK_X4)
+     // Xtensa architecture optimization
+     // Fast reciprocal: 1-ULP accurate in ~7 instructions using the
+     // hardware `recip0.s` seed + two Newton-Raphson refinement steps
+@@ -2295,6 +2306,12 @@
  //-------------------------------------------------------------------------------------------
  static bool sw_texture_alloc(sw_texture_t *texture, const void *data, int w, int h, sw_pixelformat_t format)
  {
@@ -82,7 +92,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      bool isDepth = sw_pixel_is_depth_format(format);
      int bpp = SW_PIXELFORMAT_SIZE[format];
      int newSize = w*h*bpp;
-@@ -2364,7 +2380,7 @@
+@@ -2364,7 +2381,7 @@
  
  static void sw_texture_free(sw_texture_t *texture)
  {
@@ -91,7 +101,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  }
  
  static void sw_texture_sample_nearest(float *SW_RESTRICT color, const sw_texture_t *SW_RESTRICT tex, float u, float v)
-@@ -2467,10 +2483,27 @@
+@@ -2467,10 +2484,27 @@
  }
  //-------------------------------------------------------------------------------------------
  
@@ -119,7 +129,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      if (!sw_texture_alloc(&fb->color, NULL, w, h, SW_FRAMEBUFFER_COLOR_FORMAT))
      {
          return false;
-@@ -2488,6 +2521,7 @@
+@@ -2488,6 +2522,7 @@
          return false;
      }
  
@@ -127,7 +137,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      return true;
  }
  
-@@ -2502,41 +2536,26 @@
+@@ -2502,41 +2537,26 @@
  
  static void sw_framebuffer_fill_color(sw_texture_t *colorBuffer, const float color[4])
  {
@@ -185,7 +195,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  }
  
  static void sw_framebuffer_fill_depth(sw_texture_t *depthBuffer, float depth)
-@@ -2625,18 +2644,18 @@
+@@ -2625,18 +2645,18 @@
      int dstPixelSize = SW_PIXELFORMAT_SIZE[format];
      sw_pixel_write_color8_f setColor8 = sw_pixel_get_write_color8_func(format);
  
@@ -207,7 +217,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  
              #if RLSW_FRAMEBUFFER_OUTPUT_BGRA
              if (format == SW_PIXELFORMAT_COLOR_R8G8B8A8 || format == SW_PIXELFORMAT_COLOR_R8G8B8)
-@@ -2646,11 +2665,11 @@
+@@ -2646,11 +2666,11 @@
              #endif
  
              setColor8(dline, color, 0);
@@ -221,7 +231,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
          d += w*dstPixelSize;
      }
  }
-@@ -2673,16 +2692,16 @@
+@@ -2673,16 +2693,16 @@
      for (int dy = 0; dy < hDst; dy++)
      {
          int sy = ySrcLast - (int)(dy*yScale >> 16);
@@ -241,7 +251,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  
              #if RLSW_FRAMEBUFFER_OUTPUT_BGRA
              if (format == SW_PIXELFORMAT_COLOR_R8G8B8A8 || format == SW_PIXELFORMAT_COLOR_R8G8B8)
-@@ -3882,6 +3901,9 @@
+@@ -3882,6 +3902,9 @@
  
      RLSW.colorBuffer = &RLSW.framebuffer.color;
      RLSW.depthBuffer = &RLSW.framebuffer.depth;
@@ -251,7 +261,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  
      swViewport(0, 0, w, h);
      swScissor(0, 0, w, h);
-@@ -3986,7 +4008,11 @@
+@@ -3986,7 +4009,11 @@
  
      if ((x >= w) || (y >= h)) return;
  
@@ -264,7 +274,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      {
          sw_framebuffer_output_fast(pixels, RLSW.colorBuffer);
      }
-@@ -4049,6 +4075,9 @@
+@@ -4049,6 +4076,9 @@
  
  void swEnable(SWstate state)
  {
@@ -274,7 +284,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      switch (state)
      {
          case SW_SCISSOR_TEST: RLSW.userState |= SW_STATE_SCISSOR_TEST; break;
-@@ -4839,7 +4868,7 @@
+@@ -4839,7 +4869,7 @@
      sw_immediate_end();
  }
  
@@ -283,7 +293,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  {
      if (sw_immediate_is_active())
      {
-@@ -4857,7 +4886,7 @@
+@@ -4857,7 +4887,7 @@
      }
  }
  
@@ -292,7 +302,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  {
      if (sw_immediate_is_active())
      {
-@@ -4963,6 +4992,29 @@
+@@ -4963,6 +4993,29 @@
      (void)sw_texture_alloc(RLSW.boundTexture, data, width, height, pixelFormat);
  }
  
@@ -322,7 +332,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  void swTexSubImage2D(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels)
  {
      if (sw_immediate_is_active())
-@@ -4981,6 +5033,15 @@
+@@ -4981,6 +5034,15 @@
      {
          RLSW.errCode = SW_INVALID_VALUE;
          return;
@@ -338,7 +348,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      }
  
      sw_pixel_write_color_f writeColor = sw_pixel_get_write_color_func(RLSW.boundTexture->format);
-@@ -5029,8 +5090,8 @@
+@@ -5029,8 +5091,8 @@
          for (int i = 0; i < width; ++i)
          {
              float color[4];
@@ -349,7 +359,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  
              readColor(color, srcBytes, srcPixelOffset);
              alphaFound |= (color[3] < 1.0f);
-@@ -5092,8 +5153,13 @@
+@@ -5092,8 +5154,13 @@
      }
  }
  
@@ -365,7 +375,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      if (sw_immediate_is_active())
      {
          RLSW.errCode = SW_INVALID_OPERATION;
-@@ -5110,7 +5176,7 @@
+@@ -5110,7 +5177,7 @@
      }
  }
  
@@ -374,7 +384,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  {
      if (sw_immediate_is_active())
      {
-@@ -5130,6 +5196,9 @@
+@@ -5130,6 +5197,9 @@
              RLSW.boundFramebufferId = SW_HANDLE_NULL;
              RLSW.colorBuffer = &RLSW.framebuffer.color;
              RLSW.depthBuffer = &RLSW.framebuffer.depth;
@@ -384,7 +394,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
          }
  
          sw_pool_free(&RLSW.framebufferPool, framebuffers[i]);
-@@ -5149,6 +5218,9 @@
+@@ -5149,6 +5219,9 @@
          RLSW.boundFramebufferId = SW_HANDLE_NULL;
          RLSW.colorBuffer = &RLSW.framebuffer.color;
          RLSW.depthBuffer = &RLSW.framebuffer.depth;
@@ -394,7 +404,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
          return;
      }
  
-@@ -5349,7 +5421,8 @@
+@@ -5349,7 +5422,8 @@
  
      // Pre-calculate the starting pointers for the framebuffer row
      int baseOffset = y*RLSW.colorBuffer->width + xLoopStart;
@@ -404,7 +414,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_DEPTH_TEST
      uint8_t *dPtr = (uint8_t *)(RLSW.depthBuffer->pixels) + baseOffset*SW_FRAMEBUFFER_DEPTH_SIZE;
  #endif
-@@ -5371,6 +5444,12 @@
+@@ -5371,6 +5445,12 @@
  #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_TEXTURE_2D
      float texcoord[2];
      SW_VEC_OP(texcoord[i] = start->texcoord[i] + ctx->dTdx[i]*xOffset, i, 2);
@@ -417,7 +427,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
  #endif
  
  #define SW_AFFINE_BLOCK 16
-@@ -5430,12 +5509,12 @@
+@@ -5430,12 +5510,12 @@
              #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_BLEND
              {
                  float dstColor[4];
@@ -433,7 +443,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
              #endif
  
              #undef SW_FINAL_COLOR
-@@ -5445,7 +5524,7 @@
+@@ -5445,7 +5525,7 @@
          #endif
  
              // Advance unconditionally: depth test only guards the write above
@@ -442,7 +452,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
          #if (SW_RASTER_TRIANGLE_FLAGS) & SW_STATE_DEPTH_TEST
              dPtr += SW_FRAMEBUFFER_DEPTH_SIZE;
              z += ctx->dZdx;
-@@ -5675,10 +5754,89 @@
+@@ -5675,10 +5755,89 @@
      sw_texture_sampler_f sample = sw_texture_pick_sampler(RLSW.boundTexture, dTdx, dTdy);
  #endif
  
@@ -533,7 +543,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_DEPTH_TEST
          uint8_t *dPtr = dPixels + baseOffset*SW_FRAMEBUFFER_DEPTH_SIZE;
          float z = zRow;
-@@ -5722,11 +5880,11 @@
+@@ -5722,11 +5881,11 @@
  
              #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_BLEND
                  float dstColor[4];
@@ -548,7 +558,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
              #endif
  
          #if (SW_RASTER_QUAD_FLAGS) & SW_STATE_DEPTH_TEST
-@@ -5747,7 +5905,7 @@
+@@ -5747,7 +5906,7 @@
              SW_VEC_OP(tc[i] += dTdx[i], i, 2);
          #endif
  
@@ -557,7 +567,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
          }
  
          // The for loop is clamped to the right side of the screen
-@@ -5838,7 +5996,8 @@
+@@ -5838,7 +5997,8 @@
          int py = y;
  
          int baseOffset = py*fbWidth + px;
@@ -567,7 +577,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
      #if (SW_RASTER_LINE_FLAGS) & SW_STATE_DEPTH_TEST
          uint8_t *dPtr = dPixels + baseOffset*SW_FRAMEBUFFER_DEPTH_SIZE;
      #endif
-@@ -5858,11 +6017,11 @@
+@@ -5858,11 +6018,11 @@
  
          #if (SW_RASTER_LINE_FLAGS) & SW_STATE_BLEND
              float dstColor[4];
@@ -582,7 +592,7 @@ diff --git a/src/external/rlsw.h b/src/external/rlsw.h
          #endif
  
      #if (SW_RASTER_LINE_FLAGS) & SW_STATE_DEPTH_TEST
-@@ -5963,18 +6122,19 @@
+@@ -5963,18 +6123,19 @@
      }
      #endif
  

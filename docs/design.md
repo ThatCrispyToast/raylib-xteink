@@ -1,5 +1,7 @@
 # Design and research
 
+The hardware measurements and detailed SSD1677 sequence below describe the original X4. The shared renderer now also has X3, Classic, and Pro profiles; their experimental HALs, controller variants, pinouts, and hardware-untested status are documented in [experimental hardware](experimental-hardware.md).
+
 ## Hardware findings
 
 The target is the original Xteink X4: ESP32-C3, RV32IMC, 160 MHz, 400 KB total SRAM, no PSRAM, 16 MB flash. The SSD1677 drives an 800 × 480 GDEQ0426T82 panel, normally held in 480 × 800 portrait. Display and SD share SPI; six buttons use two resistor ladders, and Power is a digital GPIO.
@@ -29,9 +31,9 @@ application.c — normal raylib API
   rcore + rshapes + rtext + rtextures
     rlgl → rlsw → 2-bit grayscale framebuffer (bottom-up portrait)
       X4 presentation → dither + rotate → monochrome panel frame
-        ESP-IDF HAL → tested SSD1677 command engine → SPI panel
-        microreader HAL → upstream DesktopEmulatorDisplay → SDL
-        test HAL → native assertions / ESP32-C3 QEMU
+        ESP-IDF HAL → SSD1677 or UltraChip command engine → SPI panel
+        desktop HAL → microreader (X4) or profile preview → SDL
+        test HAL → native assertions / ESP32-C3 and S3 QEMU
 ```
 
 The platform implementation is included by `rcore.c`, like upstream backends, so it shares raylib's actual `CORE` state. It supplies lifecycle, fixed screen geometry, timer, keyboard, and buffer presentation. No parallel imitation of raylib's public drawing API is maintained.
@@ -50,6 +52,8 @@ The chosen approach extends rlsw's default framebuffer to packed 2-bit grayscale
 | Total pixel buffers | 192,000 | |
 
 The remaining budget covers raylib state, texture metadata, default font, application textures, SPI buffers, FAT, FreeRTOS tasks, and stacks. Textures are limited to 32 live handles in this configuration. The QEMU smoke test measures actual allocations and checks heap integrity and lifecycle recovery. Hardware peripheral allocation costs are additional to that smoke test's test HAL.
+
+The table applies to X4, Classic, and Pro. X3 uses a 528 × 792 framebuffer: 104,544 grayscale bytes plus two 52,272-byte snapshots, totaling 209,088 bytes. Compile-time profile constants size the renderer, conversion loops, and snapshots together.
 
 Physical testing found two issues invisible to the desktop emulator: the initial SD chip-select assignment was wrong, and the mounted FAT driver fragmented memory enough for upstream's duplicate 32 KB font-atlas allocation to fail. SD uses GPIO12. The default atlas source and 224 glyph images are now generated into 51,488 bytes of immutable flash data by `scripts/generate-font.py`; the software renderer samples the atlas in place and only mutable font metadata allocates RAM. Texture updates copy the atlas to RAM before modification. CPU image text remains supported. The default glyph images must be copied before modification. Texture allocation errors propagate as zero texture IDs, and initialization fails cleanly if the font cannot be loaded. Nonzero application exits keep USB alive for recovery instead of immediately entering sleep. Texture readback is implemented as well; upstream rlsw silently stubbed this operation.
 
@@ -81,9 +85,9 @@ The raylib backend maintains current/previous key state and repeat timing. Defau
 
 ## Integration boundaries
 
-The hardware target is zlib-licensed and uses ESP-IDF directly. microreader's GPL display/runtime headers are isolated in the desktop emulator adapter, which is GPL-2.0-only. Other researched firmware projects were used to understand hardware behavior and compare architecture, not bundled into the firmware.
+The hardware integration uses ESP-IDF directly and is zlib-licensed; the adapted UltraChip driver and LUTs retain FreeInk's MIT license. microreader's GPL display/runtime headers are isolated in the desktop emulator adapter, which is GPL-2.0-only. The other profiles share that adapter but draw through a local SDL implementation. No Arduino runtime is required. See [third-party notices](../THIRD_PARTY.md).
 
-Upstream raylib changes are preserved as a reviewable patch: platform include and scheduler sleep, packed framebuffer allocation/access and scissored clear, unavailable depth/render targets, GL object-name pointer portability on RISC-V, and respect for an explicitly disabled partial busy wait. The tested upstream revision is fixed because rlsw is actively evolving.
+Upstream raylib changes are preserved as a reviewable patch: platform include and scheduler sleep, packed framebuffer allocation/access and scissored clear, unavailable depth/render targets, GL object-name pointer portability on RISC-V, compiler-provided reciprocal arithmetic for S3/QEMU, and respect for an explicitly disabled partial busy wait. The tested upstream revision is fixed because rlsw is actively evolving.
 
 
 ## Paper save recovery

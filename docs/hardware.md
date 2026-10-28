@@ -1,6 +1,6 @@
 # Hardware installation
 
-This target supports the **original, unlocked ESP32-C3 Xteink X4** with 16 MB flash. X3, X4 Pro, and locked variants are unsupported. Run commands from the project root.
+This installation guide covers the **original, unlocked ESP32-C3 Xteink X4** with 16 MB flash. X3, X4 Classic, and X4 Pro also have [experimental firmware ports](experimental-hardware.md), all **hardware-untested**, with separate board/controller selection. S4 and locked variants have no supported firmware installation. Run commands from the project root.
 
 **A first installation replaces the reader's firmware and partition table. Back up the full flash before installing.** Keep the backup outside the project.
 

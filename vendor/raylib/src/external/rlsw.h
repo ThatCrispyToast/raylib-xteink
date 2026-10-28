@@ -1282,7 +1282,8 @@ static SW_INLINE float sw_fract(float x)
 
 static SW_INLINE float sw_rcp(float x)
 {
-#if defined(__XTENSA__)
+    // Use toolchain division for XTEINK, including the S3 QEMU target.
+#if defined(__XTENSA__) && !defined(PLATFORM_XTEINK_X4)
     // Xtensa architecture optimization
     // Fast reciprocal: 1-ULP accurate in ~7 instructions using the
     // hardware `recip0.s` seed + two Newton-Raphson refinement steps

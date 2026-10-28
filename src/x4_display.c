@@ -102,6 +102,11 @@ X4Stats X4GetStats(void) { return stats; }
 X4Status X4GetStatus(void) { return x4_hal_status(); }
 const uint8_t *X4GetPanelFrame(void) { return have_frame && !in_flight ? front : NULL; }
 const char *X4GetStoragePath(void) { return x4_hal_storage(); }
+bool XteinkSetFrontlight(unsigned int brightness, unsigned int warmth)
+{
+    if (!XTEINK_HAS_FRONTLIGHT || brightness>100 || warmth>100) return false;
+    return xteink_hal_frontlight(brightness,warmth);
+}
 
 uint8_t x4_decode_buttons(int adc1, int adc2, bool power)
 {

@@ -15,10 +15,21 @@ endif()
 if(X4_APP_SOURCE STREQUAL "${X4_ROOT}/examples/tetris.c")
     list(APPEND X4_APP_EXTRA_SOURCES "${X4_ROOT}/examples/tetris_game.c")
 endif()
+if(XTEINK_DEVICE STREQUAL "x4")
+    set(_hal ../../src/x4_hal_espidf.c)
+else()
+    set(_hal ../../src/xteink_hal_espidf.c ../../src/xteink_epd.c ../../src/xteink_peripherals.c)
+endif()
+# IDF scans dependencies before custom device cache variables are available.
+set(_peripherals esp_driver_i2c esp_driver_ledc)
+if(IDF_TARGET STREQUAL "esp32s3")
+    list(APPEND _peripherals esp_driver_sdmmc)
+endif()
 idf_component_register(SRCS ${X4_RAYLIB_SOURCES} ../../src/x4_epd.c
-    ../../src/x4_hal_espidf.c ${X4_APP_SOURCE} ${X4_APP_EXTRA_SOURCES} app_main.c
+    ${_hal} ${X4_APP_SOURCE} ${X4_APP_EXTRA_SOURCES} app_main.c
     INCLUDE_DIRS ../../src ../../include ../../vendor/raylib/src
-    REQUIRES esp_driver_gpio esp_driver_spi esp_adc esp_timer fatfs sdmmc esp_driver_sdspi esp_driver_usb_serial_jtag)
+    REQUIRES esp_driver_gpio esp_driver_spi esp_adc esp_timer fatfs sdmmc esp_driver_sdspi esp_driver_usb_serial_jtag ${_peripherals})
 x4_configure(${COMPONENT_LIB})
+target_compile_definitions(${COMPONENT_LIB} PRIVATE ${XTEINK_PANEL_DEFINE})
 set_source_files_properties(${X4_APP_SOURCE} PROPERTIES COMPILE_DEFINITIONS "main=x4_application_main")
 target_compile_options(${COMPONENT_LIB} PRIVATE -Wno-unused-variable -Wno-unused-function -Wno-missing-field-initializers)

@@ -46,7 +46,10 @@ static bool write_bus(bool data, const uint8_t *bytes, size_t size)
             x+=8;
             if (x>x1) { x=x0; y--; }
         }
-    } else if (cmd == 0x22) { CHECK(size == 1); mode=*bytes; }
+    } else if (cmd == 0x0c) { CHECK(size == 5 && bytes[4] == (XTEINK_DEVICE==XTEINK_X4 ? 0x40 : 0x80)); }
+    else if (cmd == 0x3c) { CHECK(size == 1 && *bytes == (XTEINK_DEVICE==XTEINK_X4 ? 1 : 0x80)); }
+    else if (cmd == 0x21) { CHECK(size == 1 && (XTEINK_DEVICE==XTEINK_X4 || !*bytes)); }
+    else if (cmd == 0x22) { CHECK(size == 1); mode=*bytes; }
     else if (cmd == 0x11) { CHECK(size == 1 && *bytes == 1); }
     else if (cmd == 0x44) {
         CHECK(size == 4); x0=le16(bytes); x1=le16(bytes+2);
@@ -94,19 +97,21 @@ int main(void)
         CHECK(x4_epd_present(frame,previous,false));
         CHECK(activations == before && x4_epd_stats().ram_bytes == 0);
     }
-    CHECK(lut_loads == 2 && clock_on && analog_on);
+    unsigned int cached_luts=XTEINK_DEVICE==XTEINK_X4 ? 2 : 11;
+    CHECK(lut_loads == cached_luts && clock_on && analog_on);
     unsigned int before=activations;
     CHECK(x4_epd_idle()); CHECK(activations == before);
     clock_us+=2000000;
     CHECK(x4_epd_idle()); CHECK(activations == before+1 && !clock_on && !analog_on);
     CHECK(x4_epd_idle()); CHECK(activations == before+1);
     frame[42]^=1; present(false,3,8,1);
-    CHECK(mode == 0xcc && lut_loads == 2 && clock_on && analog_on);
+    if (XTEINK_DEVICE!=XTEINK_X4) cached_luts++;
+    CHECK(mode == (XTEINK_DEVICE==XTEINK_X4 ? 0xcc : 0xfc) && lut_loads == cached_luts && clock_on && analog_on);
     clock_us+=30000000;
-    frame[42]^=1; present(false,3,8,1); CHECK(lut_loads == 3);
+    frame[42]^=1; present(false,3,8,1); CHECK(lut_loads == cached_luts+1);
     present(true,3*X4_FRAME_BYTES,X4_PANEL_WIDTH,X4_PANEL_HEIGHT);
-    CHECK(lut_loads == 4 && !analog_on);
-    frame[42]^=1; present(false,3,8,1); CHECK(lut_loads == 5);
+    CHECK(lut_loads == cached_luts+2 && !analog_on);
+    frame[42]^=1; present(false,3,8,1); CHECK(lut_loads == cached_luts+3);
     CHECK(x4_epd_sleep()); CHECK(!x4_epd_present(frame,previous,false));
     CHECK(!clock_on && !analog_on);
     // A bus without a clock falls back to powering down after every frame.

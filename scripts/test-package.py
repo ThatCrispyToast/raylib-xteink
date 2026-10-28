@@ -74,6 +74,11 @@ with tempfile.TemporaryDirectory(prefix="x4-package-test-") as temporary:
     result=subprocess.run([sys.executable,test/"scripts/package.py","--firmware-only"],capture_output=True,text=True)
     assert result.returncode != 0 and "test-only QEMU" in result.stderr, result
     assert (output/'SHA256SUMS').read_bytes() == previous
+    for device in ('x3', 'x4-classic', 'x4-pro'):
+        (test/'firmware/build/CMakeCache.txt').write_text(f'XTEINK_DEVICE:STRING={device}\n')
+        result=subprocess.run([sys.executable,test/"scripts/package.py","--firmware-only"],capture_output=True,text=True)
+        assert result.returncode != 0 and 'original X4 release' in result.stderr, result
+        assert (output/'SHA256SUMS').read_bytes() == previous
 print("PASS: missing and stale hardware attestations rejected before packaging")
 print("PASS: Tetris QEMU image rejected before packaging firmware")
 print("PASS: private binary/source content and unexpected files rejected; previous release preserved")

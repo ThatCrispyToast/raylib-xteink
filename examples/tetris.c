@@ -17,6 +17,16 @@ static void heading(const char *subtitle)
 }
 static void controls(int y, bool title)
 {
+    if (XTEINK_HAS_TOUCH) {
+        const char *labels[]={"LEFT","RIGHT","TURN","SOFT","DROP"};
+        int width=X4_WIDTH/5;
+        for (int i=0; i<5; i++) {
+            DrawRectangleLines(i*width+2,708,width-4,40,BLACK);
+            text(labels[i],i*width+(width-MeasureText(labels[i],16))/2,720,16);
+        }
+        text("CLEAN",24,768,16); text(title ? "SLEEP" : "PAUSE",272,768,16);
+        return;
+    }
     text("LEFT / RIGHT: MOVE   UP: ROTATE",24,y,18);
     text("DOWN: SOFT DROP   ENTER: DROP",24,y+28,18);
     text(title ? "BACK: SLEEP    POWER: CLEAN" : "BACK: PAUSE    POWER: CLEAN",24,y+56,16);
@@ -99,7 +109,8 @@ static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practic
         text("Choose your pace",24,154,28);
         option("Normal",232,!practice); option("Practice",312,practice);
         text(practice ? "Place pieces at your own pace." : "Keep moving. Keep clearing.",24,408,22);
-        text("UP / DOWN: CHOOSE",24,468,20); text("ENTER: START",24,506,28);
+        text(XTEINK_HAS_TOUCH ? "TAP A MODE ABOVE" : "UP / DOWN: CHOOSE",24,468,20);
+        text(XTEINK_HAS_TOUCH ? "TAP HERE TO START" : "ENTER: START",24,506,28);
         text("Complete rows to clear them.",24,582,22);
         controls(654,true);
         text("Games are not saved between sessions.",24,760,18);
@@ -107,7 +118,7 @@ static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practic
         heading("PAUSED");
         const char *items[]={"Resume", "Restart", practice ? "Mode: Practice" : "Mode: Normal", "How to play", "Sleep"};
         for (int i=0; i<5; i++) option(items[i],164+i*80,i == menu);
-        text("UP / DOWN: CHOOSE   ENTER: OPEN",24,624,18);
+        text(XTEINK_HAS_TOUCH ? "TAP AN ITEM TO OPEN" : "UP / DOWN: CHOOSE   ENTER: OPEN",24,624,18);
         text("BACK: RESUME",24,672,22);
         text("Your game waits while paused.",24,742,20);
     } else if (screen == HELP) {
@@ -117,7 +128,7 @@ static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practic
         text("The outline shows where you will land.",24,254,20);
         text("Up rotates clockwise; edges allow",24,300,20);
         text("small shifts to make a rotation fit.",24,332,20);
-        text("Enter drops and locks the piece.",24,386,22);
+        text(XTEINK_HAS_TOUCH ? "Tap DROP to lock the piece." : "Enter drops and locks the piece.",24,386,22);
         text("Practice: pieces wait for your input.",24,438,20);
         text("Normal: pieces fall, then briefly",24,478,20);
         text("wait on landing so you can adjust.",24,510,20);
@@ -129,19 +140,25 @@ static void draw_page(Screen screen, const TetrisGame *g, int menu, bool practic
         heading(sleep_confirmation ? "SLEEP" : "RESTART");
         text(sleep_confirmation ? "End this game and sleep?" : "Restart this game?",24,238,28);
         text("Current progress will be lost.",24,304,22);
-        text(sleep_confirmation ? "ENTER: SLEEP" : "ENTER: RESTART",24,414,26);
-        text("BACK: CANCEL",24,474,26);
+        text(XTEINK_HAS_TOUCH ? "TAP TO CONFIRM" : sleep_confirmation ? "ENTER: SLEEP" : "ENTER: RESTART",24,414,26);
+        text(XTEINK_HAS_TOUCH ? "TAP TO CANCEL" : "BACK: CANCEL",24,474,26);
     } else if (screen == GAME_OVER) {
         heading("GAME OVER");
         text("The stack reached the top.",24,196,28);
         text(TextFormat("Score   %u",(unsigned)g->score),24,284,30);
         text(TextFormat("Lines   %u",(unsigned)g->lines),24,336,28);
         text(TextFormat("Level   %u",TetrisLevel(g)),24,388,28);
-        text("ENTER: TRY AGAIN",24,532,28); text("BACK: MENU",24,590,24);
+        text(XTEINK_HAS_TOUCH ? "TAP TO TRY AGAIN" : "ENTER: TRY AGAIN",24,532,28);
+        text(XTEINK_HAS_TOUCH ? "TAP FOR MENU" : "BACK: MENU",24,590,24);
     } else if (screen == SLEEP) {
         heading("ASLEEP");
         text("Press Power to wake.",24,264,30);
         text("A new game awaits.",24,326,24);
+    }
+    if (XTEINK_HAS_TOUCH && screen != SLEEP) {
+        DrawRectangle(0,700,X4_WIDTH,100,WHITE);
+        text("TAP AN OPTION TO SELECT",24,716,18);
+        text("CLEAN",24,768,16); text("BACK",272,768,16);
     }
 }
 static void new_game(TetrisGame *g, bool practice)
@@ -158,7 +175,7 @@ static int repeat_steps(bool down, bool pressed, double now, double *next, doubl
 }
 int main(void)
 {
-    InitWindow(X4_WIDTH,X4_HEIGHT,"Tetris / raylib for Xteink X4");
+    InitWindow(X4_WIDTH,X4_HEIGHT,"Tetris / raylib for Xteink");
     if (!IsWindowReady()) return 1;
     SetExitKey(KEY_NULL); SetTargetFPS(0); X4SetRefreshInterval(UINT_MAX);
     TetrisGame game={0};
@@ -173,6 +190,23 @@ int main(void)
         int keys[64], count=0, key;
         while (count<64 && (key=GetKeyPressed()) != 0)
             if (!(discard_enter && key == KEY_ENTER)) keys[count++]=key;
+        if (XTEINK_HAS_TOUCH && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && count<64) {
+            Vector2 p=GetTouchPosition(0);
+            int tap=0;
+            if (p.y>=752) tap=p.x<240 ? KEY_P : KEY_ESCAPE;
+            else if (screen==PLAY && p.y>=700) {
+                const int actions[]={KEY_LEFT,KEY_RIGHT,KEY_UP,KEY_DOWN,KEY_ENTER};
+                tap=actions[(int)p.x/(X4_WIDTH/5)];
+            } else if (screen==TITLE) {
+                if (p.y>=222 && p.y<356) { practice=p.y>=302; dirty=true; }
+                else if (p.y>=480 && p.y<558) tap=KEY_ENTER;
+            } else if (screen==PAUSE && p.y>=154 && p.y<528) {
+                menu=((int)p.y-154)/80; tap=KEY_ENTER;
+            } else if (screen==CONFIRM && p.y>=400 && p.y<520) tap=p.y<460 ? KEY_ENTER : KEY_ESCAPE;
+            else if (screen==HELP && p.y>=700) tap=KEY_ENTER;
+            else if (screen==GAME_OVER && p.y>=520 && p.y<630) tap=p.y<580 ? KEY_ENTER : KEY_ESCAPE;
+            if (tap && !(discard_enter && tap==KEY_ENTER)) keys[count++]=tap;
+        }
         discard_enter=false;
         if (screen == PLAY) {
             const int repeat[]={KEY_LEFT,KEY_RIGHT,KEY_DOWN};

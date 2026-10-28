@@ -42,6 +42,12 @@ if args.hardware_tested:
         raise SystemExit('Physical QA report does not match the application being packaged')
 dist.mkdir(exist_ok=True)
 cache = (build / "CMakeCache.txt").read_text()
+def require_x4(cache):
+    device = next((line.split('=', 1)[1] for line in cache.splitlines()
+                   if line.startswith('XTEINK_DEVICE:')), 'x4')
+    if device != 'x4':
+        raise SystemExit(f'Refusing to label {device} firmware as an original X4 release; use its IDF build outputs')
+require_x4(cache)
 application_source = next((line.split('=', 1)[1] for line in cache.splitlines()
                            if line.startswith('X4_APP_SOURCE:')), 'examples/paper.c')
 def qemu_build(cache):
@@ -54,6 +60,10 @@ if 'examples/tetris.c' in tetris_cache and qemu_build(tetris_cache):
     raise SystemExit("Refusing to package a Tetris QEMU test image as hardware firmware")
 diagnostic = root/'build-hardware/raylib_x4_firmware.bin'
 diagnostic_cache = (diagnostic.parent/'CMakeCache.txt').read_text() if diagnostic.exists() else ''
+if 'examples/tetris.c' in tetris_cache:
+    require_x4(tetris_cache)
+if 'examples/diagnostics.c' in diagnostic_cache:
+    require_x4(diagnostic_cache)
 if 'examples/diagnostics.c' in diagnostic_cache and qemu_build(diagnostic_cache):
     raise SystemExit("Refusing to package a diagnostic QEMU test image as hardware firmware")
 parts = [(0, "bootloader/bootloader.bin", "bootloader.bin"),
@@ -86,7 +96,7 @@ if tetris.exists() and 'examples/tetris.c' in tetris_cache:
 for name in ["LICENSE", "THIRD_PARTY.md"]:
     shutil.copy2(root / name, dist / name)
 (dist / "manifest.json").write_text(json.dumps({
-    "target": "original Xteink X4 / ESP32-C3", "version": "1.2.0", "application_sha256": application_hash,
+    "target": "original Xteink X4 / ESP32-C3", "version": "1.0.0", "application_sha256": application_hash,
     "application_source": Path(application_source).name,
     "flash_size": "16MB", "flash_mode": "dio", "flash_frequency": "40m",
     "merged_image": {"file": "raylib-x4.bin", "offset": 0},

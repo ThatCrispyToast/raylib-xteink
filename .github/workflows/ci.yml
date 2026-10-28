@@ -13,10 +13,32 @@ jobs:
       matrix:
         include:
           - name: emulator
+            device: x4
             emulator: 'ON'
             sanitize: 'OFF'
             build_type: Release
           - name: sanitizers
+            device: x4
+            emulator: 'OFF'
+            sanitize: 'ON'
+            build_type: Debug
+          - name: x3-emulator
+            device: x3
+            emulator: 'ON'
+            sanitize: 'OFF'
+            build_type: Release
+          - name: x4-classic-emulator
+            device: x4-classic
+            emulator: 'ON'
+            sanitize: 'OFF'
+            build_type: Release
+          - name: x4-pro-emulator
+            device: x4-pro
+            emulator: 'ON'
+            sanitize: 'OFF'
+            build_type: Release
+          - name: x3-sanitizers
+            device: x3
             emulator: 'OFF'
             sanitize: 'ON'
             build_type: Debug
@@ -30,15 +52,62 @@ jobs:
       - name: Audit public history
         run: nix develop path:. -c python3 scripts/public_audit.py --history
       - name: Fetch pinned emulator
-        if: matrix.emulator == 'ON'
+        if: matrix.emulator == 'ON' && matrix.device == 'x4'
         run: nix develop path:. -c python3 scripts/fetch-emulator.py
       - name: Configure
         run: >-
           nix develop path:. -c cmake -S . -B build -G Ninja
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DX4_BUILD_EMULATOR=${{ matrix.emulator }}
+          -DXTEINK_DEVICE=${{ matrix.device }}
           -DX4_SANITIZE=${{ matrix.sanitize }}
       - name: Build
         run: nix develop path:. -c cmake --build build --parallel 2
       - name: Test
         run: nix develop path:. -c ctest --test-dir build --output-on-failure --parallel 2
+  firmware:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: x4
+            shell: firmware
+            panels: ssd1677
+          - device: x3
+            shell: firmware
+            panels: uc8253 uc8279
+          - device: x4-classic
+            shell: firmware-s3
+            panels: ssd1677 uc8179 uc8279
+          - device: x4-pro
+            shell: firmware-s3
+            panels: ssd1677 uc8179 uc8279
+    name: firmware / ${{ matrix.device }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@d9186cbdca7adedf113a159fa91f725a27866771 # v31
+      - name: Build each panel variant
+        env:
+          DEVICE: ${{ matrix.device }}
+          PANELS: ${{ matrix.panels }}
+          DEV_SHELL: ${{ matrix.shell }}
+        run: |
+          for panel in $PANELS; do
+            nix develop "path:.#$DEV_SHELL" -c idf.py -C firmware -B "$PWD/build-firmware" \
+              -DXTEINK_DEVICE="$DEVICE" -DXTEINK_PANEL="$panel" \
+              -DSDKCONFIG="$PWD/build-firmware/sdkconfig" build
+          done
+      - name: Build CPU smoke image
+        env:
+          DEVICE: ${{ matrix.device }}
+          DEV_SHELL: ${{ matrix.shell }}
+        run: >-
+          nix develop "path:.#$DEV_SHELL" -c idf.py -C firmware -B "$PWD/build-qemu"
+          -DXTEINK_DEVICE="$DEVICE" -DX4_QEMU_SMOKE=ON
+          -DSDKCONFIG="$PWD/build-qemu/sdkconfig" build
+      - name: Execute in C3 or S3 QEMU
+        run: nix develop path:.#qemu -c python3 scripts/test-qemu.py build-qemu

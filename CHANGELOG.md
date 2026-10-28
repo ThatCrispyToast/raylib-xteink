@@ -1,13 +1,19 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — 2026-10-28
 
+- Set the public version to 1.0.0. Earlier entries below retain their development-build version numbers and historical test evidence.
+
+- Add X3, X4 Classic, and X4 Pro desktop profiles and experimental firmware HALs, including nine board/panel combinations; retain the original X4 default.
+- Add GT911 touch/Home, Pro warm/cool frontlight control and preview, SDMMC, fuel-gauge voltage reads, S3 Power wake, and touch controls for both examples. New hardware support is untested.
+- Exercise C3/S3 firmware in QEMU and panel/peripheral protocols on simulated buses; use portable renderer division on the S3 target.
+- Exercise every desktop profile in CI and document untested/planned hardware support, including the separate S4 Android target.
 - Add an Ubuntu/Debian quickstart and fix GCC 12 builds with source-path sanitization enabled.
 - Add Docker firmware exports and headless emulator, sanitizer, and QEMU testing with pinned base images.
 - Document native CMake setup and host-side flashing without Nix.
 - Capture emulator screenshots before SDL invalidates the presented backbuffer, fixing pixel checks on Ubuntu.
 
-## 1.2.0 — 2026-10-27
+## Development 1.2.0 — 2026-10-27
 
 - Reuse temperature-selected factory partial waveforms during activity; shut panel power down after two idle seconds and refresh temperature selection after 30 seconds.
 - Add optional asynchronous presentation with immutable in-flight frames and latest-frame coalescing. Paper and Tetris keep processing ordinary controls during refreshes while critical screens still wait for completion.
@@ -15,22 +21,22 @@
 - Add the Tetris example with Normal/Practice modes, retained drawing, accelerated held controls, and visible landing grace.
 - Harden display timeouts, USB diagnostic replies, and ESP32-C3 QEMU timing. Extend emulator and physical-device stress tests.
 
-## 1.1.2 — 2026-10-26
+## Development 1.1.2 — 2026-10-26
 
 - Transfer only changed panel regions and retain puzzle rendering.
 - Make Paper cleaning explicit: startup/wake and Power, with no navigation or idle cleaning flashes.
 
-## 1.1.1 — 2026-10-26
+## Development 1.1.1 — 2026-10-26
 
 - Reduce drawing/conversion latency and preserve ordered input across blocking refreshes.
 - Protect confirmations from buffered input and improve retained cursor/menu drawing.
 
-## 1.1.0 — 2026-10-26
+## Development 1.1.0 — 2026-10-26
 
 - Add undo, restart, fresh puzzles, help, and storage feedback to Paper.
 - Use alternating checksummed save records and validate legacy imports without changing unrelated files.
 - Harden file loading and no-card emulation; expand independent user acceptance tests.
 
-## 1.0.0 — 2026-10-26
+## Development 1.0.0 — 2026-10-26
 
 - Initial original-X4 target, Paper example, microreader adapter, ESP-IDF/QEMU builds, and physical acceptance tools.

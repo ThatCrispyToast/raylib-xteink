@@ -1,4 +1,6 @@
 #include "hal_test.h"
+bool xteink_hal_frontlight(unsigned int brightness, unsigned int warmth)
+{ (void)brightness; (void)warmth; return XTEINK_HAS_FRONTLIGHT; }
 X4Input test_input;
 bool test_present_ok = true;
 double test_time;

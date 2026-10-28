@@ -1,8 +1,8 @@
 # Application development
 
-Start with [examples/minimal.c](../examples/minimal.c). Include `raylib.h`, supply `int main(void)`, and call `InitWindow(480, 800, title)`. Check `IsWindowReady()` before drawing. Other window sizes are rejected.
+Start with [examples/minimal.c](../examples/minimal.c). Include `raylib.h` and `raylib_x4.h`, supply `int main(void)`, and call `InitWindow(X4_WIDTH, X4_HEIGHT, title)`. Check `IsWindowReady()` before drawing. The size constants follow the selected [device profile](emulator.md#device-profiles); other window sizes are rejected. Existing X4 API and target names work across profiles.
 
-The framebuffer covers the full controller area. Keep content at least 14 pixels from the top and bottom to allow for the bezel. All build commands below run from the project root.
+The framebuffer covers the full controller area. On X4, keep content at least 14 pixels from the top and bottom to allow for the bezel; other models' physical crops are unverified. All build commands below run from the project root. Add `-DXTEINK_DEVICE=x3`, `x4-classic`, or `x4-pro` for desktop builds. The same selection applies to [experimental firmware builds](experimental-hardware.md), which also select a panel controller.
 
 ## Build a custom application
 
@@ -49,11 +49,11 @@ Keep raylib calls on the application/render task. The firmware wrapper invokes `
 
 Redraw when state changes and call `PollInputEvents()` and `WaitTime()` while idle, as the minimal example does. `EndDrawing()` converts the framebuffer, skips unchanged output, and polls input. A quiet frame therefore causes no display refresh.
 
-Presentation is synchronous by default. Include `raylib_x4.h` and call `X4SetAsyncRefresh(true)` after initialization to submit ordinary updates without waiting for the waveform. `EndDrawing()` and `PollInputEvents()` service completion and start the newest queued snapshot. New submissions replace older queued frames; the in-flight frame remains immutable within the same 192 KB pixel-buffer budget.
+Presentation is synchronous by default. Include `raylib_x4.h` and call `X4SetAsyncRefresh(true)` after initialization to submit ordinary updates without waiting for the waveform. `EndDrawing()` and `PollInputEvents()` service completion and start the newest queued snapshot. New submissions replace older queued frames; the in-flight frame remains immutable within the same pixel-buffer budget (192,000 bytes on X4/Classic/Pro; 209,088 on X3).
 
 Use `X4WaitDisplay()` to drain output. For a confirmation or new game state that must be visible before the next input poll, set async mode to `false` **before** `EndDrawing()`. Changing the mode alone does not drain an existing update. Startup, full cleans, and closing always wait. Continue polling during idle loops so completion and automatic panel power-down can run.
 
-Both presentation modes enforce a single 15-second BUSY deadline from activation. Physical refresh costs and measurement limits are in [performance](performance.md).
+Both presentation modes enforce a 15-second BUSY deadline per controller activation. The experimental X3 UC8253 full update includes a separate conditioning activation. Physical original-X4 refresh costs and measurement limits are in [performance](performance.md).
 
 ### X4 extensions
 
@@ -66,12 +66,15 @@ Both presentation modes enforce a single 15-second BUSY deadline from activation
 | `X4IsDisplayBusy()` | Query pending/in-flight output without advancing it |
 | `X4GetStats()` | Completed refreshes, coalesced frames, errors, memory, and timings |
 | `X4GetStatus()` | Battery voltage, button ADCs/mask, heap, SD status, and input overflow |
-| `X4GetPanelFrame()` | Read-only completed 48 KB frame, 800 × 480, MSB first, 1 = white; `NULL` during flight |
+| `X4GetPanelFrame()` | Read-only completed `X4_FRAME_BYTES` frame, `X4_PANEL_WIDTH` × `X4_PANEL_HEIGHT`, MSB first, 1 = white; `NULL` during flight |
+| `XteinkSetFrontlight(brightness, warmth)` | Pro only, both values 0–100; 0 brightness turns off; 0 warmth is cool, 100 warm. Returns false if unavailable/out of range. Starts off; independent of e-paper refresh. |
 | `X4GetStoragePath()` | `/sd` on hardware, virtual SD directory in the emulator, or `NULL` |
 
 Wait before capturing the panel frame. The generic target defaults to periodic cleaning; Paper and Tetris disable that limit and use startup/wake and Power instead.
 
 ## Input
+
+The table maps the original X4's buttons and shared desktop keyboard shortcuts. X3 uses the same ADC ladders; Classic uses discrete GPIO keys. Pro has physical Up, Down, and Power plus touch/Home; it maps Home to Back. Its first touch contact maps to `GetTouchPosition(0)` and the left mouse button. Mouse press/drag/release supplies the same input in the [emulator](emulator.md#device-profiles). Paper and Tetris include touch controls for the missing keys. The desktop's extra keyboard shortcuts remain available.
 
 | Physical input | raylib key | Emulator key |
 |---|---|---|
@@ -97,6 +100,6 @@ The default font's atlas and glyph images live in flash. Treat glyph images retu
 
 Supported: 2D shapes, default bitmap text, bitmap fonts, small textures, alpha blending, 2D cameras, scissor clipping, raymath, keyboard edges/repeat, timing, and SD files. Colors become four luminance levels during rendering and are spatially dithered to monochrome for presentation. PNG, BMP, TGA, and QOI images are enabled; TTF, JPEG, and animated GIF are disabled.
 
-Outside this target: 3D/depth, audio, render textures, programmable shaders, multitouch, mouse/gamepads, window management, wireless services, and OTA. The panel's latency suits e-paper interfaces and games rather than conventional high-refresh action games.
+Outside this target: 3D/depth, audio, render textures, programmable shaders, multitouch, general mouse/gamepad support, window management, wireless services, and OTA. The Pro desktop profile supports the left mouse button as a single touch point. The panel's latency suits e-paper interfaces and games rather than conventional high-refresh action games.
 
 See [design](design.md) for the memory layout, renderer changes, and controller protocol, and [testing](testing.md) to validate an application or target change.

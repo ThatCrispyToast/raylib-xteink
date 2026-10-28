@@ -26,6 +26,8 @@ static uint8_t stable, candidate;
 static X4InputQueue presses;
 static int64_t changed_at, battery_sample_at;
 static int last_front = -1, last_side = -1, battery_mv = -1;
+bool xteink_hal_frontlight(unsigned int brightness, unsigned int warmth)
+{ (void)brightness; (void)warmth; return false; }
 
 static void sleep_ms(unsigned int ms) { vTaskDelay(pdMS_TO_TICKS(ms) ? pdMS_TO_TICKS(ms) : 1); }
 static uint64_t time_us(void) { return esp_timer_get_time(); }

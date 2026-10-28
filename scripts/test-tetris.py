@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from emulator_profile import PROFILES
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("build", nargs="?", type=Path, default=ROOT / "build")
+    parser.add_argument("device", nargs="?", choices=PROFILES, default="x4")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="x4-tetris-") as temporary:
@@ -113,7 +115,7 @@ def main():
                 assert line, result.stdout
                 state = {key:int(value) for key,value in re.findall(r"(\w+)=(-?\d+)", line[0])}
                 assert state["errors"] == 0, state
-                assert (path / "frame.ppm").read_bytes().startswith(b"P6\n480 786\n255\n")
+                assert (path / "frame.ppm").read_bytes().startswith(f"P6\n{PROFILES[args.device][0]} {PROFILES[args.device][1]}\n255\n".encode())
                 if item["timed"]:
                     assert "QA_ERROR" not in result.stderr, result.stderr
                     assert len(re.findall(r"^QA_INPUT ",result.stderr,re.MULTILINE)) == len(events)

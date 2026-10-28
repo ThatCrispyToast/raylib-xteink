@@ -1,6 +1,32 @@
 # Validation report
 
-Latest validation on 2026-10-27 on NixOS x86_64. Exact tool versions are locked in `flake.lock`; the embedded SDK is ESP-IDF 5.5.2 and the emulator is Espressif QEMU 9.2.2. The native display emulator is microreader revision `a4adfdb9a37b83bcb724cac3dc8990f335b49e8a`.
+Latest validation on 2026-10-28 on NixOS x86_64. Exact tool versions are locked in `flake.lock`; the embedded SDK is ESP-IDF 5.5.2 and the emulator is Espressif QEMU 9.2.2. The original X4 display emulator is microreader revision `a4adfdb9a37b83bcb724cac3dc8990f335b49e8a`.
+
+## XTEINK device expansion
+
+Validated on 2026-10-27/28 in the pinned Nix environment. The original X4 uses microreader; the new profiles use the local SDL display implementation. New firmware HALs use the pinned FreeInk hardware references listed in [experimental hardware](experimental-hardware.md).
+
+| Profile | Native CTest | ASan/UBSan portable CTest | Hardware validation in this change |
+|---|---|---|---|
+| `x4` | 17/17 pass | 12/12 pass | Not run; previous original-X4 results remain below |
+| `x3` | 17/17 pass | 12/12 pass | Untested |
+| `x4-classic` | 17/17 pass | Same geometry covered by X4 | Untested |
+| `x4-pro` | 18/18 pass | Same geometry covered by X4; SDL touch tested natively | Untested |
+
+Coverage includes independent per-pixel conversion, accelerated/reference raster equivalence, SDL corners and dimensions, touch lifecycle, Paper persistence, retained rendering, Tetris journeys, and input during refresh delays. Pro additionally passes touch-only Paper/Tetris journeys and frontlight color readback. SSD1677 and four UltraChip variants pass simulated-bus checks for initialization, planes, windows, conditioning, idle/sleep, failures, and deadlines. I2C tests cover GT911 and battery-voltage formats; PWM tests cover the combined brightness budget. Invalid board/panel/MCU configurations and misleading X4 release packaging are rejected. Pro Paper/Tetris screenshots were visually inspected. CI syntax, vendored patch reconstruction, and public-file checks pass; hosted CI has not run for this change.
+
+All nine Paper firmware configurations compile/link: X4/SSD1677; X3/UC8253 and UC8279; Classic and Pro each with SSD1677, UC8179, and UC8279. Pro Tetris also compiles with its touch controls. Builds use internal RAM and do not require PSRAM.
+
+| QEMU profile | CPU | Pixel buffers | Free heap while rendering | Result |
+|---|---|---|---|---|
+| `x4` | ESP32-C3 | 192,000 bytes | 114,900 bytes | Pass |
+| `x3` | ESP32-C3 | 209,088 bytes | 98,164 bytes | Pass |
+| `x4-classic` | ESP32-S3 | 192,000 bytes | 176,044 bytes | Pass |
+| `x4-pro` | ESP32-S3 | 192,000 bytes | 176,044 bytes | Pass |
+
+Each smoke image boots, draws three frames, checks shape/texture/edge pixels, verifies full/partial accounting and heap integrity, then recovers memory after closing. S3 QEMU exposed an illegal-instruction trap in rlsw's reciprocal assembly; using toolchain division fixes it in the shared hardware/test renderer. An intermittent C3 interrupt watchdog fired in FreeRTOS's idle task. The [runner](testing.md#esp32-c3-and-s3-qemu) now uses `-icount shift=3,sleep=off` to advance virtual time directly to the next timer deadline during idle. Five consecutive boots per C3 profile pass with the interrupt watchdog enabled. These runs do not measure physical scheduling latency. Hardware firmware retains its watchdogs.
+
+**No reader was flashed or physically tested during this change.** Bus models and stubbed QEMU peripherals cannot validate electrical behavior, physical crop/orientation, ghosting, frontlight accuracy, SD reliability, battery accuracy, or sleep current. Every new hardware port remains experimental and untested. S4 Android integration remains planned; see the [compatibility checklist](../README.md#compatibility-and-planned-support). Historical original-X4 evidence below does not attest newly built binaries or other models.
 
 ## Ubuntu and Debian quickstarts
 

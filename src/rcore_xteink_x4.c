@@ -191,16 +191,16 @@ int GetMonitorWidth(int monitor) { (void)monitor; return X4_WIDTH; }
 int GetMonitorHeight(int monitor) { (void)monitor; return X4_HEIGHT; }
 
 // Get selected monitor physical width in millimetres
-int GetMonitorPhysicalWidth(int monitor) { (void)monitor; return 56; }
+int GetMonitorPhysicalWidth(int monitor) { (void)monitor; return XTEINK_PHYSICAL_WIDTH_MM; }
 
 // Get selected monitor physical height in millimetres
-int GetMonitorPhysicalHeight(int monitor) { (void)monitor; return 93; }
+int GetMonitorPhysicalHeight(int monitor) { (void)monitor; return XTEINK_PHYSICAL_HEIGHT_MM; }
 
 // Get selected monitor refresh rate
 int GetMonitorRefreshRate(int monitor) { (void)monitor; return 2; }
 
 // Get the human-readable, UTF-8 encoded name of the selected monitor
-const char *GetMonitorName(int monitor) { (void)monitor; return "Xteink X4"; }
+const char *GetMonitorName(int monitor) { (void)monitor; return XTEINK_DEVICE_NAME; }
 
 // Get window position XY on monitor
 Vector2 GetWindowPosition(void)
@@ -326,6 +326,23 @@ void PollInputEvents(void)
 {
     if (!x4_service_display(false)) CORE.Window.shouldClose=true;
     X4Input input = x4_hal_poll();
+    CORE.Input.Mouse.previousPosition = CORE.Input.Mouse.currentPosition;
+    CORE.Input.Mouse.previousButtonState[MOUSE_BUTTON_LEFT] = CORE.Input.Mouse.currentButtonState[MOUSE_BUTTON_LEFT];
+    CORE.Input.Touch.previousTouchState[0] = CORE.Input.Touch.currentTouchState[0];
+    CORE.Input.Touch.previousPosition[0] = CORE.Input.Touch.position[0];
+    bool touching = XTEINK_HAS_TOUCH && (input.touch_down || input.touch_pressed);
+    if (XTEINK_HAS_TOUCH && input.touch_pressed) {
+        CORE.Input.Mouse.previousButtonState[MOUSE_BUTTON_LEFT] = 0;
+        CORE.Input.Touch.previousTouchState[0] = 0;
+    }
+    CORE.Input.Mouse.currentButtonState[MOUSE_BUTTON_LEFT] = touching;
+    CORE.Input.Touch.currentTouchState[0] = touching;
+    CORE.Input.Touch.pointCount = touching ? 1 : 0;
+    CORE.Input.Touch.pointId[0] = touching ? 0 : -1;
+    if (XTEINK_HAS_TOUCH) {
+        CORE.Input.Mouse.currentPosition = (Vector2){ input.touch_x, input.touch_y };
+        CORE.Input.Touch.position[0] = CORE.Input.Mouse.currentPosition;
+    }
     double now = GetTime();
     CORE.Input.Keyboard.keyPressedQueueCount = 0;
     CORE.Input.Keyboard.charPressedQueueCount = 0;
@@ -364,7 +381,7 @@ int InitPlatform(void)
 {
     if (CORE.Window.screen.width != X4_WIDTH || CORE.Window.screen.height != X4_HEIGHT)
     {
-        TRACELOG(LOG_ERROR, "X4: InitWindow requires 480x800 portrait resolution");
+        TRACELOG(LOG_ERROR, "%s: InitWindow requires %dx%d portrait resolution", XTEINK_DEVICE_NAME, X4_WIDTH, X4_HEIGHT);
         return -1;
     }
     if (!x4_hal_init(CORE.Window.title)) return -1;
@@ -373,6 +390,10 @@ int InitPlatform(void)
     memset(x4_repeat_at, 0, sizeof(x4_repeat_at));
     memset(&CORE.Input.Keyboard.currentKeyState, 0, sizeof(CORE.Input.Keyboard.currentKeyState));
     memset(&CORE.Input.Keyboard.previousKeyState, 0, sizeof(CORE.Input.Keyboard.previousKeyState));
+    memset(CORE.Input.Mouse.currentButtonState, 0, sizeof(CORE.Input.Mouse.currentButtonState));
+    memset(CORE.Input.Mouse.previousButtonState, 0, sizeof(CORE.Input.Mouse.previousButtonState));
+    memset(&CORE.Input.Touch, 0, sizeof(CORE.Input.Touch));
+    CORE.Input.Touch.pointId[0] = -1;
     CORE.Window.display.width = CORE.Window.render.width = X4_WIDTH;
     CORE.Window.display.height = CORE.Window.render.height = X4_HEIGHT;
     CORE.Window.currentFbo.width = X4_WIDTH;

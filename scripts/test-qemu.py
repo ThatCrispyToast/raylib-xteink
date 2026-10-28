@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Boot the ESP32-C3 smoke image and require its explicit success marker."""
+"""Boot a C3/S3 smoke image and require its explicit success marker."""
 from pathlib import Path
+import json
 import selectors
 import re
 import subprocess
@@ -10,15 +11,23 @@ import time
 root = Path(__file__).resolve().parents[1]
 build = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else root / "build-qemu"
 flash = bytearray(b"\xff") * (16 * 1024 * 1024)
-for offset, name in [(0, "bootloader/bootloader.bin"), (0x8000, "partition_table/partition-table.bin"),
-                     (0x10000, "raylib_x4_firmware.bin")]:
+config = json.loads((build / "flasher_args.json").read_text())
+chip = config["extra_esptool_args"]["chip"]
+if chip not in ("esp32c3", "esp32s3"):
+    raise SystemExit(f"Unsupported QEMU chip: {chip}")
+for address, name in config["flash_files"].items():
+    offset = int(address, 0)
     data = (build / name).read_bytes()
+    if offset < 0 or offset+len(data) > len(flash):
+        raise SystemExit("Flash section exceeds the emulated 16 MB flash")
     flash[offset:offset + len(data)] = data
 image = build / "qemu-flash.bin"
 image.write_bytes(flash)
-# Espressif's C3 model requires instruction counting for reliable timer delivery.
-command = ["qemu-system-riscv32", "-nographic", "-icount", "3", "-machine", "esp32c3", "-drive",
-           f"file={image},if=mtd,format=raw", "-no-reboot"]
+# C3 needs instruction counting; sleep=off advances idle time to the next timer deadline.
+command = ["qemu-system-riscv32" if chip == "esp32c3" else "qemu-system-xtensa", "-nographic"]
+if chip == "esp32c3":
+    command += ["-icount", "shift=3,sleep=off"]
+command += ["-machine", chip, "-drive", f"file={image},if=mtd,format=raw", "-no-reboot"]
 process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 selector = selectors.DefaultSelector()
 selector.register(process.stdout, selectors.EVENT_READ)
@@ -52,4 +61,4 @@ finally:
     process.stdout.close()
     (build / "qemu.log").write_bytes(output)
 if not passed:
-    raise SystemExit("ESP32-C3 smoke test did not pass; inspect build-qemu/qemu.log")
+    raise SystemExit(f"{chip} smoke test did not pass; inspect {build / 'qemu.log'}")
