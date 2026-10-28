@@ -18,29 +18,19 @@ Build raylib 2D applications for **X4, X3, X4 Classic, and X4 Pro**. All four ha
 
 ## Compatibility and planned support
 
-Desktop profiles run native application code with device-specific geometry, keyboard input, and virtual storage. Pro adds mouse/touch input and a frontlight preview. Separate C3/S3 QEMU smoke images execute the embedded renderer with stubbed physical peripherals; bus-model tests exercise panel and I2C protocols. Neither establishes electrical or optical compatibility.
+| Product | Desktop | Hardware |
+|---|---|---|
+| Original X4 | Supported (default) | Previously tested on unlocked X4 |
+| X3, X4 Classic / V2, X4 Pro | Supported | **Experimental; untested** |
+| S4 (Android) | Planned | No target |
 
-| Product | Portrait framebuffer | Desktop support | Physical hardware support |
-|---|---|---|---|
-| Original X4 (ESP32-C3) | 480 × 800 | Supported; default profile | Previously tested on the original unlocked X4; see [validation](docs/validation.md) |
-| X3 (ESP32-C3) | 528 × 792 | Supported | **Experimental; UNTESTED** — UC8253 / UC8279 firmware |
-| X4 Classic / X4 V2 (ESP32-S3) | 480 × 800 | Supported | **Experimental; UNTESTED** — SSD1677 / UC8179 / UC8279 firmware |
-| X4 Pro (ESP32-S3) | 480 × 800 | Supported, touch and frontlight preview | **Experimental; UNTESTED** — all three panel variants, GT911 touch, frontlight |
-| S4 (Android) | — | Planned; requires an Android target/runtime | **Untested; no hardware target** |
+Remaining work:
 
-- [x] Desktop rendering, input, and application tests for X4, X3, X4 Classic, and X4 Pro.
-- [x] X3 firmware HAL: panel variants, ADC buttons, SPI SD, gauge voltage, Power wake.
-- [x] X4 Classic firmware HAL: panel variants, discrete buttons, SDMMC, gauge voltage, Power wake.
-- [x] X4 Pro firmware HAL: panel variants, GT911 touch/Home, warm/cool frontlight, SDMMC, gauge voltage, Power wake.
-- [x] Touch controls for Paper and Tetris; Pro frontlight API and preview.
-- [x] Compile all nine board/controller combinations; execute renderer smoke tests in C3/S3 QEMU.
-- [ ] Physical validation of **every new model and panel variant**: display orientation/ghosting, buttons, touch, light, SD, battery readings, sleep/wake and power draw.
-- [ ] Panel auto-detection, RTC/IMU APIs, and calibrated battery percentage.
-- [ ] S4 Android build and emulator integration, then physical-device validation.
+- [ ] Validate every new model and panel variant on hardware.
+- [ ] Panel auto-detection, RTC/IMU APIs, calibrated battery percentage.
+- [ ] S4 Android build, emulator integration, and device validation.
 
-Only an original X4 is available for hardware testing. **All newly added hardware support remains untested.** Select the board and panel explicitly; see [experimental firmware builds and limits](docs/experimental-hardware.md). CPU emulation does not model the readers' panels, storage wiring, sensors, radios, or power behavior. The S4 runs Android and still needs an Android application/runtime integration; no S4 build or device emulator is provided.
-
-Profile references: [XTEINK product lineup](https://www.xteink.com/pages/user-guide), [FreeInk board specifications](https://github.com/Free-Ink/freeink-sdk#supported-boards), and [XTEINK S4 overview](https://xtcloud.xteink.cn/app/model-viewer-360). See [profile details and limits](docs/emulator.md#device-profiles).
+See [device profiles](docs/emulator.md#device-profiles), [firmware builds and limits](docs/experimental-hardware.md), and [validation results](docs/validation.md).
 
 ## Quickstart
 
